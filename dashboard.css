@@ -1,0 +1,271 @@
+/* Dashboard Page Styles */
+.dashboard-page {
+    background: #f5f7fa;
+    min-height: 100vh;
+  }
+  
+  .navbar-dashboard {
+    background: white;
+  }
+  
+  .dashboard-container {
+    padding: 2rem 0;
+    min-height: calc(100vh - 200px);
+  }
+  
+  .welcome-section {
+    text-align: center;
+    margin-bottom: 3rem;
+    padding: 2rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 20px;
+    color: white;
+  }
+  
+  .welcome-section h1 {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .welcome-section p {
+    font-size: 1.2rem;
+    opacity: 0.95;
+  }
+  
+  /* Stats Grid */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+  }
+  
+  .stat-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 15px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transition: transform 0.3s;
+  }
+  
+  .stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.12);
+  }
+  
+  .stat-icon {
+    font-size: 3rem;
+    width: 70px;
+    height: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 15px;
+  }
+  
+  .stat-content h3 {
+    font-size: 2rem;
+    color: #667eea;
+    margin-bottom: 0.3rem;
+  }
+  
+  .stat-content p {
+    color: #666;
+    font-size: 0.95rem;
+  }
+  
+  /* Modules Section */
+  .modules-section {
+    margin-bottom: 3rem;
+  }
+  
+  .modules-section h2 {
+    font-size: 2rem;
+    margin-bottom: 2rem;
+    color: #333;
+  }
+  
+  .modules-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2rem;
+  }
+  
+  .module-card {
+    background: white;
+    padding: 2rem;
+    border-radius: 20px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    transition: transform 0.3s;
+  }
+  
+  .module-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  }
+  
+  .module-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+  }
+  
+  .module-card h3 {
+    color: #667eea;
+    margin-bottom: 0.8rem;
+    font-size: 1.5rem;
+  }
+  
+  .module-card p {
+    color: #666;
+    margin-bottom: 1.5rem;
+    font-size: 0.95rem;
+  }
+  
+  /* Achievements Section */
+  .achievements-section {
+    margin-bottom: 3rem;
+  }
+  
+  .achievements-section h2 {
+    font-size: 2rem;
+    margin-bottom: 2rem;
+    color: #333;
+  }
+  
+  .badges-container {
+    background: white;
+    padding: 2rem;
+    border-radius: 20px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 1.5rem;
+  }
+  
+  .badge-item {
+    text-align: center;
+    padding: 1rem;
+    border-radius: 15px;
+    background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s;
+  }
+  
+  .badge-item:hover {
+    transform: scale(1.05);
+  }
+  
+  .badge-icon {
+    font-size: 3rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .badge-name {
+    font-weight: 600;
+    color: #333;
+    font-size: 0.9rem;
+  }
+  
+  .no-badges {
+    text-align: center;
+    padding: 3rem;
+    color: #999;
+    font-size: 1.1rem;
+  }
+  
+  /* Progress History Section */
+  .progress-history-section {
+    margin-bottom: 3rem;
+  }
+  
+  .progress-history-section h2 {
+    font-size: 2rem;
+    margin-bottom: 2rem;
+    color: #333;
+  }
+  
+  .history-container {
+    background: white;
+    padding: 2rem;
+    border-radius: 20px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  }
+  
+  .history-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem;
+    border-bottom: 1px solid #f0f0f0;
+    transition: background 0.3s;
+  }
+  
+  .history-item:last-child {
+    border-bottom: none;
+  }
+  
+  .history-item:hover {
+    background: #f9f9f9;
+  }
+  
+  .history-info h3 {
+    color: #667eea;
+    margin-bottom: 0.3rem;
+  }
+  
+  .history-info p {
+    color: #999;
+    font-size: 0.9rem;
+  }
+  
+  .history-stats {
+    display: flex;
+    gap: 2rem;
+    align-items: center;
+  }
+  
+  .history-stat {
+    text-align: center;
+  }
+  
+  .history-stat-value {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #667eea;
+  }
+  
+  .history-stat-label {
+    font-size: 0.85rem;
+    color: #999;
+  }
+  
+  /* Responsive */
+  @media (max-width: 768px) {
+    .welcome-section h1 {
+      font-size: 1.8rem;
+    }
+  
+    .stats-grid {
+      grid-template-columns: 1fr;
+    }
+  
+    .modules-grid {
+      grid-template-columns: 1fr;
+    }
+  
+    .history-item {
+      flex-direction: column;
+      gap: 1rem;
+      align-items: flex-start;
+    }
+  
+    .history-stats {
+      width: 100%;
+      justify-content: space-around;
+    }
+  }
