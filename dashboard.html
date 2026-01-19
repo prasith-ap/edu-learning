@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - EduPlay</title>
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body class="dashboard-page">
+  <nav class="navbar navbar-dashboard">
+    <div class="container">
+      <div class="logo">🎮 EduPlay</div>
+      <div class="nav-links">
+        <a href="dashboard.html" class="nav-link active">Dashboard</a>
+        <a href="progress.html" class="nav-link">My Progress</a>
+        <span class="user-info" id="userInfo">👤 Loading...</span>
+        <button id="logoutBtn" class="btn btn-small btn-secondary">Logout</button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="dashboard-container">
+    <div class="container">
+      <div class="welcome-section">
+        <h1 id="welcomeMessage">🌟 Welcome back, Learner! 🌟</h1>
+        <p>Ready to learn something new today?</p>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon">⭐</div>
+          <div class="stat-content">
+            <h3 id="totalPoints">0</h3>
+            <p>Total Points</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">🏆</div>
+          <div class="stat-content">
+            <h3 id="badgesCount">0</h3>
+            <p>Badges Earned</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">📝</div>
+          <div class="stat-content">
+            <h3 id="quizzesCompleted">0</h3>
+            <p>Quizzes Completed</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">🎯</div>
+          <div class="stat-content">
+            <h3 id="avgScore">0%</h3>
+            <p>Average Score</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="modules-section">
+        <h2>📚 Choose Your Learning Module</h2>
+        <div class="modules-grid">
+          <div class="module-card" data-module="mathematics">
+            <div class="module-icon">🧮</div>
+            <h3>Mathematics</h3>
+            <p>Numbers, addition, subtraction, and problem solving</p>
+            <button class="btn btn-primary" onclick="startQuiz('mathematics')">
+              Start Quiz 🚀
+            </button>
+          </div>
+
+          <div class="module-card" data-module="english">
+            <div class="module-icon">📖</div>
+            <h3>English</h3>
+            <p>Vocabulary, grammar, and reading comprehension</p>
+            <button class="btn btn-primary" onclick="startQuiz('english')">
+              Start Quiz 🚀
+            </button>
+          </div>
+
+          <div class="module-card" data-module="general-knowledge">
+            <div class="module-icon">🌍</div>
+            <h3>General Knowledge</h3>
+            <p>Science, geography, history, and fun facts</p>
+            <button class="btn btn-primary" onclick="startQuiz('general-knowledge')">
+              Start Quiz 🚀
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="achievements-section">
+        <h2>🏆 Your Achievements</h2>
+        <div id="badgesContainer" class="badges-container">
+          <div class="loading-badges">
+            <p>Loading your badges...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="container">
+      <p>&copy; 2024 EduPlay Learning Platform</p>
+    </div>
+  </footer>
+
+  <!-- Scripts at bottom - ORDER MATTERS! -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/dashboard.js"></script>
+</body>
+</html>
