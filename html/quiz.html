@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quiz | EduPlay</title>
+  <link rel="stylesheet" href="../css/main.css">
+  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600;700&display=swap" rel="stylesheet">
+  <!-- Renaming quiz.css to avoid conflicts or just inline professional styles -->
+</head>
+
+<body class="quiz-page">
+  <!-- Background Animation -->
+  <div class="background-animation">
+    <div class="floating-emoji emoji-1">🐶</div>
+    <div class="floating-emoji emoji-2">🐱</div>
+    <div class="floating-emoji emoji-3">🐘</div>
+    <div class="floating-emoji emoji-4">🦁</div>
+    <div class="floating-emoji emoji-5">🐼</div>
+    <div class="floating-emoji emoji-6">🦊</div>
+    <div class="floating-emoji emoji-7">🐵</div>
+  </div>
+
+  <nav class="navbar">
+    <div class="container navbar-inner">
+      <div class="navbar-brand">EduPlay</div>
+      <div class="nav-links">
+        <a href="dashboard.html" class="btn btn-outline btn-sm">Exit Quiz</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container" style="padding-top: 48px; padding-bottom: 48px; max-width: 800px;">
+
+    <div id="quizHeader" class="card"
+      style="margin-bottom: 24px; padding: 24px; display: flex; justify-content: space-between; align-items: center;">
+      <h1 id="quizTitle" style="font-size: 1.5rem; margin: 0;">Quiz</h1>
+      <div class="quiz-info" style="text-align: right;">
+        <div id="questionCounter" style="font-weight: 600; color: var(--secondary-light);">Question 1 of 10</div>
+        <div id="scoreDisplay" style="font-weight: 700; color: var(--primary-color);">Score: 0</div>
+      </div>
+    </div>
+
+    <div id="loadingScreen" class="text-center" style="padding: 48px;">
+      <p>Loading quiz content...</p>
+    </div>
+
+    <div id="quizContent" class="hidden">
+      <!-- Progress Bar -->
+      <div style="height: 4px; background: #e1e1e1; border-radius: 2px; margin-bottom: 24px; overflow: hidden;">
+        <div id="progressBar"
+          style="height: 100%; background: var(--primary-color); width: 0%; transition: width 0.3s;"></div>
+      </div>
+
+      <div id="questionCard" class="card" style="padding: 32px;">
+        <h2 id="questionText" style="margin-bottom: 24px; font-size: 1.25rem;">Question text goes here?</h2>
+        <div id="optionsContainer" style="display: flex; flex-direction: column; gap: 12px;">
+          <!-- Options injected by JS -->
+        </div>
+      </div>
+
+      <div id="feedbackSection" class="card hidden"
+        style="margin-top: 24px; padding: 24px; background: var(--bg-blue-light); border: 1px solid var(--primary-light);">
+        <div id="feedbackMessage" style="margin-bottom: 16px; font-weight: 600;"></div>
+        <button id="nextBtn" class="btn btn-primary">Next Question</button>
+      </div>
+    </div>
+
+    <!-- Results Screen -->
+    <div id="resultsScreen" class="hidden text-center">
+      <div class="card" style="padding: 48px;">
+        <h1 id="resultTitle" style="margin-bottom: 16px;">Quiz Complete</h1>
+
+        <div class="grid grid-cols-3" style="gap: 24px; margin: 32px 0;">
+          <div>
+            <div id="finalScore" style="font-size: 2rem; font-weight: 700; color: var(--primary-color);">0</div>
+            <div style="font-size: 0.9rem; color: #666;">Points</div>
+          </div>
+          <div>
+            <div id="correctCount" style="font-size: 2rem; font-weight: 700; color: var(--primary-color);">0/0</div>
+            <div style="font-size: 0.9rem; color: #666;">Correct</div>
+          </div>
+          <div>
+            <div id="percentage" style="font-size: 2rem; font-weight: 700; color: var(--primary-color);">0%</div>
+            <div style="font-size: 0.9rem; color: #666;">Accuracy</div>
+          </div>
+        </div>
+
+        <div id="achievementNotification" style="margin-bottom: 32px;"></div>
+
+        <div style="display: flex; gap: 16px; justify-content: center;">
+          <button onclick="retakeQuiz()" class="btn btn-primary">Retake Quiz</button>
+          <a href="dashboard.html" class="btn btn-outline">Back to Dashboard</a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../config.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/quiz.js"></script>
+  <script>
+    // Inline script compatibility
+    function retakeQuiz() {
+      window.location.reload();
+    }
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Progress | EduPlay</title>
+  <link rel="stylesheet" href="../css/main.css">
+  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body class="dashboard-page">
+  <!-- Background Animation -->
+  <div class="background-animation">
+    <div class="floating-emoji emoji-1">🐶</div>
+    <div class="floating-emoji emoji-2">🐱</div>
+    <div class="floating-emoji emoji-3">🐘</div>
+    <div class="floating-emoji emoji-4">🦁</div>
+    <div class="floating-emoji emoji-5">🐼</div>
+    <div class="floating-emoji emoji-6">🦊</div>
+    <div class="floating-emoji emoji-7">🐵</div>
+  </div>
+
+  <nav class="navbar">
+    <div class="container navbar-inner">
+      <div class="navbar-brand">EduPlay</div>
+      <div class="navbar-nav">
+        <a href="dashboard.html" class="nav-link">Dashboard</a>
+        <a href="progress.html" class="nav-link active"
+          style="color: var(--primary-color); border-bottom: 2px solid var(--primary-color);">My Progress</a>
+      </div>
+      <div class="navbar-user" style="display: flex; align-items: center; gap: 16px;">
+        <span id="userInfo" style="font-weight: 600;">Loading...</span>
+        <button id="logoutBtn" class="btn btn-outline btn-sm">Logout</button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container" style="padding-top: 48px; padding-bottom: 48px;">
+
+    <div style="margin-bottom: 32px;">
+      <h1>Learning Progress</h1>
+      <p>Track your performance over time.</p>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="grid grid-cols-3" style="gap: 24px; margin-bottom: 48px;">
+      <div class="card" style="padding: 24px; text-align: center;">
+        <h3 id="totalPoints" style="color: var(--primary-color); font-size: 2.5rem; margin-bottom: 8px;">0</h3>
+        <p style="margin: 0; font-size: 0.9rem; color: #666;">Total Points</p>
+      </div>
+      <div class="card" style="padding: 24px; text-align: center;">
+        <h3 id="totalQuizzes" style="color: var(--primary-color); font-size: 2.5rem; margin-bottom: 8px;">0</h3>
+        <p style="margin: 0; font-size: 0.9rem; color: #666;">Quizzes Taken</p>
+      </div>
+      <div class="card" style="padding: 24px; text-align: center;">
+        <h3 id="avgCorrect" style="color: var(--primary-color); font-size: 2.5rem; margin-bottom: 8px;">0%</h3>
+        <p style="margin: 0; font-size: 0.9rem; color: #666;">Average Accuracy</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header" style="background: none; border-bottom: 1px solid #e1e1e1;">
+        <h3 style="margin: 0;">Quiz History</h3>
+      </div>
+      <div class="card-body">
+        <div id="historyContainer">
+          <p style="text-align: center; color: #666;">Loading your quiz history...</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <footer class="footer">
+    <div class="container copyright">
+      <p>&copy; 2026 EduPlay. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../config.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/progress.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard | EduPlay</title>
+  <link rel="stylesheet" href="../css/main.css">
+  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body class="dashboard-page">
+  <!-- Background Animation -->
+  <div class="background-animation">
+    <div class="floating-emoji emoji-1">🐶</div>
+    <div class="floating-emoji emoji-2">🐱</div>
+    <div class="floating-emoji emoji-3">🐘</div>
+    <div class="floating-emoji emoji-4">🦁</div>
+    <div class="floating-emoji emoji-5">🐼</div>
+    <div class="floating-emoji emoji-6">🦊</div>
+    <div class="floating-emoji emoji-7">🐵</div>
+  </div>
+
+  <nav class="navbar">
+    <div class="container navbar-inner">
+      <div class="navbar-brand">EduPlay</div>
+      <div class="navbar-nav">
+        <a href="dashboard.html" class="nav-link active"
+          style="color: var(--primary-color); border-bottom: 2px solid var(--primary-color);">Dashboard</a>
+        <a href="progress.html" class="nav-link">My Progress</a>
+      </div>
+      <div class="navbar-user" style="display: flex; align-items: center; gap: 16px;">
+        <span id="userInfo" style="font-weight: 600;">Loading...</span>
+        <button id="logoutBtn" class="btn btn-outline btn-sm">Logout</button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container" style="padding-top: 48px; padding-bottom: 48px;">
+    <!-- Welcome Section -->
+    <div style="margin-bottom: 32px;">
+      <h1 id="welcomeMessage">Welcome back</h1>
+      <p>Pick up where you left off.</p>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="grid grid-cols-4" style="gap: 24px; margin-bottom: 48px;">
+      <div class="card" style="padding: 24px; text-align: center;">
+        <h3 id="totalPoints" style="color: var(--primary-color); font-size: 2.5rem; margin-bottom: 8px;">0</h3>
+        <p style="margin: 0; font-size: 0.9rem; color: #666;">Total Points</p>
+      </div>
+      <div class="card" style="padding: 24px; text-align: center;">
+        <h3 id="badgesCount" style="color: var(--primary-color); font-size: 2.5rem; margin-bottom: 8px;">0</h3>
+        <p style="margin: 0; font-size: 0.9rem; color: #666;">Certificates</p>
+      </div>
+      <div class="card" style="padding: 24px; text-align: center;">
+        <h3 id="quizzesCompleted" style="color: var(--primary-color); font-size: 2.5rem; margin-bottom: 8px;">0</h3>
+        <p style="margin: 0; font-size: 0.9rem; color: #666;">Quizzes Completed</p>
+      </div>
+      <div class="card" style="padding: 24px; text-align: center;">
+        <h3 id="avgScore" style="color: var(--primary-color); font-size: 2.5rem; margin-bottom: 8px;">0%</h3>
+        <p style="margin: 0; font-size: 0.9rem; color: #666;">Average Score</p>
+      </div>
+    </div>
+
+    <!-- Modules Section -->
+    <div class="modules-section">
+      <h2 style="margin-bottom: 24px;">Learning Modules</h2>
+      <div class="card-grid">
+        <div class="card">
+          <div class="card-img-placeholder" style="background-color: #E3F2FD; color: #1976D2;">Math</div>
+          <div class="card-body">
+            <h3>Mathematics</h3>
+            <p class="card-text">Numbers, addition, subtraction, and problem solving.</p>
+            <button class="btn btn-primary btn-block" onclick="startQuiz('mathematics')">Start Quiz</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-img-placeholder" style="background-color: #F3E5F5; color: #7B1FA2;">English</div>
+          <div class="card-body">
+            <h3>English</h3>
+            <p class="card-text">Vocabulary, grammar, and reading comprehension.</p>
+            <button class="btn btn-primary btn-block" onclick="startQuiz('english')">Start Quiz</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-img-placeholder" style="background-color: #E8F5E9; color: #388E3C;">GK</div>
+          <div class="card-body">
+            <h3>General Knowledge</h3>
+            <p class="card-text">Science, geography, history, and facts.</p>
+            <button class="btn btn-primary btn-block" onclick="startQuiz('general-knowledge')">Start Quiz</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Achievements Section -->
+    <div class="achievements-section" style="margin-top: 48px;">
+      <h2>Certificates & Badges</h2>
+      <div id="badgesContainer" class="card" style="padding: 24px; min-height: 100px;">
+        <p style="color: #666;">Complete quizzes to earn certificates.</p>
+      </div>
+    </div>
+
+  </div>
+
+  <footer class="footer">
+    <div class="container copyright">
+      <p>&copy; 2026 EduPlay. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../config.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/dashboard.js"></script>
+
+  <script>
+    // Inline script to remove emojis content if dashboard.js injects them
+    // Ideally we update dashboard.js too, but this is a safeguard.
+    // dashboard.js likely updates innerHTML of welcomeMessage etc.
+  </script>
+</body>
+
+</html>

@@ -2,18 +2,10 @@
 
 console.log('📝 Quiz.js loaded');
 
-// Check authentication
-(async function() {
-  console.log('🔒 Checking authentication...');
-  if (window.eduplay && window.eduplay.checkAuth) {
-    await window.eduplay.checkAuth();
-  }
-})();
-
 // Quiz data for different modules
 const quizData = {
   mathematics: {
-    title: '🧮 Mathematics Quiz',
+    title: 'Mathematics Quiz',
     questions: [
       { question: 'What is 15 + 27?', options: ['32', '42', '52', '62'], correct: 1 },
       { question: 'What is 8 × 7?', options: ['54', '56', '58', '60'], correct: 1 },
@@ -28,7 +20,7 @@ const quizData = {
     ]
   },
   english: {
-    title: '📖 English Quiz',
+    title: 'English Quiz',
     questions: [
       { question: 'What is the plural of "child"?', options: ['childs', 'children', 'childrens', 'childer'], correct: 1 },
       { question: 'Which word is a verb?', options: ['happy', 'run', 'beautiful', 'cat'], correct: 1 },
@@ -43,7 +35,7 @@ const quizData = {
     ]
   },
   'general-knowledge': {
-    title: '🌍 General Knowledge Quiz',
+    title: 'General Knowledge Quiz',
     questions: [
       { question: 'What is the largest planet in our solar system?', options: ['Earth', 'Mars', 'Jupiter', 'Saturn'], correct: 2 },
       { question: 'How many continents are there?', options: ['5', '6', '7', '8'], correct: 2 },
@@ -70,22 +62,22 @@ let selectedAnswer = null;
 // Initialize quiz
 function initializeQuiz() {
   console.log('🎯 Initializing quiz...');
-  
+
   const urlParams = new URLSearchParams(window.location.search);
   currentModule = urlParams.get('module') || 'mathematics';
-  
+
   console.log('📚 Module:', currentModule);
-  
+
   const moduleData = quizData[currentModule];
   if (!moduleData) {
     console.error('❌ Invalid module');
     window.location.href = 'dashboard.html';
     return;
   }
-  
+
   currentQuestions = [...moduleData.questions];
   document.getElementById('quizTitle').textContent = moduleData.title;
-  
+
   setTimeout(() => {
     document.getElementById('loadingScreen').style.display = 'none';
     document.getElementById('quizContent').style.display = 'block';
@@ -99,32 +91,32 @@ function loadQuestion() {
     showResults();
     return;
   }
-  
+
   const question = currentQuestions[currentQuestionIndex];
   selectedAnswer = null;
-  
+
   const progress = ((currentQuestionIndex) / currentQuestions.length) * 100;
   document.getElementById('progressBar').style.width = progress + '%';
   document.getElementById('questionCounter').textContent = `Question ${currentQuestionIndex + 1} of ${currentQuestions.length}`;
   document.getElementById('scoreDisplay').textContent = `Score: ${score}`;
   document.getElementById('questionText').textContent = question.question;
-  
+
   const optionsContainer = document.getElementById('optionsContainer');
-  optionsContainer.innerHTML = question.options.map((option, index) => 
+  optionsContainer.innerHTML = question.options.map((option, index) =>
     `<button class="option-btn" onclick="selectAnswer(${index})">${option}</button>`
   ).join('');
-  
+
   document.getElementById('feedbackSection').style.display = 'none';
 }
 
 // Select answer
 function selectAnswer(index) {
   if (selectedAnswer !== null) return;
-  
+
   selectedAnswer = index;
   const question = currentQuestions[currentQuestionIndex];
   const isCorrect = index === question.correct;
-  
+
   const buttons = document.querySelectorAll('.option-btn');
   buttons.forEach((btn, i) => {
     btn.disabled = true;
@@ -132,12 +124,12 @@ function selectAnswer(index) {
     else if (i === index && !isCorrect) btn.classList.add('incorrect');
     if (i === index) btn.classList.add('selected');
   });
-  
+
   if (isCorrect) {
     correctAnswers++;
     score += 10;
   }
-  
+
   showFeedback(isCorrect);
 }
 
@@ -145,7 +137,7 @@ function selectAnswer(index) {
 function showFeedback(isCorrect) {
   const feedbackSection = document.getElementById('feedbackSection');
   const feedbackMessage = document.getElementById('feedbackMessage');
-  
+
   if (isCorrect) {
     feedbackMessage.textContent = '🎉 Correct! Well done!';
     feedbackMessage.className = 'feedback-message correct';
@@ -153,12 +145,12 @@ function showFeedback(isCorrect) {
     feedbackMessage.textContent = '❌ Oops! That\'s not quite right.';
     feedbackMessage.className = 'feedback-message incorrect';
   }
-  
+
   feedbackSection.style.display = 'block';
 }
 
 // Next question
-document.getElementById('nextBtn').addEventListener('click', function() {
+document.getElementById('nextBtn').addEventListener('click', function () {
   currentQuestionIndex++;
   loadQuestion();
 });
@@ -166,20 +158,20 @@ document.getElementById('nextBtn').addEventListener('click', function() {
 // Show results
 async function showResults() {
   console.log('📊 Showing results...');
-  
+
   document.getElementById('quizContent').style.display = 'none';
   document.getElementById('resultsScreen').style.display = 'block';
-  
+
   const totalQuestions = currentQuestions.length;
   const percentage = Math.round((correctAnswers / totalQuestions) * 100);
-  
+
   document.getElementById('finalScore').textContent = score;
   document.getElementById('correctCount').textContent = `${correctAnswers}/${totalQuestions}`;
   document.getElementById('percentage').textContent = percentage + '%';
-  
+
   let icon = '🎉';
   let title = 'Quiz Complete!';
-  
+
   if (percentage === 100) {
     icon = '🏆';
     title = 'Perfect Score! Amazing!';
@@ -196,13 +188,13 @@ async function showResults() {
     icon = '📚';
     title = 'Don\'t Give Up!';
   }
-  
+
   document.getElementById('resultIcon').textContent = icon;
   document.getElementById('resultTitle').textContent = title;
-  
+
   // Save results to Supabase
   await saveQuizResults(score, correctAnswers, totalQuestions, percentage);
-  
+
   // Check for achievements
   await checkAchievements(percentage);
 }
@@ -210,12 +202,12 @@ async function showResults() {
 // Save quiz results to Supabase
 async function saveQuizResults(finalScore, correct, total, percentage) {
   console.log('💾 Saving quiz results to Supabase...');
-  
+
   if (!window.eduplay || !window.eduplay.saveQuizResult) {
     console.error('❌ eduplay not available');
     return;
   }
-  
+
   try {
     await window.eduplay.saveQuizResult({
       module: currentModule,
@@ -224,7 +216,7 @@ async function saveQuizResults(finalScore, correct, total, percentage) {
       total: total,
       percentage: percentage
     });
-    
+
     console.log('✅ Quiz results saved successfully');
   } catch (error) {
     console.error('❌ Error saving quiz results:', error);
@@ -234,22 +226,22 @@ async function saveQuizResults(finalScore, correct, total, percentage) {
 // Check achievements
 async function checkAchievements(percentage) {
   console.log('🎖️ Checking achievements...');
-  
+
   const achievementDiv = document.getElementById('achievementNotification');
   const achievements = [];
-  
+
   if (percentage === 100) {
     achievements.push('🏆 Perfect Score Achievement Unlocked!');
   } else if (percentage >= 90) {
     achievements.push('⭐ High Scorer Achievement Unlocked!');
   }
-  
+
   if (window.eduplay && window.eduplay.getCurrentUser) {
     try {
       const user = await window.eduplay.getCurrentUser();
       if (user && user.stats) {
         const quizCount = user.stats.quizzesCompleted || 0;
-        
+
         if (quizCount === 1) {
           achievements.push('🌟 First Steps Badge Earned!');
         } else if (quizCount === 5) {
@@ -257,7 +249,7 @@ async function checkAchievements(percentage) {
         } else if (quizCount === 10) {
           achievements.push('⭐ Dedicated Learner Badge Earned!');
         }
-        
+
         const totalPoints = user.stats.totalPoints || 0;
         if (totalPoints >= 500 && totalPoints < 510) {
           achievements.push('💎 Point Collector Badge Earned!');
@@ -267,7 +259,7 @@ async function checkAchievements(percentage) {
       console.error('❌ Error checking achievements:', error);
     }
   }
-  
+
   if (achievements.length > 0) {
     achievementDiv.innerHTML = achievements.join('<br>');
     achievementDiv.style.display = 'block';
@@ -281,15 +273,15 @@ function retakeQuiz() {
   score = 0;
   correctAnswers = 0;
   selectedAnswer = null;
-  
+
   document.getElementById('resultsScreen').style.display = 'none';
   document.getElementById('quizContent').style.display = 'block';
-  
+
   loadQuestion();
 }
 
 // Initialize
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
   console.log('🎯 Quiz page initialized');
   initializeQuiz();
 });

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login | EduPlay</title>
+  <!-- Google Fonts: Source Sans Pro (Similar to Coursera) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600;700&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="../css/main.css">
+  <!-- Ensure auth.css is loaded or removed if integrated into main.css. 
+       Since I integrated styles into main.css, I can skip auth.css or keep it if it has unique styles not yet migrated.
+       To be safe, I'll rely on main.css primarily. -->
+</head>
+<body>
+
+  <!-- Minimal Navbar for Auth Page -->
+  <nav class="navbar">
+    <div class="container">
+      <a href="index.html" class="navbar-brand">
+        EduPlay
+      </a>
+    </div>
+  </nav>
+
+  <div class="auth-container">
+    <div class="auth-card fade-in">
+      <div class="auth-header">
+        <h1>Welcome Back</h1>
+        <p>Log in to continue your learning journey.</p>
+      </div>
+
+      <form id="loginForm">
+        <div class="form-group">
+          <label for="username">Username</label>
+          <input type="text" id="username" name="username" placeholder="Enter your username" required autocomplete="username">
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" name="password" placeholder="Enter your password" required autocomplete="current-password">
+        </div>
+
+        <!-- Error/Success Messages -->
+        <div id="errorMessage" class="alert alert-error hidden"></div>
+        <div id="successMessage" class="alert alert-success hidden"></div>
+
+        <button type="submit" class="btn btn-primary btn-block">Log In</button>
+      </form>
+
+      <div class="auth-footer">
+        <p>New to EduPlay? <a href="register.html">Sign up for free</a></p>
+        <p><a href="index.html">Back to Home</a></p>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="container copyright">
+      <p>&copy; 2026 EduPlay. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../config.js"></script>
+  <script src="../js/auth.js"></script>
+
+  <!-- Inline Script to ensure message handling matches new CSS classes -->
+  <script>
+    // Helper to bridge auth.js 'show' class to our 'hidden' class logic if needed
+    // standardizing the auth.js output to match our CSS would be better, but for now:
+    const originalShowError = window.showError;
+    // We will let auth.js run, but we need to make sure 'hidden' class is removed when auth.js tries to show error.
+    // Ideally I will update auth.js next, but this ensures immediate compatibility.
+    
+    // Observer to toggle 'hidden' based on content?
+    // Actually, let's just update auth.js to be compatible with 'hidden' or standard 'display: none'
+    // For now, styling 'alert' with default block display and using 'hidden' class to hide is good.
+  </script>
+</body>
+</html>

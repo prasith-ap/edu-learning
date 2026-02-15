@@ -1,36 +1,42 @@
 /* Auth Page Styles */
-.auth-page {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  }
+.auth-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 20px;
+}
   
-  .auth-container {
-    width: 100%;
-    max-width: 450px;
-    padding: 20px;
-  }
+.auth-card {
+  background: white;
+  border-radius: 20px;
+  padding: 2.5rem;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  animation: slideIn 0.5s ease-out;
+  width: 100%;
+  max-width: 450px;
+}
+
+.auth-logo {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.auth-logo .navbar-brand {
+  justify-content: center;
+}
   
-  .auth-card {
-    background: white;
-    border-radius: 20px;
-    padding: 2.5rem;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-    animation: slideIn 0.5s ease-out;
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
   }
-  
-  @keyframes slideIn {
-    from {
-      opacity: 0;
-      transform: translateY(-20px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
+}
   
   .auth-header {
     text-align: center;
@@ -46,6 +52,7 @@
   .auth-header p {
     color: #666;
     font-size: 1rem;
+    margin: 0;
   }
   
   .auth-form {
@@ -65,6 +72,12 @@
     color: #333;
     font-size: 0.95rem;
   }
+
+  .form-group small {
+    font-size: 0.8rem;
+    color: #999;
+    margin-top: 0.25rem;
+  }
   
   .form-group input,
   .form-group select {
@@ -73,6 +86,7 @@
     border-radius: 10px;
     font-size: 1rem;
     transition: border-color 0.3s;
+    width: 100%;
   }
   
   .form-group input:focus,
@@ -119,6 +133,29 @@
   .error-message.show {
     display: block;
   }
+
+  .alert {
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    display: none;
+  }
+
+  .alert.show {
+    display: block;
+  }
+
+  .alert-error {
+    background: #fee;
+    color: #c33;
+    border-left: 4px solid #c33;
+  }
+
+  .alert-success {
+    background: #efe;
+    color: #2a7;
+    border-left: 4px solid #2a7;
+  }
   
   .success-message {
     background: #efe;
@@ -142,5 +179,9 @@
   
     .auth-header h1 {
       font-size: 1.5rem;
+    }
+
+    .auth-container {
+      padding: 10px;
     }
   }

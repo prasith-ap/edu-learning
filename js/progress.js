@@ -2,14 +2,6 @@
 
 console.log('📊 Progress.js loaded');
 
-// Check authentication
-(async function() {
-  console.log('🔒 Checking authentication...');
-  if (window.eduplay && window.eduplay.checkAuth) {
-    await window.eduplay.checkAuth();
-  }
-})();
-
 // Module names mapping
 const moduleNames = {
   'mathematics': '🧮 Mathematics',
