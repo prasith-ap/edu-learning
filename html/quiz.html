@@ -7,10 +7,121 @@
   <title>Quiz | EduPlay</title>
   <link rel="stylesheet" href="../css/main.css">
   <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600;700&display=swap" rel="stylesheet">
-  <!-- Renaming quiz.css to avoid conflicts or just inline professional styles -->
+  <style>
+    /* ── Option Buttons ─────────────────────────────── */
+    .option-btn {
+      width: 100%;
+      padding: 14px 20px;
+      font-size: 1rem;
+      font-weight: 500;
+      text-align: left;
+      background: #fff;
+      border: 2px solid #e1e1e1;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-family: var(--font-primary);
+      color: var(--secondary-color);
+    }
+
+    .option-btn:hover:not(:disabled) {
+      border-color: var(--primary-color);
+      background: var(--bg-blue-light);
+      transform: translateX(4px);
+    }
+
+    .option-btn.correct {
+      background: #e6fffa;
+      border-color: var(--success);
+      color: var(--success);
+      font-weight: 700;
+    }
+
+    .option-btn.incorrect {
+      background: #fce8e6;
+      border-color: var(--error);
+      color: var(--error);
+    }
+
+    .option-btn.selected.correct {
+      background: #e6fffa;
+      border-color: var(--success);
+    }
+
+    /* ── Loading spinner ────────────────────────────── */
+    .loading-spinner {
+      display: inline-block;
+      width: 40px;
+      height: 40px;
+      border: 4px solid #e1e1e1;
+      border-top-color: var(--primary-color);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin-bottom: 16px;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* ── Progress bar ───────────────────────────────── */
+    .progress-track {
+      height: 6px;
+      background: #e1e1e1;
+      border-radius: 3px;
+      margin-bottom: 28px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary-color), #4f8ef7);
+      border-radius: 3px;
+      transition: width 0.4s ease;
+    }
+
+    /* ── Feedback ───────────────────────────────────── */
+    #feedbackSection {
+      margin-top: 20px;
+      padding: 20px 24px;
+      border-radius: 8px;
+      border: 1px solid #e1e1e1;
+      background: var(--bg-blue-light);
+    }
+
+    /* ── Result stats ───────────────────────────────── */
+    .result-stat {
+      text-align: center;
+      padding: 20px;
+      background: var(--bg-blue-light);
+      border-radius: 12px;
+    }
+
+    .result-stat-number {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: var(--primary-color);
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+
+    .result-stat-label {
+      font-size: 0.875rem;
+      color: var(--secondary-light);
+    }
+
+    /* ── Btn small ──────────────────────────────────── */
+    .btn-sm {
+      padding: 6px 16px;
+      font-size: 0.875rem;
+    }
+  </style>
 </head>
 
 <body class="quiz-page">
+
   <!-- Background Animation -->
   <div class="background-animation">
     <div class="floating-emoji emoji-1">🐶</div>
@@ -22,77 +133,93 @@
     <div class="floating-emoji emoji-7">🐵</div>
   </div>
 
+  <!-- Navbar -->
   <nav class="navbar">
     <div class="container navbar-inner">
       <div class="navbar-brand">EduPlay</div>
       <div class="nav-links">
-        <a href="dashboard.html" class="btn btn-outline btn-sm">Exit Quiz</a>
+        <a href="dashboard.html" class="btn btn-outline btn-sm">✕ Exit Quiz</a>
       </div>
     </div>
   </nav>
 
-  <div class="container" style="padding-top: 48px; padding-bottom: 48px; max-width: 800px;">
+  <div class="container" style="padding-top: 40px; padding-bottom: 48px; max-width: 760px;">
 
+    <!-- Quiz Header (always visible) -->
     <div id="quizHeader" class="card"
-      style="margin-bottom: 24px; padding: 24px; display: flex; justify-content: space-between; align-items: center;">
-      <h1 id="quizTitle" style="font-size: 1.5rem; margin: 0;">Quiz</h1>
-      <div class="quiz-info" style="text-align: right;">
-        <div id="questionCounter" style="font-weight: 600; color: var(--secondary-light);">Question 1 of 10</div>
-        <div id="scoreDisplay" style="font-weight: 700; color: var(--primary-color);">Score: 0</div>
+      style="margin-bottom: 24px; padding: 20px 28px; display: flex; justify-content: space-between; align-items: center;">
+      <h1 id="quizTitle" style="font-size: 1.4rem; margin: 0;">Quiz</h1>
+      <div style="text-align: right;">
+        <div id="questionCounter" style="font-weight: 600; color: var(--secondary-light); font-size: 0.9rem;">
+          Loading...
+        </div>
+        <div id="scoreDisplay" style="font-weight: 700; color: var(--primary-color); font-size: 1.1rem;">
+          Score: 0
+        </div>
       </div>
     </div>
 
-    <div id="loadingScreen" class="text-center" style="padding: 48px;">
-      <p>Loading quiz content...</p>
+    <!-- Loading Screen -->
+    <div id="loadingScreen" class="text-center" style="padding: 64px 48px;">
+      <div class="loading-spinner"></div>
+      <p style="font-weight: 600; color: var(--secondary-light);">Loading quiz questions...</p>
     </div>
 
-    <div id="quizContent" class="hidden">
+    <!-- Quiz Content (hidden until loaded) -->
+    <div id="quizContent" style="display: none;">
+
       <!-- Progress Bar -->
-      <div style="height: 4px; background: #e1e1e1; border-radius: 2px; margin-bottom: 24px; overflow: hidden;">
-        <div id="progressBar"
-          style="height: 100%; background: var(--primary-color); width: 0%; transition: width 0.3s;"></div>
+      <div class="progress-track">
+        <div id="progressBar" class="progress-fill" style="width: 0%;"></div>
       </div>
 
+      <!-- Question Card -->
       <div id="questionCard" class="card" style="padding: 32px;">
-        <h2 id="questionText" style="margin-bottom: 24px; font-size: 1.25rem;">Question text goes here?</h2>
+        <h2 id="questionText" style="margin-bottom: 28px; font-size: 1.2rem; line-height: 1.5; font-weight: 600;">
+          Question goes here
+        </h2>
         <div id="optionsContainer" style="display: flex; flex-direction: column; gap: 12px;">
           <!-- Options injected by JS -->
         </div>
       </div>
 
-      <div id="feedbackSection" class="card hidden"
-        style="margin-top: 24px; padding: 24px; background: var(--bg-blue-light); border: 1px solid var(--primary-light);">
-        <div id="feedbackMessage" style="margin-bottom: 16px; font-weight: 600;"></div>
-        <button id="nextBtn" class="btn btn-primary">Next Question</button>
+      <!-- Feedback Section (hidden until answer selected) -->
+      <div id="feedbackSection" style="display: none;">
+        <div id="feedbackMessage" style="margin-bottom: 14px; font-size: 1rem;"></div>
+        <button id="nextBtn" class="btn btn-primary">Next Question →</button>
       </div>
+
     </div>
 
-    <!-- Results Screen -->
-    <div id="resultsScreen" class="hidden text-center">
-      <div class="card" style="padding: 48px;">
-        <h1 id="resultTitle" style="margin-bottom: 16px;">Quiz Complete</h1>
+    <!-- Results Screen (hidden until quiz ends) -->
+    <div id="resultsScreen" style="display: none;" class="text-center">
+      <div class="card" style="padding: 48px 32px;">
 
-        <div class="grid grid-cols-3" style="gap: 24px; margin: 32px 0;">
-          <div>
-            <div id="finalScore" style="font-size: 2rem; font-weight: 700; color: var(--primary-color);">0</div>
-            <div style="font-size: 0.9rem; color: #666;">Points</div>
+        <h1 id="resultTitle" style="margin-bottom: 8px; font-size: 1.8rem;">Quiz Complete! 🎉</h1>
+        <p style="margin-bottom: 32px; color: var(--secondary-light);">Here's how you did</p>
+
+        <div class="grid grid-cols-3" style="gap: 16px; margin-bottom: 32px;">
+          <div class="result-stat">
+            <div id="finalScore" class="result-stat-number">0</div>
+            <div class="result-stat-label">Points Earned</div>
           </div>
-          <div>
-            <div id="correctCount" style="font-size: 2rem; font-weight: 700; color: var(--primary-color);">0/0</div>
-            <div style="font-size: 0.9rem; color: #666;">Correct</div>
+          <div class="result-stat">
+            <div id="correctCount" class="result-stat-number">0/10</div>
+            <div class="result-stat-label">Correct</div>
           </div>
-          <div>
-            <div id="percentage" style="font-size: 2rem; font-weight: 700; color: var(--primary-color);">0%</div>
-            <div style="font-size: 0.9rem; color: #666;">Accuracy</div>
+          <div class="result-stat">
+            <div id="percentage" class="result-stat-number">0%</div>
+            <div class="result-stat-label">Accuracy</div>
           </div>
         </div>
 
-        <div id="achievementNotification" style="margin-bottom: 32px;"></div>
+        <div id="achievementNotification" style="display: none; margin-bottom: 24px;"></div>
 
-        <div style="display: flex; gap: 16px; justify-content: center;">
-          <button onclick="retakeQuiz()" class="btn btn-primary">Retake Quiz</button>
-          <a href="dashboard.html" class="btn btn-outline">Back to Dashboard</a>
+        <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
+          <button onclick="retakeQuiz()" class="btn btn-primary">🔄 Try Again (New Questions)</button>
+          <a href="dashboard.html" class="btn btn-outline">← Back to Dashboard</a>
         </div>
+
       </div>
     </div>
 
@@ -102,12 +229,7 @@
   <script src="../config.js"></script>
   <script src="../js/auth.js"></script>
   <script src="../js/quiz.js"></script>
-  <script>
-    // Inline script compatibility
-    function retakeQuiz() {
-      window.location.reload();
-    }
-  </script>
+
 </body>
 
 </html>

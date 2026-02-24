@@ -1,55 +1,7 @@
-// Quiz JavaScript with Full Supabase Integration
+// Quiz JavaScript - Questions loaded from Supabase
+// Shows 10 randomly shuffled questions per session from a pool of 30
 
 console.log('📝 Quiz.js loaded');
-
-// Quiz data for different modules
-const quizData = {
-  mathematics: {
-    title: 'Mathematics Quiz',
-    questions: [
-      { question: 'What is 15 + 27?', options: ['32', '42', '52', '62'], correct: 1 },
-      { question: 'What is 8 × 7?', options: ['54', '56', '58', '60'], correct: 1 },
-      { question: 'What is 100 - 45?', options: ['45', '50', '55', '60'], correct: 2 },
-      { question: 'What is 12 ÷ 4?', options: ['2', '3', '4', '5'], correct: 1 },
-      { question: 'What is the next number: 2, 4, 6, 8, __?', options: ['9', '10', '11', '12'], correct: 1 },
-      { question: 'What is 25 + 35?', options: ['50', '55', '60', '65'], correct: 2 },
-      { question: 'If you have 3 bags with 5 apples each, how many apples?', options: ['10', '12', '15', '18'], correct: 2 },
-      { question: 'What is 9 × 9?', options: ['72', '81', '90', '99'], correct: 1 },
-      { question: 'What is half of 50?', options: ['20', '25', '30', '35'], correct: 1 },
-      { question: 'What is 144 ÷ 12?', options: ['10', '11', '12', '13'], correct: 2 }
-    ]
-  },
-  english: {
-    title: 'English Quiz',
-    questions: [
-      { question: 'What is the plural of "child"?', options: ['childs', 'children', 'childrens', 'childer'], correct: 1 },
-      { question: 'Which word is a verb?', options: ['happy', 'run', 'beautiful', 'cat'], correct: 1 },
-      { question: 'What is the opposite of "hot"?', options: ['warm', 'cool', 'cold', 'freezing'], correct: 2 },
-      { question: 'Which sentence is correct?', options: ['She go to school', 'She goes to school', 'She going to school', 'She gone to school'], correct: 1 },
-      { question: 'What is a synonym for "happy"?', options: ['sad', 'angry', 'joyful', 'tired'], correct: 2 },
-      { question: 'Which word is an adjective?', options: ['quickly', 'run', 'beautiful', 'eat'], correct: 2 },
-      { question: 'What is the past tense of "eat"?', options: ['eated', 'ate', 'eaten', 'eating'], correct: 1 },
-      { question: 'Which word rhymes with "cat"?', options: ['dog', 'hat', 'cup', 'pen'], correct: 1 },
-      { question: 'What is the plural of "mouse"?', options: ['mouses', 'mice', 'mouse', 'meese'], correct: 1 },
-      { question: 'Which is a complete sentence?', options: ['Running fast', 'The dog barks', 'In the park', 'Very happy'], correct: 1 }
-    ]
-  },
-  'general-knowledge': {
-    title: 'General Knowledge Quiz',
-    questions: [
-      { question: 'What is the largest planet in our solar system?', options: ['Earth', 'Mars', 'Jupiter', 'Saturn'], correct: 2 },
-      { question: 'How many continents are there?', options: ['5', '6', '7', '8'], correct: 2 },
-      { question: 'What color is made by mixing red and blue?', options: ['Green', 'Purple', 'Orange', 'Brown'], correct: 1 },
-      { question: 'How many days are in a week?', options: ['5', '6', '7', '8'], correct: 2 },
-      { question: 'What do bees make?', options: ['Milk', 'Honey', 'Butter', 'Cheese'], correct: 1 },
-      { question: 'Which animal is "King of the Jungle"?', options: ['Tiger', 'Elephant', 'Lion', 'Bear'], correct: 2 },
-      { question: 'What is the capital of France?', options: ['London', 'Paris', 'Rome', 'Berlin'], correct: 1 },
-      { question: 'How many legs does a spider have?', options: ['6', '8', '10', '12'], correct: 1 },
-      { question: 'What do plants need to make food?', options: ['Darkness', 'Sunlight', 'Snow', 'Wind'], correct: 1 },
-      { question: 'Which season comes after winter?', options: ['Summer', 'Fall', 'Spring', 'Autumn'], correct: 2 }
-    ]
-  }
-};
 
 // Quiz state
 let currentModule = '';
@@ -59,33 +11,106 @@ let score = 0;
 let correctAnswers = 0;
 let selectedAnswer = null;
 
-// Initialize quiz
-function initializeQuiz() {
+// ─── Utilities ────────────────────────────────────────────────────────────────
+
+/** Fisher-Yates in-place shuffle */
+function shuffleArray(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+/** Pick n random items from arr (non-destructive) */
+function pickRandom(arr, n) {
+  return shuffleArray([...arr]).slice(0, n);
+}
+
+// ─── Supabase Loader ──────────────────────────────────────────────────────────
+
+async function loadQuestionsFromSupabase(module) {
+  console.log('🔄 Loading questions from Supabase for module:', module);
+
+  const client = window.eduplay ? window.eduplay.getSupabase() : null;
+  if (!client) {
+    throw new Error('Supabase client not available. Please refresh the page.');
+  }
+
+  const { data, error } = await client
+    .from('quiz_questions')
+    .select('question, options, correct_index')
+    .eq('module', module)
+    .order('sort_order', { ascending: true });
+
+  if (error) {
+    console.error('❌ Error loading questions:', error);
+    throw new Error('Failed to load quiz questions. Please try again.');
+  }
+
+  if (!data || data.length === 0) {
+    throw new Error('No questions found for this module. Please run the SQL seed first.');
+  }
+
+  console.log(`✅ Loaded ${data.length} questions from Supabase`);
+
+  // Normalise: options may be JSON array from Supabase
+  return data.map(row => ({
+    question: row.question,
+    options: Array.isArray(row.options) ? row.options : JSON.parse(row.options),
+    correct: row.correct_index
+  }));
+}
+
+// ─── Module meta (titles / colours) ──────────────────────────────────────────
+
+const MODULE_META = {
+  mathematics: { title: 'Mathematics Quiz', emoji: '🔢' },
+  english: { title: 'English Quiz', emoji: '📚' },
+  'general-knowledge': { title: 'General Knowledge Quiz', emoji: '🌍' }
+};
+
+// ─── Initialize Quiz ──────────────────────────────────────────────────────────
+
+async function initializeQuiz() {
   console.log('🎯 Initializing quiz...');
 
   const urlParams = new URLSearchParams(window.location.search);
   currentModule = urlParams.get('module') || 'mathematics';
-
   console.log('📚 Module:', currentModule);
 
-  const moduleData = quizData[currentModule];
-  if (!moduleData) {
-    console.error('❌ Invalid module');
+  const meta = MODULE_META[currentModule];
+  if (!meta) {
+    console.error('❌ Invalid module:', currentModule);
     window.location.href = 'dashboard.html';
     return;
   }
 
-  currentQuestions = [...moduleData.questions];
-  document.getElementById('quizTitle').textContent = moduleData.title;
+  document.getElementById('quizTitle').textContent = meta.title;
 
-  setTimeout(() => {
+  try {
+    const allQuestions = await loadQuestionsFromSupabase(currentModule);
+
+    // Pick 10 random shuffled questions from the pool of 30
+    currentQuestions = pickRandom(allQuestions, 10);
+
     document.getElementById('loadingScreen').style.display = 'none';
     document.getElementById('quizContent').style.display = 'block';
     loadQuestion();
-  }, 1500);
+
+  } catch (err) {
+    console.error('❌ Quiz initialization failed:', err);
+    document.getElementById('loadingScreen').innerHTML = `
+      <div style="color: var(--error); padding: 32px; text-align: center;">
+        <div style="font-size: 2rem; margin-bottom: 16px;">⚠️</div>
+        <p style="font-weight: 600;">${err.message}</p>
+        <a href="dashboard.html" class="btn btn-outline" style="margin-top: 16px;">Back to Dashboard</a>
+      </div>`;
+  }
 }
 
-// Load current question
+// ─── Load Question ─────────────────────────────────────────────────────────────
+
 function loadQuestion() {
   if (currentQuestionIndex >= currentQuestions.length) {
     showResults();
@@ -95,9 +120,10 @@ function loadQuestion() {
   const question = currentQuestions[currentQuestionIndex];
   selectedAnswer = null;
 
-  const progress = ((currentQuestionIndex) / currentQuestions.length) * 100;
+  const progress = (currentQuestionIndex / currentQuestions.length) * 100;
   document.getElementById('progressBar').style.width = progress + '%';
-  document.getElementById('questionCounter').textContent = `Question ${currentQuestionIndex + 1} of ${currentQuestions.length}`;
+  document.getElementById('questionCounter').textContent =
+    `Question ${currentQuestionIndex + 1} of ${currentQuestions.length}`;
   document.getElementById('scoreDisplay').textContent = `Score: ${score}`;
   document.getElementById('questionText').textContent = question.question;
 
@@ -109,7 +135,8 @@ function loadQuestion() {
   document.getElementById('feedbackSection').style.display = 'none';
 }
 
-// Select answer
+// ─── Select Answer ────────────────────────────────────────────────────────────
+
 function selectAnswer(index) {
   if (selectedAnswer !== null) return;
 
@@ -130,32 +157,38 @@ function selectAnswer(index) {
     score += 10;
   }
 
+  document.getElementById('scoreDisplay').textContent = `Score: ${score}`;
   showFeedback(isCorrect);
 }
 
-// Show feedback
+// ─── Feedback ─────────────────────────────────────────────────────────────────
+
 function showFeedback(isCorrect) {
   const feedbackSection = document.getElementById('feedbackSection');
   const feedbackMessage = document.getElementById('feedbackMessage');
 
   if (isCorrect) {
-    feedbackMessage.textContent = '🎉 Correct! Well done!';
-    feedbackMessage.className = 'feedback-message correct';
+    feedbackMessage.innerHTML = '🎉 <strong>Correct!</strong> Well done!';
+    feedbackMessage.style.color = 'var(--success)';
   } else {
-    feedbackMessage.textContent = '❌ Oops! That\'s not quite right.';
-    feedbackMessage.className = 'feedback-message incorrect';
+    const correctOption = currentQuestions[currentQuestionIndex].options[
+      currentQuestions[currentQuestionIndex].correct
+    ];
+    feedbackMessage.innerHTML = `❌ <strong>Oops!</strong> The correct answer was: <em>${correctOption}</em>`;
+    feedbackMessage.style.color = 'var(--error)';
   }
 
   feedbackSection.style.display = 'block';
 }
 
-// Next question
+// Next question button
 document.getElementById('nextBtn').addEventListener('click', function () {
   currentQuestionIndex++;
   loadQuestion();
 });
 
-// Show results
+// ─── Results ──────────────────────────────────────────────────────────────────
+
 async function showResults() {
   console.log('📊 Showing results...');
 
@@ -169,28 +202,24 @@ async function showResults() {
   document.getElementById('correctCount').textContent = `${correctAnswers}/${totalQuestions}`;
   document.getElementById('percentage').textContent = percentage + '%';
 
+  // Result title based on score
   let icon = '🎉';
   let title = 'Quiz Complete!';
 
   if (percentage === 100) {
-    icon = '🏆';
-    title = 'Perfect Score! Amazing!';
+    icon = '🏆'; title = 'Perfect Score! Amazing!';
   } else if (percentage >= 80) {
-    icon = '⭐';
-    title = 'Excellent Work!';
+    icon = '⭐'; title = 'Excellent Work!';
   } else if (percentage >= 60) {
-    icon = '👍';
-    title = 'Good Job!';
+    icon = '👍'; title = 'Good Job!';
   } else if (percentage >= 40) {
-    icon = '💪';
-    title = 'Keep Practicing!';
+    icon = '💪'; title = 'Keep Practicing!';
   } else {
-    icon = '📚';
-    title = 'Don\'t Give Up!';
+    icon = '📚'; title = "Don't Give Up!";
   }
 
-  document.getElementById('resultIcon').textContent = icon;
-  document.getElementById('resultTitle').textContent = title;
+  // Update result title (icon + title in one element)
+  document.getElementById('resultTitle').textContent = `${icon} ${title}`;
 
   // Save results to Supabase
   await saveQuizResults(score, correctAnswers, totalQuestions, percentage);
@@ -199,7 +228,8 @@ async function showResults() {
   await checkAchievements(percentage);
 }
 
-// Save quiz results to Supabase
+// ─── Save Results ─────────────────────────────────────────────────────────────
+
 async function saveQuizResults(finalScore, correct, total, percentage) {
   console.log('💾 Saving quiz results to Supabase...');
 
@@ -216,14 +246,14 @@ async function saveQuizResults(finalScore, correct, total, percentage) {
       total: total,
       percentage: percentage
     });
-
     console.log('✅ Quiz results saved successfully');
   } catch (error) {
     console.error('❌ Error saving quiz results:', error);
   }
 }
 
-// Check achievements
+// ─── Achievements ─────────────────────────────────────────────────────────────
+
 async function checkAchievements(percentage) {
   console.log('🎖️ Checking achievements...');
 
@@ -240,18 +270,14 @@ async function checkAchievements(percentage) {
     try {
       const user = await window.eduplay.getCurrentUser();
       if (user && user.stats) {
-        const quizCount = user.stats.quizzesCompleted || 0;
+        const quizCount = (user.stats.quizzesCompleted || 0) + 1; // +1 because this quiz just finished
 
-        if (quizCount === 1) {
-          achievements.push('🌟 First Steps Badge Earned!');
-        } else if (quizCount === 5) {
-          achievements.push('🎓 Quiz Master Badge Earned!');
-        } else if (quizCount === 10) {
-          achievements.push('⭐ Dedicated Learner Badge Earned!');
-        }
+        if (quizCount === 1) achievements.push('🌟 First Steps Badge Earned!');
+        else if (quizCount === 5) achievements.push('🎓 Quiz Master Badge Earned!');
+        else if (quizCount === 10) achievements.push('⭐ Dedicated Learner Badge Earned!');
 
-        const totalPoints = user.stats.totalPoints || 0;
-        if (totalPoints >= 500 && totalPoints < 510) {
+        const totalPoints = (user.stats.totalPoints || 0) + score;
+        if (totalPoints >= 500 && (totalPoints - score) < 500) {
           achievements.push('💎 Point Collector Badge Earned!');
         }
       }
@@ -261,13 +287,19 @@ async function checkAchievements(percentage) {
   }
 
   if (achievements.length > 0) {
-    achievementDiv.innerHTML = achievements.join('<br>');
+    achievementDiv.innerHTML = `
+      <div style="background: var(--bg-blue-light); border: 1px solid var(--primary-light);
+                  border-radius: 8px; padding: 16px; margin-bottom: 16px;">
+        <div style="font-weight: 700; color: var(--primary-color); margin-bottom: 8px;">🎊 Achievements!</div>
+        ${achievements.map(a => `<div style="margin: 4px 0;">${a}</div>`).join('')}
+      </div>`;
     achievementDiv.style.display = 'block';
-    console.log('🎉 Achievements:', achievements);
+    console.log('🎉 Achievements unlocked:', achievements);
   }
 }
 
-// Retake quiz
+// ─── Retake ───────────────────────────────────────────────────────────────────
+
 function retakeQuiz() {
   currentQuestionIndex = 0;
   score = 0;
@@ -275,12 +307,28 @@ function retakeQuiz() {
   selectedAnswer = null;
 
   document.getElementById('resultsScreen').style.display = 'none';
-  document.getElementById('quizContent').style.display = 'block';
+  document.getElementById('loadingScreen').innerHTML = '<p>Shuffling new questions...</p>';
+  document.getElementById('loadingScreen').style.display = 'block';
+  document.getElementById('quizContent').style.display = 'none';
 
-  loadQuestion();
+  // Re-load and re-shuffle questions for a fresh set
+  loadQuestionsFromSupabase(currentModule).then(allQuestions => {
+    currentQuestions = pickRandom(allQuestions, 10);
+    document.getElementById('loadingScreen').style.display = 'none';
+    document.getElementById('quizContent').style.display = 'block';
+    loadQuestion();
+  }).catch(err => {
+    console.error('Error reloading questions:', err);
+    // Fallback: just replay existing questions reshuffled
+    currentQuestions = shuffleArray([...currentQuestions]);
+    document.getElementById('loadingScreen').style.display = 'none';
+    document.getElementById('quizContent').style.display = 'block';
+    loadQuestion();
+  });
 }
 
-// Initialize
+// ─── Init ─────────────────────────────────────────────────────────────────────
+
 document.addEventListener('DOMContentLoaded', function () {
   console.log('🎯 Quiz page initialized');
   initializeQuiz();

@@ -2,73 +2,57 @@
 
 console.log('📊 Dashboard.js loaded');
 
-// Badge definitions
-// Badge definitions
+// Badge definitions with emojis
 const BADGES = {
-  'first_quiz': { name: 'First Steps', icon: 'Badge', description: 'Complete your first quiz' },
-  'quiz_master_5': { name: 'Quiz Master', icon: 'Badge', description: 'Complete 5 quizzes' },
-  'perfect_score': { name: 'Perfect!', icon: 'Star', description: 'Get 100% on a quiz' },
-  'high_scorer': { name: 'High Scorer', icon: 'Trophy', description: 'Score 90%+ on a quiz' },
-  'math_whiz': { name: 'Math Whiz', icon: 'Math', description: 'Complete 3 math quizzes' },
-  'word_master': { name: 'Word Master', icon: 'Book', description: 'Complete 3 English quizzes' },
-  'knowledge_seeker': { name: 'Knowledge Seeker', icon: 'Globe', description: 'Complete 3 GK quizzes' },
-  'dedicated_learner': { name: 'Dedicated', icon: 'Award', description: 'Complete 10 quizzes' },
-  'point_collector': { name: 'Point Collector', icon: 'Gem', description: 'Earn 500 points' }
+  'first_quiz': { name: 'First Steps', emoji: '🌟', description: 'Complete your first quiz' },
+  'quiz_master_5': { name: 'Quiz Master', emoji: '🎓', description: 'Complete 5 quizzes' },
+  'perfect_score': { name: 'Perfect!', emoji: '💯', description: 'Get 100% on a quiz' },
+  'high_scorer': { name: 'High Scorer', emoji: '🏆', description: 'Score 90%+ on a quiz' },
+  'math_whiz': { name: 'Math Whiz', emoji: '🔢', description: 'Complete 3 math quizzes' },
+  'word_master': { name: 'Word Master', emoji: '📖', description: 'Complete 3 English quizzes' },
+  'knowledge_seeker': { name: 'Knowledge Seeker', emoji: '🌍', description: 'Complete 3 GK quizzes' },
+  'dedicated_learner': { name: 'Dedicated', emoji: '⭐', description: 'Complete 10 quizzes' },
+  'point_collector': { name: 'Point Collector', emoji: '💎', description: 'Earn 500 points' }
 };
 
 // Load user data from Supabase
 async function loadUserData() {
   console.log('Loading user data...');
-
   try {
     const user = window.eduplay ? await window.eduplay.getCurrentUser() : null;
-
     if (!user) {
-      console.log('No user found, redirecting to login');
       window.location.href = 'login.html';
       return;
     }
 
-    console.log('User loaded:', user.username);
-
-    // Update welcome message
+    // Welcome message
     const welcomeMsg = document.getElementById('welcomeMessage');
-    if (welcomeMsg) {
-      welcomeMsg.textContent = `Welcome back, ${user.username}`;
-    }
+    if (welcomeMsg) welcomeMsg.textContent = `Welcome back, ${user.username} 👋`;
 
-    // Update user info in navbar
     const userInfo = document.getElementById('userInfo');
-    if (userInfo) {
-      userInfo.textContent = `${user.username}`;
-    }
+    if (userInfo) userInfo.textContent = user.username;
 
-    // Update stats
-    const stats = user.stats || {
-      totalPoints: 0,
-      badges: [],
-      quizzesCompleted: 0,
-      history: []
-    };
+    const stats = user.stats || { totalPoints: 0, badges: [], quizzesCompleted: 0, history: [] };
 
-    console.log('📊 Stats:', stats);
-
+    // Stats
     document.getElementById('totalPoints').textContent = stats.totalPoints || 0;
-    document.getElementById('badgesCount').textContent = stats.badges ? stats.badges.length : 0;
+    document.getElementById('badgesCount').textContent = (stats.badges || []).length;
     document.getElementById('quizzesCompleted').textContent = stats.quizzesCompleted || 0;
 
-    // Calculate average score
+    // Average score
     let avgScore = 0;
     if (stats.history && stats.history.length > 0) {
-      const totalScore = stats.history.reduce((sum, quiz) => sum + (quiz.percentage || 0), 0);
-      avgScore = Math.round(totalScore / stats.history.length);
+      avgScore = Math.round(stats.history.reduce((s, q) => s + (q.percentage || 0), 0) / stats.history.length);
     }
     document.getElementById('avgScore').textContent = avgScore + '%';
 
-    // Display badges
-    await loadBadges(stats.badges || []);
+    // Per-module best scores
+    updateModuleProgress(stats.history || []);
 
-    // Check and award new badges
+    // Badges
+    renderBadges(stats.badges || []);
+
+    // Check for new badges
     await checkAndAwardBadges(user);
 
   } catch (error) {
@@ -77,116 +61,97 @@ async function loadUserData() {
   }
 }
 
-// Load badges from Supabase
-async function loadBadges(badges) {
-  console.log('🏆 Loading badges:', badges.length);
+// Show best score bar under each module card
+function updateModuleProgress(history) {
+  const modules = {
+    'mathematics': { prefix: 'math' },
+    'english': { prefix: 'english' },
+    'general-knowledge': { prefix: 'gk' }
+  };
 
-  const badgesContainer = document.getElementById('badgesContainer');
+  Object.entries(modules).forEach(([mod, cfg]) => {
+    const attempts = history.filter(h => h.module === mod);
+    if (attempts.length === 0) return;
+
+    const best = Math.max(...attempts.map(h => h.percentage || 0));
+    const bar = document.getElementById(`${cfg.prefix}-progress`);
+    const fill = document.getElementById(`${cfg.prefix}-progress-fill`);
+    const label = document.getElementById(`${cfg.prefix}-best`);
+
+    if (bar && fill && label) {
+      bar.style.display = 'block';
+      fill.style.width = best + '%';
+      label.style.display = 'block';
+      label.textContent = `Best: ${best}% — ${attempts.length} attempt${attempts.length > 1 ? 's' : ''}`;
+    }
+  });
+}
+
+// Render badge grid
+function renderBadges(badges) {
+  const container = document.getElementById('badgesContainer');
+  if (!container) return;
 
   if (!badges || badges.length === 0) {
-    badgesContainer.innerHTML = `
-      <div class="no-badges" style="text-align: center; color: #666; padding: 20px;">
-        <p>Complete quizzes to earn your first certificate.</p>
-      </div>
-    `;
+    container.innerHTML = `
+      <div style="text-align:center; color:#666; padding:20px;">
+        <div style="font-size:2rem; margin-bottom:8px;">🎯</div>
+        <p style="margin:0;">Complete quizzes to earn your first badge!</p>
+      </div>`;
     return;
   }
 
-  badgesContainer.innerHTML = badges.map(badge => `
-    <div class="badge-item" title="${badge.description || badge.name}" style="display: flex; flex-direction: column; align-items: center; padding: 10px; border: 1px solid #eee; border-radius: 8px;">
-      <div class="badge-icon" style="font-weight: bold; color: var(--primary-color);">${badge.icon}</div>
-      <div class="badge-name" style="font-size: 0.9rem;">${badge.name}</div>
-    </div>
-  `).join('');
-
-  console.log('✅ Badges displayed:', badges.length);
+  container.innerHTML = `
+    <div class="badges-grid">
+      ${badges.map(badge => {
+    const def = BADGES[badge.badge_id || badge.id] || {};
+    const emoji = def.emoji || badge.icon || '🏅';
+    const name = def.name || badge.name || 'Badge';
+    return `
+          <div class="badge-item" title="${def.description || name}">
+            <div class="badge-icon-emoji">${emoji}</div>
+            <div class="badge-name">${name}</div>
+          </div>`;
+  }).join('')}
+    </div>`;
 }
 
-// Check and award badges based on user progress
+// Check and award new badges
 async function checkAndAwardBadges(user) {
-  console.log('🎖️ Checking for new badges...');
-
   const stats = user.stats || {};
-  const currentBadges = stats.badges || [];
-  const badgeIds = currentBadges.map(b => b.badge_id || b.id);
+  const currentBadges = (stats.badges || []).map(b => b.badge_id || b.id);
   const newBadges = [];
+  const h = stats.history || [];
 
-  // Check quiz completion badges
-  if (stats.quizzesCompleted >= 1 && !badgeIds.includes('first_quiz')) {
-    newBadges.push({ ...BADGES.first_quiz, id: 'first_quiz' });
+  if (stats.quizzesCompleted >= 1 && !currentBadges.includes('first_quiz')) newBadges.push({ ...BADGES.first_quiz, id: 'first_quiz' });
+  if (stats.quizzesCompleted >= 5 && !currentBadges.includes('quiz_master_5')) newBadges.push({ ...BADGES.quiz_master_5, id: 'quiz_master_5' });
+  if (stats.quizzesCompleted >= 10 && !currentBadges.includes('dedicated_learner')) newBadges.push({ ...BADGES.dedicated_learner, id: 'dedicated_learner' });
+  if (stats.totalPoints >= 500 && !currentBadges.includes('point_collector')) newBadges.push({ ...BADGES.point_collector, id: 'point_collector' });
+
+  if (h.length > 0) {
+    if (h.some(q => q.percentage === 100) && !currentBadges.includes('perfect_score')) newBadges.push({ ...BADGES.perfect_score, id: 'perfect_score' });
+    if (h.some(q => q.percentage >= 90) && !currentBadges.includes('high_scorer')) newBadges.push({ ...BADGES.high_scorer, id: 'high_scorer' });
+    if (h.filter(q => q.module === 'mathematics').length >= 3 && !currentBadges.includes('math_whiz')) newBadges.push({ ...BADGES.math_whiz, id: 'math_whiz' });
+    if (h.filter(q => q.module === 'english').length >= 3 && !currentBadges.includes('word_master')) newBadges.push({ ...BADGES.word_master, id: 'word_master' });
+    if (h.filter(q => q.module === 'general-knowledge').length >= 3 && !currentBadges.includes('knowledge_seeker')) newBadges.push({ ...BADGES.knowledge_seeker, id: 'knowledge_seeker' });
   }
 
-  if (stats.quizzesCompleted >= 5 && !badgeIds.includes('quiz_master_5')) {
-    newBadges.push({ ...BADGES.quiz_master_5, id: 'quiz_master_5' });
+  if (newBadges.length > 0 && window.eduplay?.saveBadge) {
+    for (const badge of newBadges) {
+      await window.eduplay.saveBadge(badge);
+    }
+    // Reload to reflect new badges
+    await loadUserData();
   }
-
-  if (stats.quizzesCompleted >= 10 && !badgeIds.includes('dedicated_learner')) {
-    newBadges.push({ ...BADGES.dedicated_learner, id: 'dedicated_learner' });
-  }
-
-  // Check points badge
-  if (stats.totalPoints >= 500 && !badgeIds.includes('point_collector')) {
-    newBadges.push({ ...BADGES.point_collector, id: 'point_collector' });
-  }
-
-  // Check performance badges
-  if (stats.history && stats.history.length > 0) {
-    const hasPerfectScore = stats.history.some(q => q.percentage === 100);
-    if (hasPerfectScore && !badgeIds.includes('perfect_score')) {
-      newBadges.push({ ...BADGES.perfect_score, id: 'perfect_score' });
-    }
-
-    const hasHighScore = stats.history.some(q => q.percentage >= 90);
-    if (hasHighScore && !badgeIds.includes('high_scorer')) {
-      newBadges.push({ ...BADGES.high_scorer, id: 'high_scorer' });
-    }
-
-    // Module-specific badges
-    const mathQuizzes = stats.history.filter(q => q.module === 'mathematics').length;
-    if (mathQuizzes >= 3 && !badgeIds.includes('math_whiz')) {
-      newBadges.push({ ...BADGES.math_whiz, id: 'math_whiz' });
-    }
-
-    const englishQuizzes = stats.history.filter(q => q.module === 'english').length;
-    if (englishQuizzes >= 3 && !badgeIds.includes('word_master')) {
-      newBadges.push({ ...BADGES.word_master, id: 'word_master' });
-    }
-
-    const gkQuizzes = stats.history.filter(q => q.module === 'general-knowledge').length;
-    if (gkQuizzes >= 3 && !badgeIds.includes('knowledge_seeker')) {
-      newBadges.push({ ...BADGES.knowledge_seeker, id: 'knowledge_seeker' });
-    }
-  }
-
-  // Save new badges to Supabase
-  if (newBadges.length > 0) {
-    console.log('🎉 New badges earned:', newBadges.length);
-
-    if (window.eduplay && window.eduplay.saveBadge) {
-      for (const badge of newBadges) {
-        await window.eduplay.saveBadge(badge);
-        console.log('✅ Badge saved:', badge.name);
-      }
-
-      // Reload user data to show new badges
-      await loadUserData();
-    }
-  } else {
-    console.log('✓ No new badges to award');
-  }
-
-  return newBadges;
 }
 
-// Start quiz function
+// Start quiz
 function startQuiz(module) {
-  console.log('🚀 Starting quiz:', module);
   window.location.href = `quiz.html?module=${module}`;
 }
 
-// Initialize dashboard on page load
+// Init
 document.addEventListener('DOMContentLoaded', async function () {
-  console.log('🎯 Dashboard initialized');
   await loadUserData();
 });
 

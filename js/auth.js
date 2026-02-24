@@ -413,7 +413,7 @@ function initializeLoginForm() {
           return;
         }
 
-       
+
 
         // Sign in with email and password
         const { data: authData, error: signInError } = await client.auth.signInWithPassword({
@@ -515,12 +515,12 @@ async function checkAuth() {
 
     if (user && !error) {
       // User is logged in - update session with latest user data
-  
+
       SessionManager.set(user.id, user.email, user.user_metadata?.username || '');
 
       // If on public/auth pages and logged in, redirect to dashboard
       if (publicPages.includes(currentPage)) {
-       
+
         window.location.href = 'dashboard.html';
         return false;
       }
@@ -573,66 +573,74 @@ async function checkAuth() {
 }
 
 /**
- * Get current user data
- * @returns {Promise<Object|null>} User data or null
+/**
+ * Get current user data — uses 3 direct queries, no FK join needed
  */
 async function getCurrentUser() {
   try {
     const client = initSupabase();
     if (!client) return null;
 
-    const { data: { user }, error: authError } = await client.auth.getUser();
+    // 1. Get authenticated user
+    let { data: authData, error: authError } = await client.auth.getUser();
+    let authUser = authData?.user;
 
-    if (authError || !user) {
-      // Try to get from localStorage as fallback
+    if (authError || !authUser) {
+      // Try session refresh first
+      const { data: refreshData } = await client.auth.refreshSession();
+      authUser = refreshData?.user;
+    }
+
+    if (!authUser) {
+      // Fallback: return minimal user from localStorage (read-only, no live stats)
       const userId = SessionManager.get();
       const username = SessionManager.getUsername();
       const email = SessionManager.getEmail();
-
       if (userId && username) {
-        console.log('📦 Returning cached user from localStorage');
         return {
-          id: userId,
-          username: username,
-          email: email,
-          stats: {
-            totalPoints: 0,
-            badges: [],
-            quizzesCompleted: 0,
-            history: []
-          }
+          id: userId, username, email,
+          stats: { totalPoints: 0, badges: [], quizzesCompleted: 0, history: [] }
         };
       }
-
       return null;
     }
 
-    // Get user profile with related data from Supabase
-    const { data: profile, error: profileError } = await client
+    // 2. Get user profile row
+    const { data: profile, error: profileErr } = await client
       .from('users')
-      .select(`
-        *,
-        badges (*),
-        quiz_history (*)
-      `)
-      .eq('id', user.id)
+      .select('id, username, email, age, total_points, quizzes_completed')
+      .eq('id', authUser.id)
       .single();
 
-    if (profileError) {
-      console.error('Error fetching profile:', profileError);
-      // Return basic user info even if profile fetch fails
+    if (profileErr || !profile) {
+      console.warn('Profile fetch error:', profileErr?.message);
       return {
-        id: user.id,
-        username: user.user_metadata?.username || '',
-        email: user.email,
-        stats: {
-          totalPoints: 0,
-          badges: [],
-          quizzesCompleted: 0,
-          history: []
-        }
+        id: authUser.id,
+        username: authUser.user_metadata?.username || '',
+        email: authUser.email,
+        stats: { totalPoints: 0, badges: [], quizzesCompleted: 0, history: [] }
       };
     }
+
+    // 3. Get quiz history directly (no FK join required)
+    const { data: history } = await client
+      .from('quiz_history')
+      .select('id, module, score, correct, total, percentage, date')
+      .eq('user_id', authUser.id)
+      .order('date', { ascending: false });
+
+    // 4. Get badges directly
+    const { data: badges } = await client
+      .from('badges')
+      .select('id, badge_id, name, icon, description, earned_at')
+      .eq('user_id', authUser.id);
+
+    const historyRows = history || [];
+    const badgeRows = badges || [];
+
+    // Compute live stats from quiz_history (always accurate)
+    const totalPoints = historyRows.reduce((s, r) => s + (r.score || 0), 0);
+    const quizzesCompleted = historyRows.length;
 
     return {
       id: profile.id,
@@ -640,10 +648,10 @@ async function getCurrentUser() {
       email: profile.email,
       age: profile.age,
       stats: {
-        totalPoints: profile.total_points || 0,
-        badges: profile.badges || [],
-        quizzesCompleted: profile.quizzes_completed || 0,
-        history: profile.quiz_history || []
+        totalPoints,
+        quizzesCompleted,
+        badges: badgeRows,
+        history: historyRows
       }
     };
 
@@ -684,51 +692,76 @@ async function updateUserStats(stats) {
 }
 
 /**
- * Save quiz result
- * @param {Object} quizData - Quiz result data
+ * Save quiz result — matches actual quiz_history table schema
  */
 async function saveQuizResult(quizData) {
   try {
     const client = initSupabase();
-    if (!client) return;
+    if (!client) { console.error('❌ saveQuizResult: no client'); return; }
 
-    const { data: { user } } = await client.auth.getUser();
-    if (!user) return;
+    // Get auth user (with refresh fallback)
+    let { data: authData } = await client.auth.getUser();
+    let user = authData?.user;
+    if (!user) {
+      const { data: refreshData } = await client.auth.refreshSession();
+      user = refreshData?.user;
+    }
+    if (!user) { console.error('❌ saveQuizResult: no auth session'); return; }
 
-    // Save quiz history
-    const { error } = await client
+    console.log('💾 Saving quiz_history for user:', user.id, quizData);
+
+    // Insert ONLY columns that exist in the actual table
+    // Schema: id, user_id, module, score, correct, total, percentage, date, created_at
+    const { data: inserted, error: insertErr } = await client
       .from('quiz_history')
-      .insert([
-        {
-          user_id: user.id,
-          module: quizData.module,
-          score: quizData.score,
-          correct: quizData.correct,
-          total: quizData.total,
-          percentage: quizData.percentage,
-          time_taken: quizData.timeTaken || null,
-          date: new Date().toISOString()
-        }
-      ]);
+      .insert([{
+        user_id: user.id,
+        module: quizData.module,
+        score: quizData.score,
+        correct: quizData.correct,
+        total: quizData.total,
+        percentage: quizData.percentage,
+        date: new Date().toISOString()
+      }])
+      .select();
 
-    if (error) {
-      console.error('Error saving quiz history:', error);
+    if (insertErr) {
+      console.error('❌ quiz_history insert failed:', insertErr.message, insertErr.details, insertErr.hint);
       return;
     }
 
-    // Update user stats
-    const currentUser = await getCurrentUser();
-    if (currentUser) {
-      await updateUserStats({
-        totalPoints: currentUser.stats.totalPoints + quizData.score,
-        quizzesCompleted: currentUser.stats.quizzesCompleted + 1
-      });
+    console.log('✅ quiz_history saved:', inserted);
+
+    // Update users.total_points and users.quizzes_completed
+    const { data: profile } = await client
+      .from('users')
+      .select('total_points, quizzes_completed')
+      .eq('id', user.id)
+      .single();
+
+    if (profile) {
+      const { error: updateErr } = await client
+        .from('users')
+        .update({
+          total_points: (profile.total_points || 0) + quizData.score,
+          quizzes_completed: (profile.quizzes_completed || 0) + 1,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', user.id);
+
+      if (updateErr) {
+        // Non-fatal: history is saved, just stats column not updated
+        console.warn('⚠️ users stats update failed (run users_rls.sql):', updateErr.message);
+      } else {
+        console.log('✅ users stats updated');
+      }
     }
 
   } catch (error) {
-    console.error('Error saving quiz result:', error);
+    console.error('❌ Unexpected error in saveQuizResult:', error);
   }
 }
+
 
 /**
  * Save badge
