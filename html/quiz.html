@@ -4,222 +4,313 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Quiz | EduPlay</title>
+  <title>Quiz | EduPlay 🎓</title>
   <link rel="stylesheet" href="../css/main.css">
-  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
-    /* ── Option Buttons ─────────────────────────────── */
-    .option-btn {
-      width: 100%;
-      padding: 14px 20px;
-      font-size: 1rem;
-      font-weight: 500;
-      text-align: left;
+    body {
+      background: var(--bg-main);
+    }
+
+    /* Quiz header card */
+    .quiz-header-card {
       background: #fff;
-      border: 2px solid #e1e1e1;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      font-family: var(--font-primary);
-      color: var(--secondary-color);
+      border-radius: 24px;
+      padding: 20px 28px;
+      margin-bottom: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: var(--shadow-card);
+      border: 2.5px solid rgba(108, 99, 255, 0.12);
+      animation: slideUp 0.4s both;
     }
 
-    .option-btn:hover:not(:disabled) {
-      border-color: var(--primary-color);
-      background: var(--bg-blue-light);
-      transform: translateX(4px);
+    #quizTitle {
+      font-size: 1.4rem;
+      font-weight: 900;
+      margin: 0;
+      color: var(--text-dark);
     }
 
-    .option-btn.correct {
-      background: #e6fffa;
-      border-color: var(--success);
-      color: var(--success);
+    #questionCounter {
       font-weight: 700;
+      color: var(--text-mid);
+      font-size: 0.9rem;
     }
 
-    .option-btn.incorrect {
-      background: #fce8e6;
-      border-color: var(--error);
-      color: var(--error);
+    #scoreDisplay {
+      font-weight: 900;
+      font-size: 1.2rem;
+      color: var(--primary);
     }
 
-    .option-btn.selected.correct {
-      background: #e6fffa;
-      border-color: var(--success);
-    }
-
-    /* ── Loading spinner ────────────────────────────── */
-    .loading-spinner {
-      display: inline-block;
-      width: 40px;
-      height: 40px;
-      border: 4px solid #e1e1e1;
-      border-top-color: var(--primary-color);
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-      margin-bottom: 16px;
-    }
-
-    @keyframes spin {
-      to {
-        transform: rotate(360deg);
-      }
-    }
-
-    /* ── Progress bar ───────────────────────────────── */
+    /* Progress bar */
     .progress-track {
-      height: 6px;
-      background: #e1e1e1;
-      border-radius: 3px;
+      height: 12px;
+      background: #e0dfff;
+      border-radius: 99px;
       margin-bottom: 28px;
       overflow: hidden;
     }
 
     .progress-fill {
       height: 100%;
-      background: linear-gradient(90deg, var(--primary-color), #4f8ef7);
-      border-radius: 3px;
-      transition: width 0.4s ease;
+      background: linear-gradient(90deg, var(--primary), var(--accent-pink));
+      border-radius: 99px;
+      transition: width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
 
-    /* ── Feedback ───────────────────────────────────── */
-    #feedbackSection {
-      margin-top: 20px;
-      padding: 20px 24px;
-      border-radius: 8px;
-      border: 1px solid #e1e1e1;
-      background: var(--bg-blue-light);
+    /* Question card */
+    #questionCard {
+      background: #fff;
+      border-radius: 28px;
+      padding: 36px;
+      box-shadow: var(--shadow-card);
+      border: 2.5px solid rgba(108, 99, 255, 0.1);
+      animation: popIn 0.4s both;
     }
 
-    /* ── Result stats ───────────────────────────────── */
-    .result-stat {
-      text-align: center;
-      padding: 20px;
-      background: var(--bg-blue-light);
-      border-radius: 12px;
+    #questionText {
+      font-size: 1.25rem;
+      font-weight: 800;
+      line-height: 1.5;
+      color: var(--text-dark);
+      margin-bottom: 28px;
     }
 
-    .result-stat-number {
-      font-size: 2.5rem;
+    /* Options */
+    .option-btn {
+      width: 100%;
+      padding: 15px 22px;
+      font-size: 1rem;
       font-weight: 700;
-      color: var(--primary-color);
+      font-family: var(--font);
+      text-align: left;
+      background: #fafafe;
+      border: 2.5px solid #e0dfff;
+      border-radius: 16px;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+      color: var(--text-dark);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .option-btn .opt-letter {
+      width: 32px;
+      height: 32px;
+      flex-shrink: 0;
+      border-radius: 50%;
+      background: var(--primary-light);
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      font-size: 0.85rem;
+      transition: all 0.2s;
+    }
+
+    .option-btn:hover:not(:disabled) {
+      border-color: var(--primary);
+      background: var(--primary-light);
+      transform: translateX(6px) scale(1.01);
+    }
+
+    .option-btn:hover:not(:disabled) .opt-letter {
+      background: var(--primary);
+      color: white;
+    }
+
+    .option-btn.correct {
+      background: #e8fff2;
+      border-color: var(--accent-green);
+      color: #1a7a3a;
+    }
+
+    .option-btn.correct .opt-letter {
+      background: var(--accent-green);
+      color: white;
+    }
+
+    .option-btn.incorrect {
+      background: #ffe5e5;
+      border-color: var(--error);
+      color: #c0392b;
+    }
+
+    .option-btn.incorrect .opt-letter {
+      background: var(--error);
+      color: white;
+    }
+
+    /* Feedback */
+    #feedbackSection {
+      background: #fafafe;
+      border: 2.5px solid #e0dfff;
+      border-radius: 20px;
+      padding: 20px 24px;
+      margin-top: 20px;
+      animation: slideUp 0.3s both;
+    }
+
+    #feedbackMessage {
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: 14px;
+    }
+
+    /* Results */
+    #resultsScreen .result-card {
+      background: #fff;
+      border-radius: 32px;
+      padding: 48px 40px;
+      box-shadow: var(--shadow-lg);
+      text-align: center;
+      border: 3px solid rgba(108, 99, 255, 0.1);
+      animation: popIn 0.6s both;
+    }
+
+    #resultTitle {
+      font-size: 2rem;
+      margin-bottom: 6px;
+    }
+
+    .result-stat-box {
+      background: linear-gradient(135deg, #f0efff, #fce4ff);
+      border-radius: 20px;
+      padding: 22px 16px;
+      text-align: center;
+    }
+
+    .result-stat-num {
+      font-size: 2.8rem;
+      font-weight: 900;
+      color: var(--primary);
       line-height: 1;
       margin-bottom: 6px;
     }
 
-    .result-stat-label {
-      font-size: 0.875rem;
-      color: var(--secondary-light);
+    .result-stat-lbl {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--text-mid);
     }
 
-    /* ── Btn small ──────────────────────────────────── */
+    /* Confetti pieces */
+    .confetti-piece {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      border-radius: 2px;
+      animation: confettiFall 1.5s ease-out both;
+      pointer-events: none;
+    }
+
+    /* Loading */
+    .spinner {
+      display: inline-block;
+      width: 40px;
+      height: 40px;
+      border: 4px solid #e0dfff;
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
     .btn-sm {
-      padding: 6px 16px;
-      font-size: 0.875rem;
+      padding: 7px 18px;
+      font-size: 0.9rem;
     }
   </style>
 </head>
 
 <body class="quiz-page">
 
-  <!-- Background Animation -->
   <div class="background-animation">
-    <div class="floating-emoji emoji-1">🐶</div>
-    <div class="floating-emoji emoji-2">🐱</div>
-    <div class="floating-emoji emoji-3">🐘</div>
-    <div class="floating-emoji emoji-4">🦁</div>
-    <div class="floating-emoji emoji-5">🐼</div>
-    <div class="floating-emoji emoji-6">🦊</div>
-    <div class="floating-emoji emoji-7">🐵</div>
+    <div class="floating-emoji emoji-1">🌟</div>
+    <div class="floating-emoji emoji-2">⭐</div>
+    <div class="floating-emoji emoji-3">🎯</div>
+    <div class="floating-emoji emoji-4">🧩</div>
+    <div class="floating-emoji emoji-5">💡</div>
+    <div class="floating-emoji emoji-6">🎈</div>
+    <div class="floating-emoji emoji-7">🦄</div>
   </div>
 
-  <!-- Navbar -->
   <nav class="navbar">
     <div class="container navbar-inner">
       <div class="navbar-brand">EduPlay</div>
-      <div class="nav-links">
-        <a href="dashboard.html" class="btn btn-outline btn-sm">✕ Exit Quiz</a>
-      </div>
+      <a href="dashboard.html" class="btn btn-outline btn-sm">✕ Exit Quiz</a>
     </div>
   </nav>
 
-  <div class="container" style="padding-top: 40px; padding-bottom: 48px; max-width: 760px;">
+  <div class="container" style="padding-top:36px; padding-bottom:48px; max-width:780px;">
 
-    <!-- Quiz Header (always visible) -->
-    <div id="quizHeader" class="card"
-      style="margin-bottom: 24px; padding: 20px 28px; display: flex; justify-content: space-between; align-items: center;">
-      <h1 id="quizTitle" style="font-size: 1.4rem; margin: 0;">Quiz</h1>
-      <div style="text-align: right;">
-        <div id="questionCounter" style="font-weight: 600; color: var(--secondary-light); font-size: 0.9rem;">
-          Loading...
-        </div>
-        <div id="scoreDisplay" style="font-weight: 700; color: var(--primary-color); font-size: 1.1rem;">
-          Score: 0
-        </div>
+    <!-- Quiz Header -->
+    <div class="quiz-header-card" id="quizHeader">
+      <h1 id="quizTitle">Quiz</h1>
+      <div style="text-align:right;">
+        <div id="questionCounter">Loading...</div>
+        <div id="scoreDisplay">Score: 0</div>
       </div>
     </div>
 
-    <!-- Loading Screen -->
-    <div id="loadingScreen" class="text-center" style="padding: 64px 48px;">
-      <div class="loading-spinner"></div>
-      <p style="font-weight: 600; color: var(--secondary-light);">Loading quiz questions...</p>
+    <!-- Loading -->
+    <div id="loadingScreen" class="text-center" style="padding:72px 40px;">
+      <div class="spinner" style="width:56px;height:56px;border-width:5px;"></div>
+      <p style="margin-top:20px; font-weight:700; font-size:1.1rem;">Loading your questions... 🚀</p>
     </div>
 
-    <!-- Quiz Content (hidden until loaded) -->
-    <div id="quizContent" style="display: none;">
+    <!-- Quiz Content -->
+    <div id="quizContent" style="display:none;">
 
-      <!-- Progress Bar -->
       <div class="progress-track">
-        <div id="progressBar" class="progress-fill" style="width: 0%;"></div>
+        <div id="progressBar" class="progress-fill" style="width:0%;"></div>
       </div>
 
-      <!-- Question Card -->
-      <div id="questionCard" class="card" style="padding: 32px;">
-        <h2 id="questionText" style="margin-bottom: 28px; font-size: 1.2rem; line-height: 1.5; font-weight: 600;">
-          Question goes here
-        </h2>
-        <div id="optionsContainer" style="display: flex; flex-direction: column; gap: 12px;">
-          <!-- Options injected by JS -->
-        </div>
+      <div id="questionCard">
+        <p id="questionText">Question goes here</p>
+        <div id="optionsContainer" style="display:flex; flex-direction:column; gap:12px;"></div>
       </div>
 
-      <!-- Feedback Section (hidden until answer selected) -->
-      <div id="feedbackSection" style="display: none;">
-        <div id="feedbackMessage" style="margin-bottom: 14px; font-size: 1rem;"></div>
-        <button id="nextBtn" class="btn btn-primary">Next Question →</button>
+      <div id="feedbackSection" style="display:none;">
+        <div id="feedbackMessage"></div>
+        <button id="nextBtn" class="btn btn-primary">Next ➡️</button>
       </div>
 
     </div>
 
-    <!-- Results Screen (hidden until quiz ends) -->
-    <div id="resultsScreen" style="display: none;" class="text-center">
-      <div class="card" style="padding: 48px 32px;">
+    <!-- Results Screen -->
+    <div id="resultsScreen" style="display:none; position:relative;">
+      <div class="result-card">
+        <div id="confettiContainer"
+          style="position:absolute;top:20px;left:50%;transform:translateX(-50%);pointer-events:none;"></div>
 
-        <h1 id="resultTitle" style="margin-bottom: 8px; font-size: 1.8rem;">Quiz Complete! 🎉</h1>
-        <p style="margin-bottom: 32px; color: var(--secondary-light);">Here's how you did</p>
+        <h1 id="resultTitle" style="margin-bottom:8px;">Quiz Complete! 🎉</h1>
+        <p style="margin-bottom:32px; color:var(--text-mid);">Here's how you did!</p>
 
-        <div class="grid grid-cols-3" style="gap: 16px; margin-bottom: 32px;">
-          <div class="result-stat">
-            <div id="finalScore" class="result-stat-number">0</div>
-            <div class="result-stat-label">Points Earned</div>
+        <div class="grid grid-cols-3" style="gap:16px; margin-bottom:32px;">
+          <div class="result-stat-box">
+            <div id="finalScore" class="result-stat-num">0</div>
+            <div class="result-stat-lbl">⭐ Points</div>
           </div>
-          <div class="result-stat">
-            <div id="correctCount" class="result-stat-number">0/10</div>
-            <div class="result-stat-label">Correct</div>
+          <div class="result-stat-box">
+            <div id="correctCount" class="result-stat-num">0/10</div>
+            <div class="result-stat-lbl">✅ Correct</div>
           </div>
-          <div class="result-stat">
-            <div id="percentage" class="result-stat-number">0%</div>
-            <div class="result-stat-label">Accuracy</div>
+          <div class="result-stat-box">
+            <div id="percentage" class="result-stat-num">0%</div>
+            <div class="result-stat-lbl">🎯 Accuracy</div>
           </div>
         </div>
 
-        <div id="achievementNotification" style="display: none; margin-bottom: 24px;"></div>
+        <div id="achievementNotification" style="display:none; margin-bottom:24px;"></div>
 
-        <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
-          <button onclick="retakeQuiz()" class="btn btn-primary">🔄 Try Again (New Questions)</button>
-          <a href="dashboard.html" class="btn btn-outline">← Back to Dashboard</a>
+        <div style="display:flex; gap:14px; justify-content:center; flex-wrap:wrap;">
+          <button onclick="retakeQuiz()" class="btn btn-primary">🔄 Try Again!</button>
+          <a href="dashboard.html" class="btn btn-outline">🏠 Back Home</a>
         </div>
-
       </div>
     </div>
 
@@ -229,7 +320,6 @@
   <script src="../config.js"></script>
   <script src="../js/auth.js"></script>
   <script src="../js/quiz.js"></script>
-
 </body>
 
 </html>

@@ -124,13 +124,23 @@ function loadQuestion() {
   document.getElementById('progressBar').style.width = progress + '%';
   document.getElementById('questionCounter').textContent =
     `Question ${currentQuestionIndex + 1} of ${currentQuestions.length}`;
-  document.getElementById('scoreDisplay').textContent = `Score: ${score}`;
+  document.getElementById('scoreDisplay').textContent = `⭐ Score: ${score}`;
   document.getElementById('questionText').textContent = question.question;
 
+  const letters = ['A', 'B', 'C', 'D'];
   const optionsContainer = document.getElementById('optionsContainer');
   optionsContainer.innerHTML = question.options.map((option, index) =>
-    `<button class="option-btn" onclick="selectAnswer(${index})">${option}</button>`
+    `<button class="option-btn" onclick="selectAnswer(${index})">
+       <span class="opt-letter">${letters[index] || index + 1}</span>
+       ${option}
+     </button>`
   ).join('');
+
+  // Animate question card in
+  const card = document.getElementById('questionCard');
+  card.style.animation = 'none';
+  card.offsetHeight; // reflow
+  card.style.animation = 'popIn 0.35s cubic-bezier(0.34,1.56,0.64,1) both';
 
   document.getElementById('feedbackSection').style.display = 'none';
 }
@@ -167,14 +177,17 @@ function showFeedback(isCorrect) {
   const feedbackSection = document.getElementById('feedbackSection');
   const feedbackMessage = document.getElementById('feedbackMessage');
 
+  const encouragements = ['Amazing! 🌟', 'Fantastic! 🎉', 'You rock! 🤘', 'Brilliant! 💡', 'Super! ⭐'];
+  const rand = encouragements[Math.floor(Math.random() * encouragements.length)];
+
   if (isCorrect) {
-    feedbackMessage.innerHTML = '🎉 <strong>Correct!</strong> Well done!';
+    feedbackMessage.innerHTML = `🎊 <strong>${rand}</strong> That's correct!`;
     feedbackMessage.style.color = 'var(--success)';
   } else {
     const correctOption = currentQuestions[currentQuestionIndex].options[
       currentQuestions[currentQuestionIndex].correct
     ];
-    feedbackMessage.innerHTML = `❌ <strong>Oops!</strong> The correct answer was: <em>${correctOption}</em>`;
+    feedbackMessage.innerHTML = `😅 <strong>Not quite!</strong> The right answer was: <em style="color:var(--accent-green);">${correctOption}</em>`;
     feedbackMessage.style.color = 'var(--error)';
   }
 

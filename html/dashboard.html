@@ -4,232 +4,323 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard | EduPlay</title>
+  <title>Dashboard | EduPlay 🎓</title>
   <link rel="stylesheet" href="../css/main.css">
-  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
-    .stat-card {
-      padding: 24px;
-      text-align: center;
+    /* ── Stat strip ──── */
+    .stats-strip {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 40px;
     }
 
-    .stat-number {
-      color: var(--primary-color);
-      font-size: 2.5rem;
-      font-weight: 700;
-      margin-bottom: 6px;
-      line-height: 1;
+    @media(max-width:768px) {
+      .stats-strip {
+        grid-template-columns: repeat(2, 1fr);
+      }
     }
 
-    .stat-label {
-      margin: 0;
-      font-size: 0.875rem;
-      color: #666;
+    /* ── Module cards ── */
+    .modules-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      margin-bottom: 48px;
     }
 
-    /* Module cards */
-    .module-icon {
-      height: 150px;
+    @media(max-width:768px) {
+      .modules-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .mod-card {
+      border-radius: 28px;
+      overflow: hidden;
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.1);
+      background: #fff;
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s;
+      cursor: pointer;
+    }
+
+    .mod-card:hover {
+      transform: translateY(-10px) scale(1.03);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+    }
+
+    .mod-icon-area {
+      height: 170px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 3.5rem;
-      font-weight: 700;
+      font-size: 5rem;
+      position: relative;
+      overflow: hidden;
     }
 
-    /* Badge items */
+    .mod-icon-area .icon {
+      animation: bounce 2.5s ease-in-out infinite;
+      display: inline-block;
+    }
+
+    .mod-icon-area .sparkle {
+      position: absolute;
+      font-size: 1.2rem;
+      animation: starPop 1.5s ease-in-out infinite alternate;
+    }
+
+    .mod-icon-area .sparkle-1 {
+      top: 16px;
+      left: 20px;
+      animation-delay: 0s;
+    }
+
+    .mod-icon-area .sparkle-2 {
+      top: 20px;
+      right: 20px;
+      animation-delay: 0.5s;
+    }
+
+    .mod-icon-area .sparkle-3 {
+      bottom: 20px;
+      left: 30px;
+      animation-delay: 1s;
+    }
+
+    .mod-body {
+      padding: 22px 24px 28px;
+    }
+
+    .mod-body h3 {
+      font-size: 1.25rem;
+      color: var(--text-dark);
+      margin-bottom: 6px;
+    }
+
+    .mod-body p {
+      font-size: 0.9rem;
+      color: var(--text-mid);
+      margin-bottom: 14px;
+    }
+
+    .mod-best {
+      font-size: 0.82rem;
+      font-weight: 800;
+      padding: 5px 14px;
+      border-radius: 99px;
+      margin-bottom: 14px;
+      display: inline-block;
+    }
+
+    /* ── Badges section ── */
     .badges-grid {
       display: flex;
       flex-wrap: wrap;
-      gap: 16px;
-      padding: 8px 0;
+      gap: 14px;
+      padding: 4px 0;
     }
 
     .badge-item {
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 16px 20px;
-      border: 1px solid #e1e1e1;
-      border-radius: 12px;
-      min-width: 90px;
+      padding: 16px 18px;
+      border-radius: 20px;
+      background: linear-gradient(135deg, #f0efff, #e8fff5);
+      border: 2.5px solid rgba(108, 99, 255, 0.15);
+      min-width: 88px;
       text-align: center;
-      transition: transform 0.2s, box-shadow 0.2s;
-      background: var(--bg-blue-light);
+      transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+      cursor: default;
     }
 
     .badge-item:hover {
-      transform: translateY(-3px);
-      box-shadow: var(--shadow-md);
+      transform: translateY(-6px) scale(1.08);
     }
 
     .badge-icon-emoji {
-      font-size: 2rem;
+      font-size: 2.2rem;
       margin-bottom: 6px;
+      animation: wiggle 2s ease-in-out infinite;
     }
 
     .badge-name {
-      font-size: 0.8rem;
-      font-weight: 600;
-      color: var(--secondary-color);
+      font-size: 0.78rem;
+      font-weight: 800;
+      color: var(--text-dark);
     }
 
-    /* Loading spinner */
+    /* ── Section card ── */
+    .section-card {
+      background: #fff;
+      border-radius: 24px;
+      padding: 28px 32px;
+      box-shadow: var(--shadow-card);
+      border: 2.5px solid rgba(108, 99, 255, 0.08);
+      margin-bottom: 32px;
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .section-header h2 {
+      margin: 0;
+      font-size: 1.4rem;
+    }
+
+    /* ── Fun empty state ── */
+    .empty-state {
+      text-align: center;
+      padding: 32px 24px;
+      color: var(--text-mid);
+    }
+
+    .empty-state .em-icon {
+      font-size: 3rem;
+      margin-bottom: 12px;
+      animation: bounce 2s ease-in-out infinite;
+    }
+
+    /* ── Spinner ── */
     .spinner {
       display: inline-block;
-      width: 32px;
-      height: 32px;
-      border: 3px solid #e1e1e1;
-      border-top-color: var(--primary-color);
+      width: 36px;
+      height: 36px;
+      border: 4px solid #e0dfff;
+      border-top-color: var(--primary);
       border-radius: 50%;
       animation: spin 0.8s linear infinite;
-    }
-
-    @keyframes spin {
-      to {
-        transform: rotate(360deg);
-      }
-    }
-
-    .btn-sm {
-      padding: 6px 16px;
-      font-size: 0.875rem;
-    }
-
-    .module-progress-bar {
-      height: 5px;
-      background: #e1e1e1;
-      border-radius: 3px;
-      margin-top: 8px;
-    }
-
-    .module-progress-fill {
-      height: 100%;
-      background: var(--primary-color);
-      border-radius: 3px;
-      transition: width 0.6s ease;
     }
   </style>
 </head>
 
 <body class="dashboard-page">
-  <!-- Background Animation -->
+
+  <!-- Animated background -->
   <div class="background-animation">
-    <div class="floating-emoji emoji-1">🐶</div>
-    <div class="floating-emoji emoji-2">🐱</div>
-    <div class="floating-emoji emoji-3">🐘</div>
-    <div class="floating-emoji emoji-4">🦁</div>
-    <div class="floating-emoji emoji-5">🐼</div>
-    <div class="floating-emoji emoji-6">🦊</div>
-    <div class="floating-emoji emoji-7">🐵</div>
+    <div class="floating-emoji emoji-1">⭐</div>
+    <div class="floating-emoji emoji-2">🌈</div>
+    <div class="floating-emoji emoji-3">🎈</div>
+    <div class="floating-emoji emoji-4">🌟</div>
+    <div class="floating-emoji emoji-5">🎉</div>
+    <div class="floating-emoji emoji-6">🦋</div>
+    <div class="floating-emoji emoji-7">🎯</div>
   </div>
 
+  <!-- Navbar -->
   <nav class="navbar">
     <div class="container navbar-inner">
       <div class="navbar-brand">EduPlay</div>
       <div class="navbar-nav">
-        <a href="dashboard.html" class="nav-link active"
-          style="color: var(--primary-color); border-bottom: 2px solid var(--primary-color);">Dashboard</a>
+        <a href="dashboard.html" class="nav-link active">Dashboard</a>
         <a href="progress.html" class="nav-link">My Progress</a>
       </div>
-      <div class="navbar-user" style="display: flex; align-items: center; gap: 16px;">
-        <span id="userInfo" style="font-weight: 600;">Loading...</span>
-        <button id="logoutBtn" class="btn btn-outline btn-sm">Logout</button>
+      <div class="navbar-user">
+        <span id="userInfo" style="font-weight:800; color:var(--primary);">Loading...</span>
+        <button id="logoutBtn" class="btn btn-outline btn-sm">👋 Logout</button>
       </div>
     </div>
   </nav>
 
-  <div class="container" style="padding-top: 48px; padding-bottom: 48px;">
+  <div class="container" style="padding-top:40px; padding-bottom:56px;">
 
     <!-- Welcome -->
-    <div style="margin-bottom: 32px;">
-      <h1 id="welcomeMessage">Welcome back 👋</h1>
-      <p>Pick up where you left off and keep learning!</p>
+    <div style="margin-bottom:32px; animation: slideUp 0.5s both;">
+      <h1 id="welcomeMessage" style="font-size:2.2rem;">Welcome back! 👋</h1>
+      <p>Ready to learn something awesome today?</p>
     </div>
 
-    <!-- Stats Grid -->
-    <div class="grid grid-cols-4" style="gap: 20px; margin-bottom: 48px;">
-      <div class="card stat-card">
-        <div id="totalPoints" class="stat-number">—</div>
-        <p class="stat-label">Total Points</p>
+    <!-- Stats -->
+    <div class="stats-strip">
+      <div class="stat-chip" style="animation: popIn 0.4s 0.1s both;">
+        <div id="totalPoints" class="stat-chip-number">—</div>
+        <div class="stat-chip-label">⭐ Total Points</div>
       </div>
-      <div class="card stat-card">
-        <div id="badgesCount" class="stat-number">—</div>
-        <p class="stat-label">Badges Earned</p>
+      <div class="stat-chip" style="animation: popIn 0.4s 0.2s both;">
+        <div id="badgesCount" class="stat-chip-number">—</div>
+        <div class="stat-chip-label">🏅 Badges</div>
       </div>
-      <div class="card stat-card">
-        <div id="quizzesCompleted" class="stat-number">—</div>
-        <p class="stat-label">Quizzes Done</p>
+      <div class="stat-chip" style="animation: popIn 0.4s 0.3s both;">
+        <div id="quizzesCompleted" class="stat-chip-number">—</div>
+        <div class="stat-chip-label">📝 Quizzes Done</div>
       </div>
-      <div class="card stat-card">
-        <div id="avgScore" class="stat-number">—</div>
-        <p class="stat-label">Avg. Accuracy</p>
+      <div class="stat-chip" style="animation: popIn 0.4s 0.4s both;">
+        <div id="avgScore" class="stat-chip-number">—</div>
+        <div class="stat-chip-label">🎯 Avg. Score</div>
       </div>
     </div>
 
     <!-- Learning Modules -->
-    <div class="modules-section">
-      <h2 style="margin-bottom: 24px;">Learning Modules</h2>
-      <div class="card-grid">
+    <div style="margin-bottom:16px; animation: fadeIn 0.5s 0.3s both;">
+      <h2>🚀 Pick Your Subject!</h2>
+      <p>Choose a quiz and start earning points!</p>
+    </div>
+    <div class="modules-grid" style="animation: slideUp 0.5s 0.4s both;">
 
-        <div class="card">
-          <div class="module-icon" style="background:#E3F2FD; color:#1976D2;">🔢</div>
-          <div class="card-body">
-            <h3>Mathematics</h3>
-            <p class="card-text">Numbers, addition, subtraction, and problem solving.</p>
-            <div id="math-progress" class="module-progress-bar" style="display:none;">
-              <div id="math-progress-fill" class="module-progress-fill" style="width:0%"></div>
-            </div>
-            <p id="math-best"
-              style="display:none; font-size:0.8rem; color:var(--primary-color); margin:6px 0 12px; font-weight:600;">
-            </p>
-            <button class="btn btn-primary btn-block" onclick="startQuiz('mathematics')">Start Quiz</button>
-          </div>
+      <!-- Mathematics -->
+      <div class="mod-card" onclick="startQuiz('mathematics')">
+        <div class="mod-icon-area" style="background:linear-gradient(135deg,#667eea,#764ba2);">
+          <span class="icon">🔢</span>
+          <span class="sparkle sparkle-1">✨</span>
+          <span class="sparkle sparkle-2">⭐</span>
+          <span class="sparkle sparkle-3">💫</span>
         </div>
-
-        <div class="card">
-          <div class="module-icon" style="background:#F3E5F5; color:#7B1FA2;">📚</div>
-          <div class="card-body">
-            <h3>English</h3>
-            <p class="card-text">Vocabulary, grammar, and reading comprehension.</p>
-            <div id="english-progress" class="module-progress-bar" style="display:none;">
-              <div id="english-progress-fill" class="module-progress-fill" style="width:0%"></div>
-            </div>
-            <p id="english-best"
-              style="display:none; font-size:0.8rem; color:var(--primary-color); margin:6px 0 12px; font-weight:600;">
-            </p>
-            <button class="btn btn-primary btn-block" onclick="startQuiz('english')">Start Quiz</button>
-          </div>
+        <div class="mod-body">
+          <h3>Mathematics</h3>
+          <p>Numbers, addition, subtraction and fun problem solving!</p>
+          <div id="math-best" style="display:none;" class="mod-best"></div>
+          <button class="btn btn-primary btn-block" onclick="startQuiz('mathematics')">▶ Start Quiz</button>
         </div>
-
-        <div class="card">
-          <div class="module-icon" style="background:#E8F5E9; color:#388E3C;">🌍</div>
-          <div class="card-body">
-            <h3>General Knowledge</h3>
-            <p class="card-text">Science, geography, history, and amazing facts.</p>
-            <div id="gk-progress" class="module-progress-bar" style="display:none;">
-              <div id="gk-progress-fill" class="module-progress-fill" style="width:0%"></div>
-            </div>
-            <p id="gk-best"
-              style="display:none; font-size:0.8rem; color:var(--primary-color); margin:6px 0 12px; font-weight:600;">
-            </p>
-            <button class="btn btn-primary btn-block" onclick="startQuiz('general-knowledge')">Start Quiz</button>
-          </div>
-        </div>
-
       </div>
+
+      <!-- English -->
+      <div class="mod-card" onclick="startQuiz('english')">
+        <div class="mod-icon-area" style="background:linear-gradient(135deg,#f093fb,#f5576c);">
+          <span class="icon">📚</span>
+          <span class="sparkle sparkle-1">✨</span>
+          <span class="sparkle sparkle-2">⭐</span>
+          <span class="sparkle sparkle-3">💫</span>
+        </div>
+        <div class="mod-body">
+          <h3>English</h3>
+          <p>Words, grammar, reading and exciting vocabulary!</p>
+          <div id="english-best" style="display:none;" class="mod-best"></div>
+          <button class="btn btn-primary btn-block" onclick="startQuiz('english')">▶ Start Quiz</button>
+        </div>
+      </div>
+
+      <!-- General Knowledge -->
+      <div class="mod-card" onclick="startQuiz('general-knowledge')">
+        <div class="mod-icon-area" style="background:linear-gradient(135deg,#4facfe,#00f2fe);">
+          <span class="icon">🌍</span>
+          <span class="sparkle sparkle-1">✨</span>
+          <span class="sparkle sparkle-2">⭐</span>
+          <span class="sparkle sparkle-3">💫</span>
+        </div>
+        <div class="mod-body">
+          <h3>General Knowledge</h3>
+          <p>Science, animals, geography and amazing fun facts!</p>
+          <div id="gk-best" style="display:none;" class="mod-best"></div>
+          <button class="btn btn-primary btn-block" onclick="startQuiz('general-knowledge')">▶ Start Quiz</button>
+        </div>
+      </div>
+
     </div>
 
-    <!-- Badges & Achievements -->
-    <div class="achievements-section" style="margin-top: 48px;">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-        <h2 style="margin:0;">Certificates &amp; Badges</h2>
-        <a href="progress.html" class="btn btn-outline btn-sm">View Full Progress →</a>
+    <!-- Badges Section -->
+    <div class="section-card" style="animation: slideUp 0.5s 0.5s both;">
+      <div class="section-header">
+        <h2 style="margin:0;">🏅 My Badges</h2>
+        <a href="progress.html" class="btn btn-outline btn-sm">View Progress →</a>
       </div>
-      <div class="card" style="padding: 24px; min-height: 100px;">
-        <div id="badgesContainer" class="text-center" style="padding: 20px; color: #666;">
+      <div id="badgesContainer">
+        <div class="text-center" style="padding:20px;">
           <div class="spinner"></div>
-          <p style="margin-top: 12px;">Loading your badges...</p>
         </div>
       </div>
     </div>
@@ -237,9 +328,7 @@
   </div>
 
   <footer class="footer">
-    <div class="container copyright">
-      <p>&copy; 2026 EduPlay. All rights reserved.</p>
-    </div>
+    <div class="container copyright">🎓 EduPlay — Learning is fun! © 2026</div>
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
