@@ -1,0 +1,338 @@
+/* 
+  EduPlay - Shared Theme: Magical Sky Kingdom
+  Contains variables, base typography, and background architecture.
+*/
+
+:root {
+    /* Magical Palette */
+    --sky-top: #667EEA;
+    --sky-bottom: #764BA2;
+    --cloud-white: #FFFFFF;
+    --sun-gold: #FFD93D;
+    --sun-orange: #FF6B35;
+    --grass-green: #4ECB71;
+    --grass-dark: #27AE60;
+    --accent-pink: #FF6B9D;
+    --accent-coral: #FF8E6E;
+    --accent-mint: #A8EDEA;
+    --accent-lavender: #C4B5FD;
+    --star-yellow: #FDE68A;
+
+    --card-white: rgba(255, 255, 255, 0.92);
+    --card-border: rgba(255, 255, 255, 0.6);
+
+    --text-dark: #2D1B69;
+    --text-medium: #5B4B8A;
+    --text-light: #8B7BAB;
+
+    /* Transitions */
+    --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+    --smooth: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Base Styles */
+body {
+    font-family: 'Nunito', sans-serif;
+    background: linear-gradient(180deg, var(--sky-top) 0%, var(--sky-bottom) 40%, var(--accent-pink) 70%, var(--accent-coral) 100%);
+    color: var(--text-dark);
+    min-height: 100vh;
+    overflow-x: hidden;
+    cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' style='font-size: 20px;'><text y='20'>⭐</text></svg>"), auto;
+}
+
+h1,
+h2,
+h3,
+.font-heading {
+    font-family: 'Baloo 2', cursive;
+    line-height: 1.2;
+}
+
+button,
+a {
+    cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' style='font-size: 20px;'><text y='20'>🚀</text></svg>"), pointer;
+}
+
+/* ─── LIVING BACKGROUND STYLES ─── */
+.background-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    pointer-events: none;
+}
+
+.clouds-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 40%;
+    z-index: 1;
+    pointer-events: none;
+}
+
+.cloud-wrapper {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+.cloud {
+    position: absolute;
+    background: white;
+    border-radius: 50%;
+    filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.05));
+    opacity: 0.85;
+}
+
+.cloud::before,
+.cloud::after {
+    content: '';
+    position: absolute;
+    background: white;
+    border-radius: 50%;
+}
+
+.floating-elements-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 2;
+    pointer-events: none;
+}
+
+.floating-emoji {
+    position: absolute;
+    opacity: 0.6;
+    user-select: none;
+}
+
+.rainbow-arc {
+    position: fixed;
+    top: -50px;
+    right: -50px;
+    width: 400px;
+    height: 400px;
+    z-index: 1;
+    pointer-events: none;
+    opacity: 0.35;
+    animation: rainbowPulse 4s infinite alternate ease-in-out;
+}
+
+.rainbow-band {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+}
+
+.grass-hills {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1;
+    pointer-events: none;
+}
+
+.hill {
+    position: absolute;
+    bottom: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-radius: 50% 50% 0 0;
+}
+
+.flower {
+    position: absolute;
+    font-size: 1.5rem;
+    animation: float 4s infinite alternate ease-in-out;
+}
+
+/* ─── GLASSNAV (Unified Header) ─── */
+.glass-nav {
+    position: sticky;
+    top: 0;
+    width: 100%;
+    height: 80px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(15px) saturate(180%);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+}
+
+.nav-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.nav-left,
+.nav-right,
+.nav-center {
+    display: flex;
+    align-items: center;
+}
+
+.brand {
+    text-decoration: none;
+    font-family: 'Baloo 2', cursive;
+    font-size: 2rem;
+    font-weight: 900;
+    color: white;
+    text-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s var(--spring);
+}
+
+.brand:hover {
+    transform: scale(1.05);
+}
+
+.nav-link {
+    text-decoration: none;
+    color: white;
+    font-weight: 800;
+    margin: 0 10px;
+    opacity: 0.8;
+    transition: all 0.3s ease;
+    padding: 10px 22px;
+    border-radius: 50px;
+}
+
+.nav-link.active {
+    background: white;
+    color: var(--text-dark);
+    opacity: 1;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.nav-link:not(.active):hover {
+    opacity: 1;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.nav-right {
+    gap: 15px;
+}
+
+.username-display {
+    color: white;
+    font-weight: 800;
+    font-size: 1rem;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.avatar-circle {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--sun-gold), var(--sun-orange));
+    border: 2px solid white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-family: 'Baloo 2', cursive;
+    font-weight: 800;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.logout-btn {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50px;
+    padding: 8px 18px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s var(--spring);
+}
+
+.logout-btn:hover {
+    background: white;
+    color: var(--text-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* ─── ANIMATIONS ─── */
+@keyframes float {
+    0% {
+        transform: translateY(0);
+    }
+
+    100% {
+        transform: translateY(-15px);
+    }
+}
+
+@keyframes rainbowPulse {
+    from {
+        opacity: 0.25;
+        transform: scale(1);
+    }
+
+    to {
+        opacity: 0.45;
+        transform: scale(1.05);
+    }
+}
+
+@keyframes cloudDrift {
+    0% {
+        transform: translateX(-250px);
+    }
+
+    100% {
+        transform: translateX(110vw);
+    }
+}
+
+@keyframes popIn {
+    0% {
+        transform: scale(0.8);
+        opacity: 0;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    0% {
+        transform: translateY(30px);
+        opacity: 0;
+    }
+
+    100% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes shimmer {
+    0% {
+        left: -100%;
+    }
+
+    100% {
+        left: 100%;
+    }
+}

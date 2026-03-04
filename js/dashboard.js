@@ -1,158 +1,382 @@
-// Dashboard JavaScript with Supabase Integration
+/**
+ * EduPlay Dashboard - Magical Sky Kingdom Hub
+ * Orchestrates animations, background systems, and real-time data from Supabase.
+ */
 
-console.log('📊 Dashboard.js loaded');
+// Global State
+let currentUser = null;
+const STAR_COUNT = 60;
+const CLOUD_COUNT = 4;
+const EMOJIS = ["🌈", "⭐", "🎈", "🦋", "🌸", "💫", "🎊", "🌙", "✨", "🎯"];
 
-// Badge definitions with emojis
-const BADGES = {
-  'first_quiz': { name: 'First Steps', emoji: '🌟', description: 'Complete your first quiz' },
-  'quiz_master_5': { name: 'Quiz Master', emoji: '🎓', description: 'Complete 5 quizzes' },
-  'perfect_score': { name: 'Perfect!', emoji: '💯', description: 'Get 100% on a quiz' },
-  'high_scorer': { name: 'High Scorer', emoji: '🏆', description: 'Score 90%+ on a quiz' },
-  'math_whiz': { name: 'Math Whiz', emoji: '🔢', description: 'Complete 3 math quizzes' },
-  'word_master': { name: 'Word Master', emoji: '📖', description: 'Complete 3 English quizzes' },
-  'knowledge_seeker': { name: 'Knowledge Seeker', emoji: '🌍', description: 'Complete 3 GK quizzes' },
-  'dedicated_learner': { name: 'Dedicated', emoji: '⭐', description: 'Complete 10 quizzes' },
-  'point_collector': { name: 'Point Collector', emoji: '💎', description: 'Earn 500 points' }
-};
+document.addEventListener('DOMContentLoaded', async () => {
+  // 1. Initialize Living Background immediately (z-index 0)
+  initLivingBackground();
 
-// Load user data from Supabase
+  // 2. Fetch User Data from Supabase
+  await loadUserData();
+
+  // 3. Orchestrate Entrance Sequence (Section 1)
+  initPageEntrance();
+
+  // 4. Global Interactive Listeners
+  window.addEventListener('click', (e) => {
+    if (window.eduplayTheme) window.eduplayTheme.spawnClickRipple(e.clientX, e.clientY);
+  });
+  if (window.eduplayTheme) window.eduplayTheme.initMouseParallax();
+});
+
+/* ─── SECTION 1: PAGE ENTRANCE SEQUENCE ─── */
+
+function initPageEntrance() {
+  const isShown = sessionStorage.getItem('eduplay_intro_shown');
+  const introDuration = 3200;
+
+  if (isShown) {
+    // Skip intro, show instantly
+    document.body.style.opacity = '1';
+    document.body.style.transition = 'none';
+    return;
+  }
+
+  // Step 1: Fade body in (0ms)
+  setTimeout(() => {
+    document.body.style.transition = 'opacity 0.6s ease';
+    document.body.style.opacity = '1';
+  }, 0);
+
+  // Step 2: Clouds slide in (400ms)
+  setTimeout(() => {
+    const clouds = document.querySelectorAll('.cloud');
+    clouds.forEach((cloud, i) => {
+      cloud.style.transition = 'transform 0.6s cubic-bezier(0.22, 1, 0.36, 1)';
+      cloud.style.transform = 'translateX(0)';
+    });
+  }, 400);
+
+  // Step 3: Navbar slides down (800ms)
+  setTimeout(() => {
+    const nav = document.getElementById('mainNav');
+    if (nav) {
+      nav.style.transition = 'transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)';
+      nav.style.transform = 'translateY(0)';
+    }
+  }, 800);
+
+  // Step 4: Hero section rises (1000ms)
+  setTimeout(() => {
+    const hero = document.getElementById('heroSection');
+    if (hero) {
+      hero.style.transition = 'transform 0.6s ease, opacity 0.6s ease';
+      hero.style.transform = 'translateY(0)';
+      hero.style.opacity = '1';
+    }
+  }, 1000);
+
+  // Step 5: Stats chips pop in (1400ms)
+  setTimeout(() => {
+    const cards = document.querySelectorAll('.stat-card');
+    cards.forEach((card, i) => {
+      setTimeout(() => {
+        card.style.animation = 'chipPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards';
+        card.style.opacity = '1';
+      }, i * 150);
+    });
+  }, 1400);
+
+  // Step 6: Subject cards fly in (1800ms)
+  setTimeout(() => {
+    const subjects = document.querySelectorAll('.subject-card');
+    subjects.forEach((card, i) => {
+      setTimeout(() => {
+        card.style.transition = 'transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.8s ease';
+        card.style.transform = 'translateY(0) rotate(0)';
+        card.style.opacity = '1';
+      }, i * 150);
+    });
+  }, 1800);
+
+  // Step 7: Final fade / idle start (2400ms)
+  setTimeout(() => {
+    sessionStorage.setItem('eduplay_intro_shown', 'true');
+    checkAndShowDailyTip();
+  }, 2400);
+}
+
+/* ─── SECTION 2: LIVING BACKGROUND ─── */
+
+function initLivingBackground() {
+  if (window.eduplayTheme) {
+    window.eduplayTheme.initLivingBackground();
+  }
+}
+
+/* ─── SECTION 11: DATA LOGIC ─── */
+
 async function loadUserData() {
-  console.log('Loading user data...');
+  console.log('🔄 Loading user data from eduplay API...');
   try {
-    const user = window.eduplay ? await window.eduplay.getCurrentUser() : null;
-    if (!user) {
+    if (!window.eduplay) {
+      console.error('❌ EduPlay API not found on window object!');
+      return;
+    }
+
+    currentUser = await window.eduplay.getCurrentUser();
+    console.log('👤 Current User Data:', currentUser);
+
+    if (!currentUser) {
+      console.warn('⚠️ No user session found, redirecting to login...');
       window.location.href = 'login.html';
       return;
     }
 
-    // Welcome message
-    const welcomeMsg = document.getElementById('welcomeMessage');
-    if (welcomeMsg) welcomeMsg.textContent = `Welcome back, ${user.username} 👋`;
+    // Correctly map data from the nested .stats object provided by auth.js
+    const stats = currentUser.stats || { totalPoints: 0, badges: [], quizzesCompleted: 0, history: [] };
 
-    const userInfo = document.getElementById('userInfo');
-    if (userInfo) userInfo.textContent = user.username;
+    renderStats(stats);
+    renderBadges(stats.badges);
+    updateModuleCards(stats.history);
+    initDailyChallenge(stats.history);
 
-    const stats = user.stats || { totalPoints: 0, badges: [], quizzesCompleted: 0, history: [] };
+    // Username and Avatar (direct on currentUser)
+    document.getElementById('navUsername').textContent = currentUser.username || 'Explorer';
+    document.getElementById('welcomeMessage').textContent = `Welcome back, ${currentUser.username || 'Explorer'}! 👋`;
 
-    // Stats
-    document.getElementById('totalPoints').textContent = stats.totalPoints || 0;
-    document.getElementById('badgesCount').textContent = (stats.badges || []).length;
-    document.getElementById('quizzesCompleted').textContent = stats.quizzesCompleted || 0;
+    const initials = (currentUser.username || 'EX').substring(0, 2).toUpperCase();
+    const avatarEl = document.getElementById('userAvatar');
+    if (avatarEl) avatarEl.textContent = initials;
 
-    // Average score
-    let avgScore = 0;
-    if (stats.history && stats.history.length > 0) {
-      avgScore = Math.round(stats.history.reduce((s, q) => s + (q.percentage || 0), 0) / stats.history.length);
+    // Level Update
+    const level = calculateLevel(stats.totalPoints || 0);
+    const lPill = document.getElementById('levelBadgePill');
+    if (lPill) {
+      lPill.textContent = level.label;
+      lPill.className = `level-badge ${level.class}`;
     }
-    document.getElementById('avgScore').textContent = avgScore + '%';
 
-    // Per-module best scores
-    updateModuleProgress(stats.history || []);
-
-    // Badges
-    renderBadges(stats.badges || []);
-
-    // Check for new badges
-    await checkAndAwardBadges(user);
-
-  } catch (error) {
-    console.error('❌ Error loading user data:', error);
-    window.location.href = 'login.html';
+  } catch (err) {
+    console.error('❌ Error in loadUserData:', err);
   }
 }
 
-// Show best score bar under each module card
-function updateModuleProgress(history) {
+function renderStats(stats) {
+  animateCountUp(document.getElementById('totalPoints'), stats.totalPoints || 0, 1200);
+  animateCountUp(document.getElementById('badgesCount'), stats.badges ? stats.badges.length : 0, 1200);
+  animateCountUp(document.getElementById('quizzesCompleted'), stats.quizzesCompleted || 0, 1200);
+
+  if (stats.history && stats.history.length > 0) {
+    const totalPercentage = stats.history.reduce((acc, h) => acc + (h.percentage || 0), 0);
+    const avg = Math.round(totalPercentage / stats.history.length);
+    animateCountUp(document.getElementById('avgScore'), avg, 1200, '%');
+
+    // Streak calculation (handled in utilities)
+    const streak = calculateStreak(stats.history);
+    const indicator = document.getElementById('streakIndicator');
+    if (indicator && streak >= 1) {
+      indicator.querySelector('span').textContent = streak;
+      indicator.style.display = 'block';
+    }
+  }
+}
+
+function renderBadges(badges) {
+  const container = document.getElementById('badgesContainer');
+  if (!container || !badges) return;
+
+  if (badges.length > 0) {
+    container.innerHTML = '';
+    badges.forEach(b => {
+      const item = document.createElement('div');
+      item.className = 'badge-item';
+      if (b.is_new) item.classList.add('special');
+
+      item.innerHTML = `
+                <span class="badge-emoji">${b.emoji || '🏅'}</span>
+                <span class="badge-name">${b.name}</span>
+            `;
+      container.appendChild(item);
+    });
+  }
+}
+
+function updateModuleCards(history) {
+  if (!history) return;
+
   const modules = {
-    'mathematics': { prefix: 'math' },
-    'english': { prefix: 'english' },
-    'general-knowledge': { prefix: 'gk' }
+    'mathematics': { badge: 'math-best-badge', progress: 'math-progress', fill: 'math-progress-fill' },
+    'english': { badge: 'english-best-badge', progress: 'english-progress', fill: 'english-progress-fill' },
+    'general-knowledge': { badge: 'gk-best-badge', progress: 'gk-progress', fill: 'gk-progress-fill' }
   };
 
-  Object.entries(modules).forEach(([mod, cfg]) => {
-    const attempts = history.filter(h => h.module === mod);
-    if (attempts.length === 0) return;
+  Object.keys(modules).forEach(mod => {
+    const modHistory = history.filter(h => h.module === mod);
+    if (modHistory.length > 0) {
+      const best = Math.max(...modHistory.map(h => h.percentage || 0));
 
-    const best = Math.max(...attempts.map(h => h.percentage || 0));
-    const bar = document.getElementById(`${cfg.prefix}-progress`);
-    const fill = document.getElementById(`${cfg.prefix}-progress-fill`);
-    const label = document.getElementById(`${cfg.prefix}-best`);
+      const badge = document.getElementById(modules[mod].badge);
+      badge.textContent = `Best: ${best}%`;
+      badge.style.display = 'block';
 
-    if (bar && fill && label) {
-      bar.style.display = 'block';
-      fill.style.width = best + '%';
-      label.style.display = 'block';
-      label.textContent = `Best: ${best}% — ${attempts.length} attempt${attempts.length > 1 ? 's' : ''}`;
+      const prog = document.getElementById(modules[mod].progress);
+      prog.style.display = 'block';
+
+      const fill = document.getElementById(modules[mod].fill);
+      setTimeout(() => {
+        fill.style.width = best + '%';
+      }, 2000);
     }
   });
 }
 
-// Render badge grid
-function renderBadges(badges) {
-  const container = document.getElementById('badgesContainer');
-  if (!container) return;
+function initDailyChallenge(history) {
+  const today = new Date().toISOString().split('T')[0];
+  const todayCorrect = history ? history
+    .filter(h => h.date.startsWith(today))
+    .reduce((acc, h) => acc + (h.correct || 0), 0) : 0;
 
-  if (!badges || badges.length === 0) {
-    container.innerHTML = `
-      <div style="text-align:center; color:#666; padding:20px;">
-        <div style="font-size:2rem; margin-bottom:8px;">🎯</div>
-        <p style="margin:0;">Complete quizzes to earn your first badge!</p>
-      </div>`;
-    return;
-  }
-
-  container.innerHTML = `
-    <div class="badges-grid">
-      ${badges.map(badge => {
-    const def = BADGES[badge.badge_id || badge.id] || {};
-    const emoji = def.emoji || badge.icon || '🏅';
-    const name = def.name || badge.name || 'Badge';
-    return `
-          <div class="badge-item" title="${def.description || name}">
-            <div class="badge-icon-emoji">${emoji}</div>
-            <div class="badge-name">${name}</div>
-          </div>`;
-  }).join('')}
-    </div>`;
+  const count = Math.min(todayCorrect, 5);
+  document.getElementById('challengeProgressText').textContent = `${count}/5 correct today ⭐`;
+  document.getElementById('challengeProgressBarFill').style.width = (count * 20) + '%';
 }
 
-// Check and award new badges
-async function checkAndAwardBadges(user) {
-  const stats = user.stats || {};
-  const currentBadges = (stats.badges || []).map(b => b.badge_id || b.id);
-  const newBadges = [];
-  const h = stats.history || [];
+/* ─── UTILITIES ─── */
 
-  if (stats.quizzesCompleted >= 1 && !currentBadges.includes('first_quiz')) newBadges.push({ ...BADGES.first_quiz, id: 'first_quiz' });
-  if (stats.quizzesCompleted >= 5 && !currentBadges.includes('quiz_master_5')) newBadges.push({ ...BADGES.quiz_master_5, id: 'quiz_master_5' });
-  if (stats.quizzesCompleted >= 10 && !currentBadges.includes('dedicated_learner')) newBadges.push({ ...BADGES.dedicated_learner, id: 'dedicated_learner' });
-  if (stats.totalPoints >= 500 && !currentBadges.includes('point_collector')) newBadges.push({ ...BADGES.point_collector, id: 'point_collector' });
+function calculateLevel(pts) {
+  if (pts >= 1000) return { label: '👑 Legend', class: 'lvl-legend' };
+  if (pts >= 600) return { label: '🔥 Fire Champion', class: 'lvl-champion' };
+  if (pts >= 300) return { label: '🚀 Space Cadet', class: 'lvl-cadet' };
+  if (pts >= 100) return { label: '⭐ Rising Star', class: 'lvl-star' };
+  return { label: '🌱 Sprout Explorer', class: 'lvl-sprout' };
+}
 
-  if (h.length > 0) {
-    if (h.some(q => q.percentage === 100) && !currentBadges.includes('perfect_score')) newBadges.push({ ...BADGES.perfect_score, id: 'perfect_score' });
-    if (h.some(q => q.percentage >= 90) && !currentBadges.includes('high_scorer')) newBadges.push({ ...BADGES.high_scorer, id: 'high_scorer' });
-    if (h.filter(q => q.module === 'mathematics').length >= 3 && !currentBadges.includes('math_whiz')) newBadges.push({ ...BADGES.math_whiz, id: 'math_whiz' });
-    if (h.filter(q => q.module === 'english').length >= 3 && !currentBadges.includes('word_master')) newBadges.push({ ...BADGES.word_master, id: 'word_master' });
-    if (h.filter(q => q.module === 'general-knowledge').length >= 3 && !currentBadges.includes('knowledge_seeker')) newBadges.push({ ...BADGES.knowledge_seeker, id: 'knowledge_seeker' });
-  }
+function animateCountUp(el, target, duration, suffix = '') {
+  if (!el) return;
+  let start = 0;
+  const startTime = performance.now();
 
-  if (newBadges.length > 0 && window.eduplay?.saveBadge) {
-    for (const badge of newBadges) {
-      await window.eduplay.saveBadge(badge);
+  function update(currentTime) {
+    const elapsed = currentTime - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+
+    // easeOutExpo
+    const value = progress === 1 ? target : Math.floor(target * (1 - Math.pow(2, -10 * progress)));
+    el.textContent = value + suffix;
+
+    if (progress < 1) {
+      requestAnimationFrame(update);
     }
-    // Reload to reflect new badges
-    await loadUserData();
+  }
+  requestAnimationFrame(update);
+}
+
+function calculateStreak(history) {
+  if (!history || history.length === 0) return 0;
+
+  const dates = [...new Set(history.map(h => h.date.split('T')[0]))].sort().reverse();
+  let streak = 0;
+  let today = new Date().toISOString().split('T')[0];
+
+  // Check if the most recent quiz was today or yesterday
+  let current = new Date(dates[0]);
+  let now = new Date(today);
+  const diffDays = Math.ceil(Math.abs(now - current) / (1000 * 60 * 60 * 24));
+
+  if (diffDays > 1) return 0; // Streak broken
+
+  for (let i = 0; i < dates.length - 1; i++) {
+    let d1 = new Date(dates[i]);
+    let d2 = new Date(dates[i + 1]);
+    const diff = Math.ceil(Math.abs(d1 - d2) / (1000 * 60 * 60 * 24));
+    if (diff === 1) {
+      streak++;
+    } else {
+      break;
+    }
+  }
+  return streak + 1;
+}
+
+function spawnClickRipple(x, y) {
+  const ripple = document.createElement('div');
+  ripple.className = 'ripple';
+  ripple.style.left = (x - 10) + 'px';
+  ripple.style.top = (y - 10) + 'px';
+  document.body.appendChild(ripple);
+  setTimeout(() => ripple.remove(), 600);
+}
+
+function initMouseParallax() {
+  window.addEventListener('mousemove', (e) => {
+    const x = (e.clientX / window.innerWidth - 0.5) * 20;
+    const y = (e.clientY / window.innerHeight - 0.5) * 20;
+
+    // Parallax for floating elements
+    document.querySelectorAll('.floating-emoji').forEach((el, i) => {
+      const factor = (i % 3 + 1) * 0.5; // Foreground moves more
+      el.style.transform = `translate(${x * factor}px, ${y * factor}px)`;
+    });
+  });
+}
+
+function checkAndShowDailyTip() {
+  const tips = [
+    "💡 Tip: Try General Knowledge today for variety!",
+    "💡 Tip: Take a break every 3 quizzes to stretch! 🧘",
+    "💡 Tip: Read the hints! They're super helpful. 💡",
+    "💡 Tip: You earn more points on high streaks! 🔥",
+    "💡 Tip: English quizzes help build your vocabulary! 📚"
+  ];
+  const tip = tips[Math.floor(Math.random() * tips.length)];
+
+  // Basic toast - assuming existing toast logic if not create simple one
+  console.log('Daily Tip:', tip);
+}
+
+// Global start function
+window.startQuiz = function (module) {
+  console.log(`🚀 Starting adventure for: ${module}`);
+  sessionStorage.setItem('currentModule', module);
+
+  // Show a quick transition effect
+  document.body.style.opacity = '0';
+  document.body.style.transition = 'opacity 0.4s ease';
+
+  setTimeout(() => {
+    // PASS via URL for maximum reliability
+    window.location.href = `quiz.html?module=${module}`;
+  }, 400);
+};
+
+// Programmatic listener attachment for Subject Cards
+function initSubjectButtons() {
+  const mathCard = document.getElementById('mathCard');
+  if (mathCard) {
+    const btn = mathCard.querySelector('.start-btn');
+    if (btn) btn.addEventListener('click', () => window.startQuiz('mathematics'));
+  }
+
+  const englishCard = document.getElementById('englishCard');
+  if (englishCard) {
+    const btn = englishCard.querySelector('.start-btn');
+    if (btn) btn.addEventListener('click', () => window.startQuiz('english'));
+  }
+
+  const gkCard = document.getElementById('gkCard');
+  if (gkCard) {
+    const btn = gkCard.querySelector('.start-btn');
+    if (btn) btn.addEventListener('click', () => window.startQuiz('general-knowledge'));
   }
 }
 
-// Start quiz
-function startQuiz(module) {
-  window.location.href = `quiz.html?module=${module}`;
+// Call button init safely
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initSubjectButtons);
+} else {
+  initSubjectButtons();
 }
 
-// Init
-document.addEventListener('DOMContentLoaded', async function () {
-  await loadUserData();
+document.getElementById('logoutBtn').addEventListener('click', () => {
+  console.log('👋 Logging out...');
+  if (window.eduplay) window.eduplay.session.clear();
+  window.location.href = 'login.html';
 });
-
-console.log('✅ Dashboard.js ready');

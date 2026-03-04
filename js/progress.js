@@ -3,9 +3,9 @@
 console.log('📊 Progress.js loaded');
 
 const modulesMeta = {
-  'mathematics': { label: 'Mathematics', emoji: '🔢', color: '#1976D2', bg: '#E3F2FD' },
-  'english': { label: 'English', emoji: '📖', color: '#7B1FA2', bg: '#F3E5F5' },
-  'general-knowledge': { label: 'General Knowledge', emoji: '🌍', color: '#388E3C', bg: '#E8F5E9' }
+  'mathematics': { label: 'Mathematics', emoji: '🔢', color: '#667EEA', bg: 'rgba(102, 126, 234, 0.1)' },
+  'english': { label: 'English', emoji: '📖', color: '#FF6B9D', bg: 'rgba(255, 107, 157, 0.1)' },
+  'general-knowledge': { label: 'General Knowledge', emoji: '🌍', color: '#FFD93D', bg: 'rgba(255, 217, 61, 0.1)' }
 };
 
 // ─── Main Loader ──────────────────────────────────────────────────────────────
@@ -15,8 +15,13 @@ async function loadProgressData() {
     const user = window.eduplay ? await window.eduplay.getCurrentUser() : null;
     if (!user) { window.location.href = 'login.html'; return; }
 
-    const userInfo = document.getElementById('userInfo');
-    if (userInfo) userInfo.textContent = user.username;
+    // 0. Update Header UI
+    const navUsername = document.getElementById('navUsername');
+    if (navUsername) navUsername.textContent = user.username || 'Explorer';
+
+    const initials = (user.username || 'EX').substring(0, 2).toUpperCase();
+    const avatarEl = document.getElementById('userAvatar');
+    if (avatarEl) avatarEl.textContent = initials;
 
     const stats = user.stats || { totalPoints: 0, quizzesCompleted: 0, history: [] };
     const history = stats.history || [];
@@ -34,11 +39,16 @@ async function loadProgressData() {
     renderBestScores(history);
     renderModuleBreakdown(history);
     renderQuizHistory(history);
+    if (typeof renderMoodCorrelation === 'function') {
+      renderMoodCorrelation(history);
+    }
 
   } catch (error) {
     console.error('❌ Error loading progress data:', error);
-    document.getElementById('historyContainer').innerHTML =
-      `<p style="color:var(--error);text-align:center;">Error loading data. Please refresh.</p>`;
+    const container = document.getElementById('historyContainer');
+    if (container) {
+      container.innerHTML = `<p style="color:var(--error);text-align:center;">Error loading data. Please refresh.</p>`;
+    }
   }
 }
 
@@ -60,8 +70,8 @@ function renderBestScores(history) {
           <div class="best-module-icon">${meta.emoji}</div>
           <div class="best-module-name">${meta.label}</div>
           <div class="best-score-big">—</div>
-          <div class="best-score-label">No attempts yet</div>
-          <a href="dashboard.html" class="btn btn-outline" style="font-size:0.8rem;padding:6px 16px;margin-top:8px;">Start Quiz</a>
+          <p style="color:rgba(255,255,255,0.6); margin-bottom:15px;">No attempts yet</p>
+          <a href="dashboard.html" class="btn-astonishing primary">Start Quiz</a>
         </div>`;
     }
 
@@ -82,9 +92,9 @@ function renderBestScores(history) {
         <div class="best-module-icon">${meta.emoji}</div>
         <div class="best-module-name">${meta.label}</div>
         <div class="best-score-big" style="color:${meta.color};">${best}%</div>
-        <div class="best-score-label">Best accuracy · ${bestPoints} pts</div>
-        <span class="best-score-grade" style="background:${gradeBg};color:${gradeColor};">${gradeLabel}</span>
-        <div class="attempts-note">${attempts.length} attempt${attempts.length !== 1 ? 's' : ''} total</div>
+        <div class="best-score-label" style="color:white; opacity:0.8;">Best: ${bestPoints} pts</div>
+        <span class="best-score-grade" style="background:${gradeBg};color:${gradeColor}; padding:5px 15px; border-radius:20px; font-weight:800; margin:10px 0;">${gradeLabel}</span>
+        <div class="attempts-note" style="color:rgba(255,255,255,0.6); font-size:0.85rem;">${attempts.length} attempt${attempts.length !== 1 ? 's' : ''}</div>
       </div>`;
   }).join('');
 }
@@ -104,11 +114,10 @@ function renderModuleBreakdown(history) {
     if (attempts.length === 0) {
       return `
         <div class="module-row">
-          <div class="module-icon-sm">${meta.emoji}</div>
           <div class="module-bar-wrap">
-            <div class="module-name">${meta.label}</div>
+            <div class="module-name">${meta.emoji} ${meta.label}</div>
             <div class="mini-bar"><div class="mini-bar-fill" style="width:0%;"></div></div>
-            <div class="module-meta">Not attempted — <a href="dashboard.html">Start Quiz →</a></div>
+            <div class="module-meta">Not attempted — <a href="dashboard.html" style="color:var(--sun-gold);">Start Quiz →</a></div>
           </div>
           <div class="module-pct" style="color:#ccc;">—</div>
         </div>`;
@@ -119,13 +128,12 @@ function renderModuleBreakdown(history) {
 
     return `
       <div class="module-row">
-        <div class="module-icon-sm">${meta.emoji}</div>
         <div class="module-bar-wrap">
-          <div class="module-name">${meta.label}</div>
+          <div class="module-name">${meta.emoji} ${meta.label}</div>
           <div class="mini-bar">
             <div class="mini-bar-fill" style="width:${best}%; background:${meta.color};"></div>
           </div>
-          <div class="module-meta">Best: <strong>${best}%</strong> &nbsp;|&nbsp; Avg: ${avg}% &nbsp;|&nbsp; ${attempts.length} attempt${attempts.length !== 1 ? 's' : ''}</div>
+          <div class="module-meta">Best: <strong>${best}%</strong> &nbsp;|&nbsp; Avg: ${avg}% &nbsp;|&nbsp; ${attempts.length} attempts</div>
         </div>
         <div class="module-pct" style="color:${meta.color};">${best}%</div>
       </div>`;
@@ -140,10 +148,10 @@ function renderQuizHistory(history) {
 
   if (!history || history.length === 0) {
     container.innerHTML = `
-      <div style="text-align:center; padding:32px; color:#666;">
+      <div style="text-align:center; padding:32px; color:white;">
         <div style="font-size:2.5rem; margin-bottom:12px;">📝</div>
         <p style="margin:0 0 16px;">No quizzes taken yet!</p>
-        <a href="dashboard.html" class="btn btn-primary">Start Your First Quiz</a>
+        <a href="dashboard.html" class="btn-astonishing primary">Start Your First Quiz</a>
       </div>`;
     return;
   }
@@ -161,31 +169,32 @@ function renderQuizHistory(history) {
     else if (quiz.percentage >= 40) { gradeClass = 'grade-okay'; gradeLabel = 'Keep Trying'; gradeEmoji = '💪'; }
     else { gradeClass = 'grade-start'; gradeLabel = 'Keep Going'; gradeEmoji = '📚'; }
 
-    let itemClass = quiz.percentage === 100 ? 'perfect' : quiz.percentage >= 80 ? 'excellent' : quiz.percentage >= 60 ? 'good' : '';
-
     return `
-      <div class="history-item ${itemClass}">
+      <div class="history-item">
         <div class="history-info">
-          <h3>${meta.emoji} ${meta.label}</h3>
-          <p>${date}</p>
+          <h3 style="margin:0; font-family:'Baloo 2', cursive;">${meta.emoji} ${meta.label}</h3>
+          <p style="margin:5px 0 0; opacity:0.7;">${date}</p>
         </div>
-        <div class="history-stats">
+        <div class="history-stats" style="display:flex; gap:20px;">
           <div class="history-stat">
-            <div class="history-stat-value">${quiz.score}</div>
-            <div class="history-stat-label">Points</div>
+            <div class="history-stat-value" style="font-weight:900; font-size:1.2rem;">${quiz.score}</div>
+            <div class="history-stat-label" style="font-size:0.75rem; opacity:0.6;">Points</div>
           </div>
           <div class="history-stat">
-            <div class="history-stat-value">${quiz.correct}/${quiz.total}</div>
-            <div class="history-stat-label">Correct</div>
-          </div>
-          <div class="history-stat">
-            <div class="history-stat-value">${quiz.percentage}%</div>
-            <div class="history-stat-label">Accuracy</div>
+            <div class="history-stat-value" style="font-weight:900; font-size:1.2rem;">${quiz.percentage}%</div>
+            <div class="history-stat-label" style="font-size:0.75rem; opacity:0.6;">Accuracy</div>
           </div>
         </div>
-        <span class="grade-chip ${gradeClass}">${gradeEmoji} ${gradeLabel}</span>
+        <span class="grade-chip ${gradeClass}" style="padding:5px 15px; border-radius:15px; font-weight:800;">${gradeEmoji} ${gradeLabel}</span>
       </div>`;
   }).join('');
+}
+
+function renderMoodCorrelation(history) {
+  const container = document.getElementById('moodCorrelation');
+  if (!container) return;
+  // (Existing mood correlation logic if any, but let's keep it simple for now)
+  container.innerHTML = `<p style="text-align:center; opacity:0.7;">Mood analysis coming soon! Keep learning! ✨</p>`;
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -200,17 +209,39 @@ function formatDate(date) {
   const diffDays = Math.floor(diffHrs / 24);
   if (diffDays === 1) return 'Yesterday';
   if (diffDays < 7) return `${diffDays} days ago`;
-  const diffWeeks = Math.floor(diffDays / 7);
-  if (diffDays < 30) return `${diffWeeks} week${diffWeeks > 1 ? 's' : ''} ago`;
-  const diffMonths = Math.floor(diffDays / 30);
-  if (diffDays < 365) return `${diffMonths} month${diffMonths > 1 ? 's' : ''} ago`;
   return date.toLocaleDateString();
 }
 
 // ─── Init ─────────────────────────────────────────────────────────────────────
 
 document.addEventListener('DOMContentLoaded', async function () {
+  // 1. Theme Engine
+  if (window.eduplayTheme) {
+    window.eduplayTheme.initLivingBackground();
+    window.eduplayTheme.initMouseParallax();
+    window.addEventListener('click', (e) => window.eduplayTheme.spawnClickRipple(e.clientX, e.clientY));
+  }
+
+  // 2. Mascot Interaction
+  const mascot = document.getElementById('mascotOwl');
+  if (mascot) {
+    mascot.addEventListener('click', () => {
+      mascot.style.transform = 'scale(1.5) rotate(20deg)';
+      setTimeout(() => mascot.style.transform = '', 300);
+    });
+  }
+
+  // 3. Data Loading (Wait for it)
   await loadProgressData();
+
+  // 4. Entrance Sequence (Smooth Fade)
+  setTimeout(() => {
+    const wrapper = document.getElementById('contentWrapper');
+    if (wrapper) {
+      wrapper.classList.add('active');
+      console.log('✨ Adventure logs manifested!');
+    }
+  }, 300);
 });
 
 console.log('✅ Progress.js ready');

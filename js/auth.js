@@ -622,12 +622,24 @@ async function getCurrentUser() {
       };
     }
 
-    // 3. Get quiz history directly (no FK join required)
-    const { data: history } = await client
+    // 3. Get quiz history
+    let { data: history, error: historyErr } = await client
       .from('quiz_history')
-      .select('id, module, score, correct, total, percentage, date')
+      .select('id, module, score, correct, total, percentage, date, mood')
       .eq('user_id', authUser.id)
       .order('date', { ascending: false });
+
+    // Fallback if mood column is missing
+    if (historyErr && historyErr.message.includes('mood')) {
+      console.warn('⚠️ auth.js: mood column missing, retrying without it');
+      const retryResult = await client
+        .from('quiz_history')
+        .select('id, module, score, correct, total, percentage, date')
+        .eq('user_id', authUser.id)
+        .order('date', { ascending: false });
+      history = retryResult.data;
+      historyErr = retryResult.error;
+    }
 
     // 4. Get badges directly
     const { data: badges } = await client
@@ -711,23 +723,41 @@ async function saveQuizResult(quizData) {
     console.log('💾 Saving quiz_history for user:', user.id, quizData);
 
     // Insert ONLY columns that exist in the actual table
-    // Schema: id, user_id, module, score, correct, total, percentage, date, created_at
-    const { data: inserted, error: insertErr } = await client
+    // Schema: id, user_id, module, score, correct, total, percentage, date, created_at, mood
+    const currentMood = sessionStorage.getItem('eduplay_mood') || null;
+
+    let payload = {
+      user_id: user.id,
+      module: quizData.module,
+      score: quizData.score,
+      correct: quizData.correct,
+      total: quizData.total,
+      percentage: quizData.percentage,
+      date: new Date().toISOString(),
+      mood: currentMood
+    };
+
+    let { data: inserted, error: insertErr } = await client
       .from('quiz_history')
-      .insert([{
-        user_id: user.id,
-        module: quizData.module,
-        score: quizData.score,
-        correct: quizData.correct,
-        total: quizData.total,
-        percentage: quizData.percentage,
-        date: new Date().toISOString()
-      }])
+      .insert([payload])
       .select();
 
     if (insertErr) {
-      console.error('❌ quiz_history insert failed:', insertErr.message, insertErr.details, insertErr.hint);
-      return;
+      console.warn('⚠️ Primary insert failed, possibly due to missing mood column. Retrying without mood...', insertErr.message);
+
+      delete payload.mood;
+      const retryResult = await client
+        .from('quiz_history')
+        .insert([payload])
+        .select();
+
+      inserted = retryResult.data;
+      insertErr = retryResult.error;
+
+      if (insertErr) {
+        console.error('❌ quiz_history fallback insert failed:', insertErr.message);
+        return;
+      }
     }
 
     console.log('✅ quiz_history saved:', inserted);

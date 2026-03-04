@@ -1,0 +1,293 @@
+/* 
+  EduPlay - Premium Progress Aesthetics
+  High-fidelity glassmorphism, glows, and staggered animations.
+*/
+
+.entrance-container {
+    position: relative;
+    z-index: 10;
+    padding-top: 40px;
+    padding-bottom: 80px;
+    opacity: 0;
+    transform: translateY(40px) scale(0.98);
+    transition: all 1s var(--spring);
+}
+
+.entrance-container.active {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+}
+
+.page-title-zone {
+    text-align: center;
+    margin-bottom: 60px;
+    color: white;
+    text-shadow: 0 4px 25px rgba(0, 0, 0, 0.3);
+    animation: popIn 0.8s var(--spring) both;
+}
+
+.page-title-zone h1 {
+    font-size: 3.5rem;
+    margin-bottom: 12px;
+    background: linear-gradient(135deg, #FFF, #FFD93D);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+
+/* (Header styles moved to theme.css) */
+
+/* ─── ASTONISHING BUTTONS ─── */
+.btn-astonishing {
+    display: inline-block;
+    padding: 12px 28px;
+    border-radius: 50px;
+    font-family: 'Baloo 2', cursive;
+    font-weight: 800;
+    font-size: 1.1rem;
+    text-decoration: none;
+    transition: all 0.4s var(--spring);
+    border: none;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+}
+
+.btn-astonishing.primary {
+    background: linear-gradient(135deg, #667EEA, #764BA2);
+    color: white;
+    box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+}
+
+.btn-astonishing::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 60%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    z-index: -1;
+    transition: all 0.6s;
+}
+
+.btn-astonishing:hover {
+    transform: translateY(-5px) scale(1.05);
+    box-shadow: 0 15px 35px rgba(102, 126, 234, 0.6);
+}
+
+.btn-astonishing:hover::after {
+    left: 140%;
+}
+
+/* Glassmorphism Stat Cards with Glows */
+.stat-chip {
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(25px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 35px;
+    padding: 35px;
+    text-align: center;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15), inset 0 0 20px rgba(255, 255, 255, 0.1);
+    transition: all 0.4s var(--spring);
+}
+
+.stat-chip:hover {
+    transform: translateY(-12px) scale(1.05);
+    background: rgba(255, 255, 255, 0.12);
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.25), 0 0 20px var(--sun-gold);
+}
+
+.stat-chip-number {
+    font-size: 3.5rem;
+    font-weight: 900;
+    font-family: 'Baloo 2', cursive;
+    line-height: 1;
+    background: linear-gradient(135deg, var(--sun-gold), var(--accent-pink));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 10px;
+    text-shadow: 0 0 30px rgba(255, 217, 61, 0.3);
+}
+
+.stat-label {
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+}
+
+/* Personal Best Cards - Modernized */
+#bestScores {
+    gap: 30px;
+}
+
+.best-card {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(20px);
+    border-radius: 45px;
+    padding: 40px 30px;
+    border: 2px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
+    transition: all 0.5s var(--spring);
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+    color: white;
+}
+
+.best-card:hover {
+    transform: translateY(-15px) rotate(1.5deg);
+    border-color: rgba(255, 255, 255, 0.4);
+    box-shadow: 0 40px 80px rgba(0, 0, 0, 0.3);
+}
+
+.best-module-icon {
+    font-size: 4rem;
+    margin-bottom: 15px;
+    filter: drop-shadow(0 5px 15px rgba(0, 0, 0, 0.3));
+}
+
+.best-module-name {
+    font-family: 'Baloo 2', cursive;
+    font-weight: 900;
+    font-size: 1.8rem;
+    color: white;
+    margin-bottom: 10px;
+}
+
+.best-score-big {
+    font-size: 4.5rem;
+    font-weight: 900;
+    color: var(--sun-gold);
+    text-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+    margin: 10px 0;
+}
+
+/* Subject Breakdown */
+.card-glass {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(30px);
+    border-radius: 40px;
+    padding: 50px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 30px 70px rgba(0, 0, 0, 0.2);
+    color: white;
+}
+
+.module-row {
+    margin-bottom: 30px;
+    display: flex;
+    flex-direction: column;
+}
+
+.mini-bar {
+    height: 18px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
+    overflow: hidden;
+    margin: 12px 0;
+    box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.mini-bar-fill {
+    height: 100%;
+    border-radius: 20px;
+    position: relative;
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+}
+
+/* Staggered Animations */
+.stat-chip {
+    animation: popIn 0.6s var(--spring) both;
+}
+
+.stat-chip:nth-child(1) {
+    animation-delay: 0.2s;
+}
+
+.stat-chip:nth-child(2) {
+    animation-delay: 0.3s;
+}
+
+.stat-chip:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+#bestScores>div {
+    animation: slideUp 0.8s var(--spring) both;
+}
+
+#bestScores>div:nth-child(1) {
+    animation-delay: 0.5s;
+}
+
+#bestScores>div:nth-child(2) {
+    animation-delay: 0.6s;
+}
+
+#bestScores>div:nth-child(3) {
+    animation-delay: 0.7s;
+}
+
+.card-glass {
+    animation: slideUp 1s var(--spring) both;
+    animation-delay: 0.8s;
+}
+
+/* Mascot */
+.mascot-side {
+    position: fixed;
+    bottom: 40px;
+    right: 40px;
+    font-size: 5rem;
+    z-index: 100;
+    animation: mascotFloat 3s infinite ease-in-out;
+    filter: drop-shadow(0 10px 25px rgba(0, 0, 0, 0.3));
+    cursor: pointer;
+    transition: transform 0.3s var(--spring);
+}
+
+.mascot-side:hover {
+    transform: scale(1.2) rotate(10deg);
+}
+
+@keyframes mascotFloat {
+
+    0%,
+    100% {
+        transform: translateY(0) rotate(0);
+    }
+
+    50% {
+        transform: translateY(-20px) rotate(-5deg);
+    }
+}
+
+/* History Items */
+.history-item {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 25px;
+    padding: 30px;
+    margin-bottom: 25px;
+    transition: all 0.4s var(--spring);
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.history-item:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateX(15px) scale(1.02);
+    border-color: rgba(255, 255, 255, 0.4);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}

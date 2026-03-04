@@ -4,322 +4,148 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Quiz | EduPlay 🎓</title>
-  <link rel="stylesheet" href="../css/main.css">
-  <style>
-    body {
-      background: var(--bg-main);
-    }
+  <title>EduPlay - Quiz Challenge!</title>
 
-    /* Quiz header card */
-    .quiz-header-card {
-      background: #fff;
-      border-radius: 24px;
-      padding: 20px 28px;
-      margin-bottom: 24px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      box-shadow: var(--shadow-card);
-      border: 2.5px solid rgba(108, 99, 255, 0.12);
-      animation: slideUp 0.4s both;
-    }
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800;900&family=Nunito:wght@700;800;900&family=Dancing+Script:wght@700&display=swap"
+    rel="stylesheet">
 
-    #quizTitle {
-      font-size: 1.4rem;
-      font-weight: 900;
-      margin: 0;
-      color: var(--text-dark);
-    }
+  <!-- Three.js (for background) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
-    #questionCounter {
-      font-weight: 700;
-      color: var(--text-mid);
-      font-size: 0.9rem;
-    }
-
-    #scoreDisplay {
-      font-weight: 900;
-      font-size: 1.2rem;
-      color: var(--primary);
-    }
-
-    /* Progress bar */
-    .progress-track {
-      height: 12px;
-      background: #e0dfff;
-      border-radius: 99px;
-      margin-bottom: 28px;
-      overflow: hidden;
-    }
-
-    .progress-fill {
-      height: 100%;
-      background: linear-gradient(90deg, var(--primary), var(--accent-pink));
-      border-radius: 99px;
-      transition: width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-    }
-
-    /* Question card */
-    #questionCard {
-      background: #fff;
-      border-radius: 28px;
-      padding: 36px;
-      box-shadow: var(--shadow-card);
-      border: 2.5px solid rgba(108, 99, 255, 0.1);
-      animation: popIn 0.4s both;
-    }
-
-    #questionText {
-      font-size: 1.25rem;
-      font-weight: 800;
-      line-height: 1.5;
-      color: var(--text-dark);
-      margin-bottom: 28px;
-    }
-
-    /* Options */
-    .option-btn {
-      width: 100%;
-      padding: 15px 22px;
-      font-size: 1rem;
-      font-weight: 700;
-      font-family: var(--font);
-      text-align: left;
-      background: #fafafe;
-      border: 2.5px solid #e0dfff;
-      border-radius: 16px;
-      cursor: pointer;
-      transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-      color: var(--text-dark);
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .option-btn .opt-letter {
-      width: 32px;
-      height: 32px;
-      flex-shrink: 0;
-      border-radius: 50%;
-      background: var(--primary-light);
-      color: var(--primary);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 900;
-      font-size: 0.85rem;
-      transition: all 0.2s;
-    }
-
-    .option-btn:hover:not(:disabled) {
-      border-color: var(--primary);
-      background: var(--primary-light);
-      transform: translateX(6px) scale(1.01);
-    }
-
-    .option-btn:hover:not(:disabled) .opt-letter {
-      background: var(--primary);
-      color: white;
-    }
-
-    .option-btn.correct {
-      background: #e8fff2;
-      border-color: var(--accent-green);
-      color: #1a7a3a;
-    }
-
-    .option-btn.correct .opt-letter {
-      background: var(--accent-green);
-      color: white;
-    }
-
-    .option-btn.incorrect {
-      background: #ffe5e5;
-      border-color: var(--error);
-      color: #c0392b;
-    }
-
-    .option-btn.incorrect .opt-letter {
-      background: var(--error);
-      color: white;
-    }
-
-    /* Feedback */
-    #feedbackSection {
-      background: #fafafe;
-      border: 2.5px solid #e0dfff;
-      border-radius: 20px;
-      padding: 20px 24px;
-      margin-top: 20px;
-      animation: slideUp 0.3s both;
-    }
-
-    #feedbackMessage {
-      font-size: 1.05rem;
-      font-weight: 700;
-      margin-bottom: 14px;
-    }
-
-    /* Results */
-    #resultsScreen .result-card {
-      background: #fff;
-      border-radius: 32px;
-      padding: 48px 40px;
-      box-shadow: var(--shadow-lg);
-      text-align: center;
-      border: 3px solid rgba(108, 99, 255, 0.1);
-      animation: popIn 0.6s both;
-    }
-
-    #resultTitle {
-      font-size: 2rem;
-      margin-bottom: 6px;
-    }
-
-    .result-stat-box {
-      background: linear-gradient(135deg, #f0efff, #fce4ff);
-      border-radius: 20px;
-      padding: 22px 16px;
-      text-align: center;
-    }
-
-    .result-stat-num {
-      font-size: 2.8rem;
-      font-weight: 900;
-      color: var(--primary);
-      line-height: 1;
-      margin-bottom: 6px;
-    }
-
-    .result-stat-lbl {
-      font-size: 0.82rem;
-      font-weight: 700;
-      color: var(--text-mid);
-    }
-
-    /* Confetti pieces */
-    .confetti-piece {
-      position: absolute;
-      width: 10px;
-      height: 10px;
-      border-radius: 2px;
-      animation: confettiFall 1.5s ease-out both;
-      pointer-events: none;
-    }
-
-    /* Loading */
-    .spinner {
-      display: inline-block;
-      width: 40px;
-      height: 40px;
-      border: 4px solid #e0dfff;
-      border-top-color: var(--primary);
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-    }
-
-    .btn-sm {
-      padding: 7px 18px;
-      font-size: 0.9rem;
-    }
-  </style>
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="../css/quiz.css">
 </head>
 
-<body class="quiz-page">
+<body>
 
-  <div class="background-animation">
-    <div class="floating-emoji emoji-1">🌟</div>
-    <div class="floating-emoji emoji-2">⭐</div>
-    <div class="floating-emoji emoji-3">🎯</div>
-    <div class="floating-emoji emoji-4">🧩</div>
-    <div class="floating-emoji emoji-5">💡</div>
-    <div class="floating-emoji emoji-6">🎈</div>
-    <div class="floating-emoji emoji-7">🦄</div>
+  <!-- 3D Canvas Background -->
+  <div id="canvas-container"></div>
+
+  <!-- Loading Screen (Initial state) -->
+  <div id="loadingScreen" class="overlay-screen loading-screen">
+    <div class="loading-spinner"></div>
+    <h2 class="text-gradient">Loading your adventure...</h2>
   </div>
 
-  <nav class="navbar">
-    <div class="container navbar-inner">
-      <div class="navbar-brand">EduPlay</div>
-      <a href="dashboard.html" class="btn btn-outline btn-sm">✕ Exit Quiz</a>
-    </div>
-  </nav>
+  <!-- Story Intro Overlay (Injected dynamically but we provide container if needed, quiz.js handles it) -->
 
-  <div class="container" style="padding-top:36px; padding-bottom:48px; max-width:780px;">
+  <!-- Mood Checkin Overlay (quiz.js handles it) -->
 
-    <!-- Quiz Header -->
-    <div class="quiz-header-card" id="quizHeader">
-      <h1 id="quizTitle">Quiz</h1>
-      <div style="text-align:right;">
-        <div id="questionCounter">Loading...</div>
-        <div id="scoreDisplay">Score: 0</div>
+  <!-- Main Quiz Container (Hidden initially) -->
+  <div id="quizApp" style="display: none; width: 100%; height: 100%; display: flex; flex-direction: column;">
+    <!-- Navbar -->
+    <nav class="quiz-navbar">
+      <div class="quiz-brand">
+        🎓 <span class="text-gradient">EduPlay</span>
       </div>
-    </div>
+      <div id="subjectPill" class="subject-pill">Subject</div>
+      <button class="exit-btn" id="exitBtn">✖ Exit</button>
+    </nav>
 
-    <!-- Loading -->
-    <div id="loadingScreen" class="text-center" style="padding:72px 40px;">
-      <div class="spinner" style="width:56px;height:56px;border-width:5px;"></div>
-      <p style="margin-top:20px; font-weight:700; font-size:1.1rem;">Loading your questions... 🚀</p>
-    </div>
-
-    <!-- Quiz Content -->
-    <div id="quizContent" style="display:none;">
-
-      <div class="progress-track">
-        <div id="progressBar" class="progress-fill" style="width:0%;"></div>
-      </div>
-
-      <div id="questionCard">
-        <p id="questionText">Question goes here</p>
-        <div id="optionsContainer" style="display:flex; flex-direction:column; gap:12px;"></div>
+    <!-- Main Content -->
+    <main class="quiz-main">
+      <!-- HUD -->
+      <div class="hud-row">
+        <div class="hud-stats">
+          <div id="scoreChip" class="chip score-chip">⭐ <span id="scoreVal">0</span> pts</div>
+          <div id="timerChip" class="chip timer-chip">⏱ <span id="timerVal">30</span>s</div>
+          <div id="streakChip" class="chip streak-chip">🔥 <span id="streakVal">3</span>x Streak!</div>
+        </div>
+        <div class="hud-lifelines">
+          <button id="hintBtn" class="lifeline-btn" title="Get a Hint">💡</button>
+          <button id="freezeBtn" class="lifeline-btn" title="Freeze Timer (10s)">❄️</button>
+          <button id="fiftyFiftyBtn" class="lifeline-btn" title="50/50">✂️</button>
+        </div>
       </div>
 
-      <div id="feedbackSection" style="display:none;">
-        <div id="feedbackMessage"></div>
-        <button id="nextBtn" class="btn btn-primary">Next ➡️</button>
+      <!-- Progress Tracker -->
+      <div class="progress-tracker">
+        <div class="dot-map" id="dotMap">
+          <!-- Dots injected JS -->
+        </div>
+        <div class="progress-bar-container">
+          <div id="progressBarFill" class="progress-bar-fill"></div>
+        </div>
       </div>
 
-    </div>
-
-    <!-- Results Screen -->
-    <div id="resultsScreen" style="display:none; position:relative;">
-      <div class="result-card">
-        <div id="confettiContainer"
-          style="position:absolute;top:20px;left:50%;transform:translateX(-50%);pointer-events:none;"></div>
-
-        <h1 id="resultTitle" style="margin-bottom:8px;">Quiz Complete! 🎉</h1>
-        <p style="margin-bottom:32px; color:var(--text-mid);">Here's how you did!</p>
-
-        <div class="grid grid-cols-3" style="gap:16px; margin-bottom:32px;">
-          <div class="result-stat-box">
-            <div id="finalScore" class="result-stat-num">0</div>
-            <div class="result-stat-lbl">⭐ Points</div>
-          </div>
-          <div class="result-stat-box">
-            <div id="correctCount" class="result-stat-num">0/10</div>
-            <div class="result-stat-lbl">✅ Correct</div>
-          </div>
-          <div class="result-stat-box">
-            <div id="percentage" class="result-stat-num">0%</div>
-            <div class="result-stat-lbl">🎯 Accuracy</div>
+      <!-- Question Area -->
+      <div id="questionWrapper">
+        <div class="question-area">
+          <div id="mascot" class="mascot-container">🦉</div>
+          <div class="question-bubble">
+            <div id="multiplierBadge" class="multiplier-badge">🔥 2x POINTS!</div>
+            <div id="questionLabel" class="question-label">❓ Question 1 of 10</div>
+            <div id="questionText" class="question-text">Loading question...</div>
           </div>
         </div>
 
-        <div id="achievementNotification" style="display:none; margin-bottom:24px;"></div>
+        <!-- Options Grid -->
+        <div class="options-grid" id="optionsGrid">
+          <!-- Buttons injected by JS -->
+        </div>
 
-        <div style="display:flex; gap:14px; justify-content:center; flex-wrap:wrap;">
-          <button onclick="retakeQuiz()" class="btn btn-primary">🔄 Try Again!</button>
-          <a href="dashboard.html" class="btn btn-outline">🏠 Back Home</a>
+        <!-- Post-Answer Explanation Card -->
+        <div id="explanationCard" class="post-answer-card">
+          <div id="explanationHeader" class="feedback-header">
+            <span id="explanationIcon">✨</span> <span id="explanationTitle">Explanation</span>
+          </div>
+          <div id="explanationBody" class="feedback-body">Loading feedback...</div>
+          <div class="next-btn-container">
+            <button id="nextQuestionBtn" class="next-btn">Next ➔</button>
+          </div>
         </div>
       </div>
-    </div>
 
+      <!-- Results Screen -->
+      <div id="resultsScreen" class="results-screen">
+        <div id="resultMascot" class="mascot-container" style="font-size: 6rem; margin-bottom: 1rem;">🏆</div>
+
+        <div class="star-rating" id="starRatingContainer">
+          <span id="star1">⭐</span>
+          <span id="star2">⭐</span>
+          <span id="star3">⭐</span>
+        </div>
+
+        <h1 id="resultTitle" class="text-gradient" style="margin-bottom: 0.5rem;">Legendary Explorer!</h1>
+        <div id="finalScoreDisplay" class="final-score text-gradient-gold">0 pts</div>
+
+        <div class="meta-chips">
+          <div class="chip">✅ <span id="resultCorrect">0/10</span> Correct</div>
+          <div class="chip">🎯 <span id="resultAccuracy">0%</span> Accuracy</div>
+          <div class="chip" id="resultMoodChip">😊 Mood: Good</div>
+        </div>
+
+        <div id="moodInsightCard"
+          style="background: rgba(255,255,255,0.05); padding: 1rem; border-radius: 16px; margin-bottom: 1.5rem; display: none;">
+          <strong style="color: var(--accent-gold);">💡 Insight:</strong> <span id="resultMoodInsight">Keep it
+            up!</span>
+        </div>
+
+        <div class="review-bars" id="reviewBarsContainer">
+          <!-- Bars injected via JS -->
+        </div>
+
+        <div class="results-actions">
+          <button id="retakeBtn" class="btn-primary">🔄 Try Again!</button>
+          <button id="homeBtn" class="btn-ghost">🏠 Back Home</button>
+        </div>
+      </div>
+
+    </main>
   </div>
 
+  <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="../config.js"></script>
   <script src="../js/auth.js"></script>
+  <script src="../js/groq.js"></script>
+  <script src="../js/adaptive.js"></script>
   <script src="../js/quiz.js"></script>
+
 </body>
 
 </html>
