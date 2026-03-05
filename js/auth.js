@@ -131,270 +131,451 @@ const SessionManager = {
 /**
  * UI Helper Functions
  */
-function showError(message) {
+function showError(message, type = 'error') {
   console.error('Error:', message);
+
+  // Owl mascot reaction
+  reactOwlError(type);
+
+  // Try styled inline message first
+  const existing = document.querySelector('.auth-inline-msg');
+  if (existing) existing.remove();
+
+  const colors = {
+    error: { bg: 'rgba(239,68,68,0.12)', border: 'rgba(239,68,68,0.4)', text: '#EF4444', icon: '❌' },
+    success: { bg: 'rgba(16,185,129,0.12)', border: 'rgba(16,185,129,0.4)', text: '#10B981', icon: '✅' },
+    info: { bg: 'rgba(59,130,246,0.12)', border: 'rgba(59,130,246,0.4)', text: '#93C5FD', icon: '💡' }
+  };
+  const c = colors[type] || colors.error;
+
+  // Find a good insertion point (before submit button)
+  const submitBtn = document.querySelector('#registerBtn, #loginBtn, [type=submit]');
+  if (submitBtn && submitBtn.parentElement) {
+    const msg = document.createElement('div');
+    msg.className = 'auth-inline-msg';
+    msg.style.cssText = `
+      background:${c.bg}; border:1.5px solid ${c.border}; border-radius:16px;
+      padding:12px 18px; color:${c.text}; font-family:'Nunito',sans-serif;
+      font-weight:700; font-size:0.9rem; margin:10px 0;
+      display:flex; align-items:center; gap:8px;
+      animation: slideInMsg 0.3s ease;
+    `;
+    msg.innerHTML = `<span>${c.icon}</span><span>${message}</span>`;
+    submitBtn.parentElement.insertBefore(msg, submitBtn);
+
+    const delay = type === 'success' ? 3000 : type === 'info' ? 0 : 5000;
+    if (delay > 0) setTimeout(() => msg.remove(), delay);
+    return;
+  }
+
+  // Fallback: legacy div
   const errorDiv = document.getElementById('errorMessage');
   if (errorDiv) {
     errorDiv.textContent = message;
     errorDiv.classList.remove('hidden');
     errorDiv.style.display = 'block';
-
-    setTimeout(() => {
-      errorDiv.classList.add('hidden');
-      errorDiv.style.display = 'none';
-    }, 5000);
+    setTimeout(() => { errorDiv.classList.add('hidden'); errorDiv.style.display = 'none'; }, 5000);
   }
 }
 
 function showSuccess(message) {
   console.log('Success:', message);
+  showError(message, 'success');
   const successDiv = document.getElementById('successMessage');
   if (successDiv) {
     successDiv.textContent = message;
     successDiv.classList.remove('hidden');
     successDiv.style.display = 'block';
-
-    setTimeout(() => {
-      successDiv.classList.add('hidden');
-      successDiv.style.display = 'none';
-    }, 3000);
+    setTimeout(() => { successDiv.classList.add('hidden'); successDiv.style.display = 'none'; }, 3000);
   }
 }
 
 function clearMessages() {
+  document.querySelectorAll('.auth-inline-msg').forEach(el => el.remove());
   const errorDiv = document.getElementById('errorMessage');
   const successDiv = document.getElementById('successMessage');
-  if (errorDiv) {
-    errorDiv.classList.add('hidden');
-    errorDiv.style.display = 'none';
-  }
-  if (successDiv) {
-    successDiv.classList.add('hidden');
-    successDiv.style.display = 'none';
+  if (errorDiv) { errorDiv.classList.add('hidden'); errorDiv.style.display = 'none'; }
+  if (successDiv) { successDiv.classList.add('hidden'); successDiv.style.display = 'none'; }
+}
+
+function reactOwlError(type) {
+  const owl = document.getElementById('mascotEmoji');
+  if (!owl) return;
+  owl.textContent = type === 'success' ? '🎉' : '🙈';
+  setTimeout(() => { owl.textContent = '🦉'; }, 1200);
+}
+
+function setLoadingState(isLoading, buttonId) {
+  const btn = document.getElementById(buttonId);
+  if (!btn) return;
+  if (isLoading) {
+    btn.disabled = true;
+    btn.dataset.originalText = btn.innerHTML;
+    btn.innerHTML = '<span style="display:inline-block;animation:spin 1s linear infinite">🌀</span> Creating account...';
+    btn.style.opacity = '0.8';
+    btn.style.cursor = 'not-allowed';
+  } else {
+    btn.disabled = false;
+    btn.innerHTML = btn.dataset.originalText || btn.innerHTML;
+    btn.style.opacity = '1';
+    btn.style.cursor = 'pointer';
   }
 }
 
 function showLoading(button, isLoading) {
   if (!button) return;
-
   if (isLoading) {
     button.disabled = true;
     button.dataset.originalText = button.textContent;
     button.textContent = 'Processing...';
   } else {
     button.disabled = false;
-    if (button.dataset.originalText) {
-      button.textContent = button.dataset.originalText;
+    if (button.dataset.originalText) button.textContent = button.dataset.originalText;
+  }
+}
+
+// Add spin keyframe once
+if (!document.getElementById('auth-spin-style')) {
+  const s = document.createElement('style');
+  s.id = 'auth-spin-style';
+  s.textContent = '@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}} @keyframes slideInMsg{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}';
+  document.head.appendChild(s);
+}
+
+/**
+ * Insert user profile with exponential-backoff retry.
+ * Fixes the FK race condition (23503 / 409) between auth.users commit and public.users insert.
+ */
+async function insertProfileWithRetry(client, userId, username, email, age) {
+  const delays = [1500, 2000, 3000, 4000, 5000];
+
+  for (let attempt = 1; attempt <= delays.length; attempt++) {
+    // Wait before each attempt — gives auth.users row time to commit
+    await new Promise(r => setTimeout(r, delays[attempt - 1]));
+    console.log(`👤 Profile insert attempt ${attempt}/${delays.length}...`);
+
+    // NOTE: Do NOT call getUser() here — when email confirmation is required,
+    // there is no active session yet, so getUser() returns null and would
+    // cause all retries to skip. We already have userId from authData.user.id.
+
+    const { data, error } = await client
+      .from('users')
+      .insert({
+        id: userId,
+        username: username.toLowerCase(),
+        email: email.toLowerCase(),
+        age: parseInt(age),
+        total_points: 0,
+        quizzes_completed: 0,
+        game_coins: 0
+      })
+      .select()
+      .single();
+
+    if (!error && data) {
+      console.log(`✅ Profile created on attempt ${attempt}`);
+      return { success: true, data };
     }
+
+    if (error) {
+      console.warn(`Attempt ${attempt} error (${error.code}):`, error.message);
+      if (error.code === '23505') {
+        // Profile already exists — treat as success
+        console.log('Profile already exists, treating as success.');
+        return { success: true, data: null };
+      }
+      if (error.code !== '23503' && error.code !== '409' && error.code !== '42501') {
+        // Non-retryable error (not FK violation / conflict / permission)
+        console.error('Non-retryable profile insert error:', error);
+        return { success: false, error };
+      }
+      // FK violation (23503) or conflict (409) — retry after delay
+      console.log(`FK/conflict error, will retry...`);
+    }
+  }
+
+  return { success: false, error: { message: 'Max retry attempts reached' } };
+}
+
+
+/**
+ * Resend confirmation email with cooldown.
+ */
+async function handleResendEmail(email) {
+  const btn = document.getElementById('resendEmailBtn');
+  if (btn) { btn.disabled = true; btn.textContent = '📨 Sending...'; }
+
+  const client = initSupabase();
+  if (!client) return;
+
+  const { error } = await client.auth.resend({
+    type: 'signup',
+    email: email,
+    options: { emailRedirectTo: window.location.origin + '/html/dashboard.html' }
+  });
+
+  if (!error) {
+    if (btn) {
+      let secs = 60;
+      btn.textContent = `Resend in ${secs}s`;
+      const iv = setInterval(() => {
+        secs--;
+        if (btn) btn.textContent = `Resend in ${secs}s`;
+        if (secs <= 0) {
+          clearInterval(iv);
+          if (btn) { btn.disabled = false; btn.textContent = '📧 Resend Email'; }
+        }
+      }, 1000);
+    }
+    showError('Email sent! Check your inbox 📬', 'success');
+  } else {
+    if (btn) { btn.disabled = false; btn.textContent = '📧 Resend Email'; }
+    showError('Could not resend. Try again in a moment.');
   }
 }
 
 /**
- * User Registration
+ * Show the email-confirmation-pending UI inside the form.
+ */
+function showEmailConfirmationUI(email, formEl) {
+  // Hide all form children except a new card
+  Array.from(formEl.children).forEach(el => el.style.display = 'none');
+
+  const card = document.createElement('div');
+  card.style.cssText = 'text-align:center;padding:24px 16px;color:var(--text-primary,#fff);';
+  card.innerHTML = `
+    <div style="font-size:64px;animation:float 3s ease-in-out infinite;">📧</div>
+    <h2 style="font-family:'Baloo 2',cursive;font-size:1.5rem;font-weight:900;margin:16px 0 8px;">
+      Check your email! 📬
+    </h2>
+    <p style="font-family:'Nunito',sans-serif;font-size:0.95rem;margin:0 0 16px;opacity:0.9;">
+      We sent a confirmation link to:<br>
+      <strong style="color:#a78bfa;">${email}</strong><br><br>
+      Click the link to activate your account! 🚀
+    </p>
+    <p style="font-size:0.85rem;opacity:0.6;margin:0 0 12px;">Didn't receive it? Check your spam folder or:</p>
+    <button id="resendEmailBtn"
+      onclick="handleResendEmail('${email}')"
+      style="background:linear-gradient(135deg,#6C63FF,#FF6B9D);color:#fff;
+             border:none;border-radius:50px;padding:12px 28px;
+             font-family:'Baloo 2',cursive;font-size:1rem;font-weight:800;
+             cursor:pointer;margin-bottom:12px;">
+      📧 Resend Email
+    </button><br>
+    <a href="login.html" style="color:#a78bfa;font-size:0.9rem;font-family:'Nunito',sans-serif;">
+      ← Back to Login
+    </a>
+  `;
+  formEl.appendChild(card);
+}
+
+/**
+ * Handle email confirmation tokens in URL (called on every page load).
+ */
+async function handleEmailConfirmation() {
+  const client = initSupabase();
+  if (!client) return;
+
+  // Method 1: code in query params (PKCE flow — newer Supabase)
+  const params = new URLSearchParams(window.location.search);
+  const code = params.get('code');
+  if (code) {
+    try {
+      const { data, error } = await client.auth.exchangeCodeForSession(code);
+      if (!error && data?.session) {
+        window.history.replaceState({}, '', window.location.pathname);
+        SessionManager.set(data.session.user.id, data.session.user.email,
+          data.session.user.user_metadata?.username || '');
+        const dashPath = window.location.pathname.includes('/html/')
+          ? 'dashboard.html' : 'html/dashboard.html';
+        window.location.replace(dashPath);
+        return;
+      }
+    } catch (_) { /* not a code exchange page */ }
+  }
+
+  // Method 2: access_token in hash (implicit flow — older Supabase)
+  const hash = window.location.hash;
+  if (hash.includes('access_token') && hash.includes('type=signup')) {
+    // Supabase SDK auto-handles hash tokens; just wait for session
+    const { data } = await client.auth.getSession();
+    if (data?.session) {
+      const dashPath = window.location.pathname.includes('/html/')
+        ? 'dashboard.html' : 'html/dashboard.html';
+      window.location.replace(dashPath);
+    }
+  }
+}
+
+// Run email confirmation handler on every page load
+(async () => { await handleEmailConfirmation(); })();
+
+/**
+ * User Registration — complete rewrite with retry + email confirm flow
  */
 function initializeRegisterForm() {
   const registerForm = document.getElementById('registerForm');
-  if (registerForm) {
-    // Add real-time validation to password confirm
-    const pwInput = document.getElementById('reg-password-input');
-    const confirmInput = document.getElementById('reg-confirm-input');
+  if (!registerForm) return;
 
-    if (pwInput && confirmInput) {
-      confirmInput.addEventListener('input', function () {
-        if (this.value && this.value !== pwInput.value) {
-          this.setCustomValidity("Passwords don't match");
-          this.classList.add('invalid');
-          this.classList.remove('valid');
-        } else {
-          this.setCustomValidity('');
-          if (this.value) {
-            this.classList.add('valid');
-            this.classList.remove('invalid');
-          }
-        }
-      });
-    }
-
-    registerForm.addEventListener('submit', async function (e) {
-      e.preventDefault();
-      clearMessages();
-
-      const submitBtn = document.getElementById('registerBtn');
-      showLoading(submitBtn, true);
-
-      // get inputs dynamically so it handles either simple ID or prefixed ID logic
-      const uEl = document.getElementById('username') || document.getElementById('reg-username-input');
-      const eEl = document.getElementById('email') || document.getElementById('reg-email-input');
-      const aEl = document.getElementById('age') || document.getElementById('reg-age-input');
-      const pEl = document.getElementById('password') || document.getElementById('reg-password-input');
-      const cEl = document.getElementById('confirmPassword') || document.getElementById('reg-confirm-input');
-
-      const username = uEl ? uEl.value.trim() : '';
-      const email = eEl ? eEl.value.trim() : '';
-      const ageStr = aEl ? aEl.value.trim() : '';
-      const age = parseInt(ageStr);
-      const password = pEl ? pEl.value : '';
-      const confirmPassword = cEl ? cEl.value : '';
-
-      // Validation
-      if (!username || !email || !age || !password || !confirmPassword) {
-        showError('Please fill in all fields!');
-
-        if (!age) {
-          const aErr = document.getElementById('ageError');
-          if (aErr) aErr.classList.add('show');
-        }
-
-        showLoading(submitBtn, false);
-        return;
-      }
-
-      if (password.length < 6) {
-        showError('Password must be at least 6 characters long!');
-        showLoading(submitBtn, false);
-        return;
-      }
-
-      if (password !== confirmPassword) {
-        showError('Passwords do not match!');
-        showLoading(submitBtn, false);
-        return;
-      }
-
-      const client = initSupabase();
-      if (!client) {
-        showLoading(submitBtn, false);
-        return;
-      }
-
-      try {
-        console.log('🔍 Checking if username exists...');
-
-        const { data: existingUser, error: checkError } = await client
-          .from('users')
-          .select('id')
-          .eq('username', username)
-          .maybeSingle();
-
-        if (checkError) {
-          console.error("Username check error:", checkError);
-        }
-
-        if (existingUser) {
-          showError('That username is already taken. Please try another one!');
-          showLoading(submitBtn, false);
-          return;
-        }
-
-        console.log('✅ Username is available. Creating account...');
-
-        // Check auth status first - sometimes leftover sessions break signup
-        await client.auth.signOut();
-
-        const { data: authData, error: signUpError } = await client.auth.signUp({
-          email: email,
-          password: password,
-          options: {
-            data: {
-              username: username,
-              age: age
-            }
-          }
-        });
-
-        if (signUpError) {
-          console.error('Signup error:', signUpError);
-          if (signUpError.message && signUpError.message.includes('already registered')) {
-            showError('An account with this email already exists! Try logging in.');
-          } else if (signUpError.message && signUpError.message.includes('password')) {
-            showError('Password is too weak. Please use a stronger password.');
-          } else {
-            showError(`Sign up failed: ${signUpError.message}`);
-          }
-          showLoading(submitBtn, false);
-          return;
-        }
-
-        if (!authData || !authData.user) {
-          showError('Sign up failed. Please try again.');
-          showLoading(submitBtn, false);
-          return;
-        }
-
-        console.log('✅ User created in auth system. ID:', authData.user.id);
-        const userId = authData.user.id;
-
-        // Try to create profile with retries
-        let profileCreated = false;
-        let retryCount = 0;
-        const maxRetries = 3;
-
-        while (!profileCreated && retryCount < maxRetries) {
-          try {
-            console.log(`👤 Attempting to create profile for ${username} (Attempt ${retryCount + 1})`);
-
-            const { error: profileError } = await client
-              .from('users')
-              .upsert([
-                {
-                  id: userId,
-                  username: username,
-                  email: email,
-                  age: age,
-                  created_at: new Date().toISOString()
-                }
-              ], { onConflict: 'id' });
-
-            if (profileError) {
-              console.error(`Profile creation error (Attempt ${retryCount + 1}):`, profileError);
-
-              if (profileError.code === '23505') {
-                console.log('Profile already exists (duplicate key error), treating as success.');
-                profileCreated = true;
-                break;
-              }
-
-              retryCount++;
-              if (retryCount < maxRetries) {
-                console.log(`Waiting before retry ${retryCount + 1}...`);
-                await new Promise(r => setTimeout(r, 1000 * retryCount));
-              } else {
-                throw new Error(`Could not save user profile after ${maxRetries} attempts: ` + profileError.message);
-              }
-            } else {
-              console.log('✅ Profile created successfully!');
-              profileCreated = true;
-            }
-          } catch (err) {
-            console.error('Try/catch error saving user profile:', err);
-            retryCount++;
-            if (retryCount >= maxRetries) {
-              showError(`Account created but profile setup failed: ${err.message}. Please contact support.`);
-              showLoading(submitBtn, false);
-              return;
-            }
-            await new Promise(r => setTimeout(r, 1000 * retryCount));
-          }
-        }
-
-        SessionManager.set(userId, email, username);
-
-        // Success!
-        showSuccess('Account created! Welcome to EduPlay! Redirecting...');
-
-        // Wait a bit for animations then redirect
-        setTimeout(() => {
-          // If in magic flip view, redirect from login.html
-          window.location.replace('dashboard.html');
-        }, 2000);
-
-      } catch (error) {
-        console.error('Registration error:', error);
-        showError('An error occurred during registration. Please try again.');
-        showLoading(submitBtn, false);
+  // Real-time password match indicator
+  const pwInput = document.getElementById('reg-password-input');
+  const confirmInput = document.getElementById('reg-confirm-input');
+  if (pwInput && confirmInput) {
+    confirmInput.addEventListener('input', function () {
+      if (this.value && this.value !== pwInput.value) {
+        this.setCustomValidity("Passwords don't match");
+        this.classList.add('invalid'); this.classList.remove('valid');
+      } else {
+        this.setCustomValidity('');
+        if (this.value) { this.classList.add('valid'); this.classList.remove('invalid'); }
       }
     });
   }
+
+  registerForm.addEventListener('submit', async function (e) {
+    e.preventDefault();
+    clearMessages();
+
+    // ── STEP 1: Collect inputs ─────────────────────────────────────────────────
+    const uEl = document.getElementById('username') || document.getElementById('reg-username-input');
+    const eEl = document.getElementById('email') || document.getElementById('reg-email-input');
+    const aEl = document.getElementById('age') || document.getElementById('reg-age-input');
+    const pEl = document.getElementById('password') || document.getElementById('reg-password-input');
+    const cEl = document.getElementById('confirmPassword') || document.getElementById('reg-confirm-input');
+
+    const username = uEl ? uEl.value.trim() : '';
+    const email = eEl ? eEl.value.trim() : '';
+    const ageStr = aEl ? aEl.value.trim() : '';
+    const age = parseInt(ageStr);
+    const password = pEl ? pEl.value : '';
+    const confirmPassword = cEl ? cEl.value : '';
+
+    // ── STEP 2: Validate ───────────────────────────────────────────────────────
+    if (!/^[a-zA-Z0-9_]{3,50}$/.test(username)) {
+      showError('Username must be 3-50 characters: letters, numbers, underscore only.');
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      showError('Please enter a valid email address 📧');
+      return;
+    }
+    if (!age || age < 6 || age > 12) {
+      showError('Please select your age! 🎂');
+      const aErr = document.getElementById('ageError');
+      if (aErr) aErr.classList.add('show');
+      return;
+    }
+    if (password.length < 6) {
+      showError('Password must be at least 6 characters 🔒');
+      return;
+    }
+    if (password !== confirmPassword) {
+      showError('Passwords do not match! 🔑');
+      return;
+    }
+
+    setLoadingState(true, 'registerBtn');
+
+    try {
+      const client = initSupabase();
+      if (!client) { setLoadingState(false, 'registerBtn'); return; }
+
+      // ── STEP 3: Check username uniqueness ────────────────────────────────────
+      console.log('🔍 Checking username availability...');
+      const { data: existingUser, error: checkError } = await client
+        .from('users')
+        .select('username')
+        .eq('username', username.toLowerCase())
+        .maybeSingle();
+
+      if (checkError && checkError.code !== 'PGRST116') {
+        showError('Connection issue. Please try again 🌐');
+        setLoadingState(false, 'registerBtn');
+        return;
+      }
+      if (existingUser) {
+        showError('That username is taken! Try another 😊');
+        setLoadingState(false, 'registerBtn');
+        return;
+      }
+
+      // ── STEP 4: Create Supabase Auth user ────────────────────────────────────
+      console.log('🔐 Creating auth account...');
+      await client.auth.signOut(); // clear any stale session
+
+      const { data: authData, error: signUpError } = await client.auth.signUp({
+        email,
+        password,
+        options: {
+          data: { username, age: parseInt(age) },
+          emailRedirectTo: window.location.origin + '/html/dashboard.html'
+        }
+      });
+
+      if (signUpError) {
+        const msg = signUpError.message || '';
+        if (msg.includes('already registered') || signUpError.code === 'email_exists')
+          showError('That email is already registered! Try logging in 📧');
+        else if (signUpError.code === 'weak_password')
+          showError('Password too weak! Use 6+ characters 🔒');
+        else if (signUpError.code === 'email_address_invalid')
+          showError('Invalid email address 📧');
+        else
+          showError(`Sign up failed: ${msg}`);
+        setLoadingState(false, 'registerBtn');
+        return;
+      }
+
+      if (!authData?.user) {
+        showError('Registration failed. Please try again!');
+        setLoadingState(false, 'registerBtn');
+        return;
+      }
+
+      const userId = authData.user.id;
+      console.log('✅ Auth user created. ID:', userId);
+
+      // ── STEP 5: Insert profile with retry ────────────────────────────────────
+      const profileResult = await insertProfileWithRetry(client, userId, username, email, age);
+
+      setLoadingState(false, 'registerBtn');
+
+      if (profileResult.success) {
+        // Check email confirmation state
+        if (authData.user.email_confirmed_at) {
+          // Email confirmation disabled — go straight to dashboard
+          SessionManager.set(userId, email, username);
+          showError('Account created! Welcome to EduPlay! 🎉', 'success');
+          setTimeout(() => window.location.replace('dashboard.html'), 1500);
+        } else {
+          // Normal flow — show confirmation pending UI
+          showEmailConfirmationUI(email, registerForm);
+        }
+      } else {
+        // Profile failed after all retries
+        console.error('Profile creation failed:', profileResult.error);
+        // Try to clean up auth user (best effort)
+        try { await client.auth.admin?.deleteUser(userId); } catch (_) { }
+        showError(
+          'Account setup failed after multiple attempts. Please try again or contact support.'
+        );
+        // Show retry button
+        const submitBtn = document.getElementById('registerBtn');
+        if (submitBtn) {
+          const retry = document.createElement('button');
+          retry.textContent = '🔄 Try Again';
+          retry.style.cssText = 'margin-top:10px;padding:10px 24px;border-radius:50px;border:none;background:#6C63FF;color:#fff;font-weight:700;cursor:pointer;';
+          retry.onclick = () => { retry.remove(); registerForm.dispatchEvent(new Event('submit')); };
+          submitBtn.parentElement.insertBefore(retry, submitBtn.nextSibling);
+        }
+      }
+
+    } catch (err) {
+      console.error('Unexpected registration error:', err);
+      showError('Something went wrong. Please try again!');
+      setLoadingState(false, 'registerBtn');
+    }
+  });
 }
 
 /**
