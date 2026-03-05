@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Games Hub | EduPlay</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800;900&family=Nunito:wght@700;800;900&family=Fredoka+One&display=swap"
+        rel="stylesheet">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="../css/main.css">
+    <link rel="stylesheet" href="../css/theme.css">
+    <link rel="stylesheet" href="../css/dashboard.css">
+    <link rel="stylesheet" href="../css/games-hub.css">
+
+    <!-- Supabase SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+
+<body class="dashboard-page">
+
+    <!-- LIVING BACKGROUND -->
+    <canvas id="starsCanvas" class="background-canvas"></canvas>
+    <div id="cloudsContainer" class="clouds-container"></div>
+    <div id="floatingContainer" class="floating-elements-container"></div>
+    <div class="rainbow-arc">
+        <div class="rainbow-band band-1"></div>
+        <div class="rainbow-band band-2"></div>
+        <div class="rainbow-band band-3"></div>
+        <div class="rainbow-band band-4"></div>
+    </div>
+
+    <div class="grass-hills">
+        <div class="hill hill-back">
+            <span class="flower">🌸</span>
+            <span class="flower">🌼</span>
+        </div>
+        <div class="hill hill-front">
+            <span class="flower">🌺</span>
+            <span class="flower">🌸</span>
+        </div>
+    </div>
+
+    <!-- NAVBAR -->
+    <nav class="glass-nav" id="mainNav">
+        <div class="nav-content container">
+            <div class="nav-left">
+                <a href="dashboard.html" class="brand">🎓 EduPlay</a>
+            </div>
+            <div class="nav-center">
+                <a href="dashboard.html" class="nav-link">Dashboard</a>
+                <a href="progress.html" class="nav-link">My Progress</a>
+                <a href="games.html" class="nav-link active">Games</a>
+            </div>
+            <div class="nav-right">
+                <!-- Coin Display -->
+                <div class="stat-chip"
+                    style="margin-right: 15px; background: linear-gradient(135deg, #F59E0B, #FCD34D); padding: 5px 15px; border-radius: 20px; color: #78350F; font-weight: bold; border: 2px solid white; box-shadow: 0 4px 10px rgba(245, 158, 11, 0.3);">
+                    🪙 <span id="navCoins">0</span>
+                </div>
+                <span id="navUsername" class="username-display">Explorer</span>
+                <div id="userAvatar" class="avatar-circle">?</div>
+                <button id="logoutBtn" class="logout-btn">👋 Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="dashboard-main container">
+        <div class="games-hero">
+            <h1>Bonus Mini-Games! 🎮</h1>
+            <p>Play games, test your skills, and earn extra EduCoins! Complete quizzes to unlock more.</p>
+        </div>
+
+        <div class="games-grid">
+            <!-- GAME 1 -->
+            <article class="game-card">
+                <div class="game-visual-zone math-visual">
+                    <div class="coin-reward-badge">Earn 🪙</div>
+                    <div class="game-emoji">🚀</div>
+                </div>
+                <div class="game-info-zone">
+                    <h3>Math Blaster</h3>
+                    <p>Blast numbers from the sky by solving quick math equations. Don't let the answers crash!</p>
+                    <button class="play-button math-btn" onclick="attemptLaunch('math-blaster')">▶ Launch
+                        Game</button>
+                </div>
+            </article>
+
+            <!-- GAME 2 -->
+            <article class="game-card" id="card-word-bubble">
+                <div class="game-visual-zone word-visual">
+                    <div class="coin-reward-badge">Earn 🪙</div>
+                    <div class="game-emoji">🫧</div>
+
+                    <!-- Locked Overlay -->
+                    <div class="locked-overlay" id="lock-word-bubble">
+                        <div class="lock-icon">🔒</div>
+                        <div class="lock-text">100 🪙</div>
+                    </div>
+                </div>
+                <div class="game-info-zone">
+                    <h3>Word Bubble Pop</h3>
+                    <p>Pop the iridescent bubbles with correctly spelled words before they float away. Watch out for
+                        misspelled ones!</p>
+                    <button class="play-button word-btn" id="btn-word-bubble" onclick="attemptLaunch('word-bubble')">▶
+                        Launch Game</button>
+                </div>
+            </article>
+
+            <!-- COMING SOON -->
+            <article class="game-card" style="opacity: 0.7; pointer-events: none;">
+                <div class="game-visual-zone" style="background: linear-gradient(135deg, #6B7280, #9CA3AF);">
+                    <div class="game-emoji" style="filter: grayscale(1);">🧩</div>
+                </div>
+                <div class="game-info-zone">
+                    <h3>Puzzle Quest</h3>
+                    <p>Coming soon! Unlock this area by reaching Level 10 in General Knowledge.</p>
+                    <button class="play-button" style="background: #9CA3AF; box-shadow: none;">Locked 🔒</button>
+                </div>
+            </article>
+        </div>
+    </main>
+
+    <!-- UNLOCK MODAL -->
+    <div id="unlockModal" class="dashboard-modal"
+        style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1000; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); justify-content: center; align-items: center;">
+        <div class="modal-content"
+            style="background: white; padding: 30px; border-radius: 20px; max-width: 400px; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.3);">
+            <div id="modalEmoji" style="font-size: 4rem; margin-bottom: 10px;">🔒</div>
+            <h2 id="modalTitle" style="margin-bottom: 15px; color: #1F2937;">Unlock Game?</h2>
+            <p id="modalMessage" style="color: #6B7280; margin-bottom: 25px;">You need 100 EduCoins to unlock Word
+                Bubble Pop. Do you want to purchase it?</p>
+
+            <div style="display: flex; gap: 10px; justify-content: center;">
+                <button id="modalBtnCancel" class="secondary-btn" style="padding: 10px 20px;">Cancel</button>
+                <button id="modalBtnAction" class="btn-primary"
+                    style="padding: 10px 20px; background: linear-gradient(135deg, #F59E0B, #FCD34D); color: #78350F; border: none;">Unlock
+                    (100 🪙)</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../config.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/theme-engine.js"></script>
+    <script>
+        let currentUser = null;
+        let gameToUnlock = null;
+        const GAME_COSTS = {
+            'word-bubble': 100
+        };
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const userId = localStorage.getItem('eduplay_user_id');
+            const username = localStorage.getItem('eduplay_username');
+
+            if (userId) {
+                currentUser = { id: userId, username: username };
+                updateGameUI();
+
+                // Always fetch fresh coins from Supabase on page load
+                try {
+                    const supabase = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
+                    const { data } = await supabase
+                        .from('users')
+                        .select('game_coins')
+                        .eq('id', userId)
+                        .single();
+                    if (data) {
+                        const coinEl = document.getElementById('navCoins');
+                        if (coinEl) coinEl.textContent = data.game_coins || 0;
+                        window.eduplay_current_coins = data.game_coins || 0;
+                    }
+                } catch (e) {
+                    console.warn('Failed to fetch coins on load:', e);
+                }
+            }
+
+            // Setup Modal Listeners
+            document.getElementById('modalBtnCancel').addEventListener('click', closeUnlockModal);
+            document.getElementById('modalBtnAction').addEventListener('click', confirmUnlock);
+        });
+
+        function updateGameUI() {
+            if (!currentUser) return;
+            // Check localStorage for unlocks
+            const isUnlocked = localStorage.getItem(`eduplay_unlocked_word-bubble_${currentUser.id}`) === 'true';
+
+            const lockOverlay = document.getElementById('lock-word-bubble');
+            const playBtn = document.getElementById('btn-word-bubble');
+
+            if (isUnlocked) {
+                if (lockOverlay) lockOverlay.style.display = 'none';
+                playBtn.textContent = '▶ Launch Game';
+                playBtn.classList.remove('locked-btn');
+            } else {
+                if (lockOverlay) lockOverlay.style.display = 'flex';
+                playBtn.textContent = '🔒 Unlock (100 🪙)';
+                playBtn.classList.add('locked-btn');
+            }
+        }
+
+        function attemptLaunch(gameId) {
+            if (gameId === 'math-blaster') {
+                window.location.href = 'math-blaster.html';
+                return;
+            }
+
+            const isUnlocked = localStorage.getItem(`eduplay_unlocked_${gameId}_${currentUser.id}`) === 'true';
+
+            if (isUnlocked) {
+                window.location.href = `${gameId}.html`;
+            } else {
+                showUnlockModal(gameId);
+            }
+        }
+
+        function showUnlockModal(gameId) {
+            gameToUnlock = gameId;
+            const cost = GAME_COSTS[gameId] || 0;
+            const currentCoins = window.eduplay_current_coins || 0;
+
+            const modal = document.getElementById('unlockModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalMessage = document.getElementById('modalMessage');
+            const btnAction = document.getElementById('modalBtnAction');
+            const modalEmoji = document.getElementById('modalEmoji');
+
+            modal.style.display = 'flex';
+
+            if (currentCoins >= cost) {
+                modalEmoji.textContent = '🔓';
+                modalTitle.textContent = 'Unlock this Game?';
+                modalMessage.textContent = `You have ${currentCoins} coins. Do you want to spend ${cost} coins to permanently unlock this game?`;
+                btnAction.textContent = `Yes, Unlock (${cost} 🪙)`;
+                btnAction.style.display = 'block';
+                btnAction.onclick = confirmUnlock;
+            } else {
+                modalEmoji.textContent = '🪙';
+                modalTitle.textContent = 'Not enough Coins!';
+                modalMessage.textContent = `This game requires ${cost} coins, but you only have ${currentCoins}. Play quizzes and other games to earn more!`;
+                btnAction.style.display = 'none';
+            }
+        }
+
+        function closeUnlockModal() {
+            document.getElementById('unlockModal').style.display = 'none';
+            gameToUnlock = null;
+        }
+
+        async function confirmUnlock() {
+            if (!gameToUnlock || !currentUser) return;
+
+            const cost = GAME_COSTS[gameToUnlock];
+            const currentCoins = window.eduplay_current_coins || 0;
+
+            if (currentCoins < cost) return; // double check
+
+            try {
+                const btnAction = document.getElementById('modalBtnAction');
+                btnAction.textContent = 'Unlocking...';
+                btnAction.disabled = true;
+
+                const client = initSupabase();
+                const newCoins = currentCoins - cost;
+
+                // Deduct from Supabase
+                const { error } = await client.from('users').update({ game_coins: newCoins }).eq('id', currentUser.id);
+
+                if (!error) {
+                    // Update Local State
+                    localStorage.setItem(`eduplay_unlocked_${gameToUnlock}_${currentUser.id}`, 'true');
+                    window.eduplay_current_coins = newCoins;
+                    document.getElementById('navCoins').textContent = newCoins;
+
+                    updateGameUI();
+
+                    // Success UI
+                    document.getElementById('modalEmoji').textContent = '🎉';
+                    document.getElementById('modalTitle').textContent = 'Unlocked!';
+                    document.getElementById('modalMessage').textContent = `Awesome! You can now play this game forever!`;
+                    btnAction.textContent = 'Play Now!';
+                    btnAction.disabled = false;
+                    btnAction.onclick = () => { window.location.href = `${gameToUnlock}.html`; };
+
+                    // Trigger confetti maybe
+                } else {
+                    alert("Error unlocking game: " + error.message);
+                    closeUnlockModal();
+                }
+            } catch (err) {
+                alert("An error occurred!");
+                closeUnlockModal();
+            }
+        }
+    </script>
+</body>
+
+</html>

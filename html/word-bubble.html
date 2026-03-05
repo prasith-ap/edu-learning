@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Word Bubble Pop | EduPlay Games</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800;900&family=Nunito:wght@700;800&display=swap"
+        rel="stylesheet">
+
+    <!-- Shared Styles -->
+    <link rel="stylesheet" href="../css/games.css">
+</head>
+
+<body>
+
+    <!-- Game Navbar -->
+    <nav class="game-nav">
+        <div class="nav-left">
+            <a href="dashboard.html" class="brand">🎓 EduPlay</a>
+        </div>
+        <div class="nav-center">
+            <div class="game-title">🫧 Word Bubble Pop</div>
+        </div>
+        <div class="nav-right nav-actions">
+            <button id="btnPause">⏸ Pause</button>
+            <button id="btnExit" onclick="window.location.href='dashboard.html'">✕ Exit</button>
+        </div>
+    </nav>
+
+    <!-- Game HUD -->
+    <div class="game-hud">
+        <div class="hud-left">
+            <div class="score-display">
+                <div class="hud-correct">✅ <span id="correctScore">0</span></div>
+                <div class="hud-wrong">❌ <span id="wrongScore">0</span></div>
+            </div>
+        </div>
+        <div class="hud-center">
+            <div class="timer-box" id="timerBox">
+                <svg class="timer-ring">
+                    <circle cx="30" cy="30" r="28"></circle>
+                </svg>
+                <div class="timer-display" id="timeValue">60</div>
+            </div>
+        </div>
+        <div class="hud-right" style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
+            <div class="level-badge" id="levelBadge">LEVEL 1</div>
+            <div class="combo-display" id="comboDisplay">🔥 3x Combo!</div>
+        </div>
+    </div>
+
+    <!-- Screen Flashes & Level UI -->
+    <div id="flashGreen" class="flash-overlay flash-green"></div>
+    <div id="flashRed" class="flash-overlay flash-red"></div>
+    <div id="levelUpText" class="level-up-overlay">LEVEL UP! 🚀</div>
+
+    <!-- Physics Canvas -->
+    <canvas id="gameCanvas"></canvas>
+
+    <!-- Start Screen Overlay -->
+    <div id="startScreen" class="overlay overlay-start active">
+        <div class="card">
+            <div class="large-emoji">🫧</div>
+            <h1 class="overlay-title title-word">Word Bubble Pop!</h1>
+            <p class="overlay-subtitle">Pop the correctly spelled bubbles!</p>
+
+            <div class="instructions">
+                <div class="instruction-item">👀 Read each word in the bubble carefully</div>
+                <div class="instruction-item">✅ Click bubbles with CORRECTLY spelled words</div>
+                <div class="instruction-item">❌ Avoid bubbles with spelling mistakes!</div>
+                <div class="instruction-item">⏱️ You have 60 seconds — go!</div>
+            </div>
+
+            <button id="btnStart" class="start-btn btn-word" style="margin-top: 20px;">🫧 Start Popping!</button>
+        </div>
+    </div>
+
+    <!-- Game Over Screen Overlay -->
+    <div id="gameOverScreen" class="overlay">
+        <div class="card">
+            <div id="gameOverEmoji" class="large-emoji">🎉</div>
+            <div id="highScoreBanner" class="high-score-banner" style="display: none;">🌟 New High Score! 🌟</div>
+            <h1 id="gameOverTitle" class="overlay-title title-word">Time's Up!</h1>
+
+            <div class="stats-grid">
+                <div class="stat-box">✅ Correct Pops: <span id="finalCorrect">0</span></div>
+                <div class="stat-box">❌ Wrong Pops: <span id="finalWrong">0</span></div>
+                <div class="stat-box">🏆 Best Combo: <span id="finalCombo">0</span>x</div>
+                <div class="stat-box" style="color: var(--accent-gold);">🪙 Coins Earned: <span id="finalCoins">0</span>
+                </div>
+                <div class="accuracy-container">
+                    <div class="accuracy-label">Accuracy: <span id="finalAccuracy">0</span>%</div>
+                    <div class="accuracy-bar-bg">
+                        <div class="accuracy-bar-fill" id="accuracyBar"></div>
+                    </div>
+                </div>
+            </div>
+
+            <button id="btnPlayAgain" class="start-btn btn-word" style="width: 100%;">🫧 Play Again</button>
+            <button id="btnBackDashboard" class="secondary-btn" onclick="window.location.href='dashboard.html'">🏠 Back
+                to Dashboard</button>
+        </div>
+    </div>
+
+    <!-- Pause Screen Overlay -->
+    <div id="pauseScreen" class="overlay">
+        <div class="card">
+            <div class="large-emoji">⏸️</div>
+            <h1 class="overlay-title">Game Paused</h1>
+            <button id="btnResume" class="start-btn btn-word" style="margin-top: 24px;">▶ Resume Game</button>
+        </div>
+    </div>
+
+    <!-- Supabase CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <!-- Local Scripts -->
+    <script src="../config.js"></script>
+    <script src="../js/word-bubble.js"></script>
+</body>
+
+</html>

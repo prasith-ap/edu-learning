@@ -154,6 +154,20 @@ async function loadUserData() {
       lPill.className = `level-badge ${level.class}`;
     }
 
+    // Fetch and display game coins
+    try {
+      const supabase = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
+      const userId = localStorage.getItem('eduplay_user_id');
+      if (userId) {
+        const { data: coinData } = await supabase
+          .from('users')
+          .select('game_coins')
+          .eq('id', userId)
+          .single();
+        const coinEl = document.getElementById('navCoins');
+        if (coinEl && coinData) coinEl.textContent = coinData.game_coins || 0;
+      }
+    } catch (e) { console.warn('Coin fetch failed:', e); }
   } catch (err) {
     console.error('❌ Error in loadUserData:', err);
   }
@@ -396,7 +410,7 @@ function initSubjectButtons() {
 function calculateDaysSinceLastLogin(stats) {
   const history = stats.history || [];
   if (history.length === 0) return 999;
-  
+
   const lastQuizDate = new Date(history[history.length - 1].date || history[history.length - 1].created_at);
   const today = new Date();
   const diffTime = Math.abs(today - lastQuizDate);
@@ -407,7 +421,7 @@ function calculateDaysSinceLastLogin(stats) {
 function calculateWeakSubjects(stats) {
   const modules = {};
   const history = stats.history || [];
-  
+
   history.forEach(q => {
     const mod = q.module || 'general';
     if (!modules[mod]) {
@@ -416,7 +430,7 @@ function calculateWeakSubjects(stats) {
     modules[mod].total += q.percentage || 0;
     modules[mod].count++;
   });
-  
+
   return Object.entries(modules)
     .map(([name, data]) => ({ name, avg: data.total / data.count }))
     .sort((a, b) => a.avg - b.avg)
@@ -427,7 +441,7 @@ function calculateWeakSubjects(stats) {
 function calculateStrongSubjects(stats) {
   const modules = {};
   const history = stats.history || [];
-  
+
   history.forEach(q => {
     const mod = q.module || 'general';
     if (!modules[mod]) {
@@ -436,7 +450,7 @@ function calculateStrongSubjects(stats) {
     modules[mod].total += q.percentage || 0;
     modules[mod].count++;
   });
-  
+
   return Object.entries(modules)
     .map(([name, data]) => ({ name, avg: data.total / data.count }))
     .sort((a, b) => b.avg - a.avg)

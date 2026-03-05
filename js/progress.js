@@ -26,6 +26,22 @@ async function loadProgressData() {
     const stats = user.stats || { totalPoints: 0, quizzesCompleted: 0, history: [] };
     const history = stats.history || [];
 
+    // Fetch and display game coins in header
+    try {
+      const supabase = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
+      const userId = localStorage.getItem('eduplay_user_id');
+      if (userId) {
+        const { data: coinData } = await supabase
+          .from('users')
+          .select('game_coins')
+          .eq('id', userId)
+          .single();
+        const coinEl = document.getElementById('navCoins');
+        if (coinEl && coinData) coinEl.textContent = coinData.game_coins || 0;
+        window.eduplay_current_coins = coinData?.game_coins || 0;
+      }
+    } catch (e) { console.warn('Coin fetch failed:', e); }
+
     // Top stats
     document.getElementById('totalPoints').textContent = stats.totalPoints || 0;
     document.getElementById('totalQuizzes').textContent = history.length || stats.quizzesCompleted || 0;

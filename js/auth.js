@@ -519,6 +519,9 @@ async function checkAuth() {
 
       SessionManager.set(user.id, user.email, user.user_metadata?.username || '');
 
+      // Update coins in nav if present
+      updateNavCoins(user.id);
+
       // If on public pages (but NOT auth pages like login/register) and logged in, redirect to dashboard
       if (publicPages.includes(currentPage) && !authPages.includes(currentPage)) {
 
@@ -537,6 +540,10 @@ async function checkAuth() {
           window.location.href = 'dashboard.html';
           return false;
         }
+
+        // Update coins in nav if present using localStorage user id
+        updateNavCoins(SessionManager.get());
+
         return true;
       }
 
@@ -571,6 +578,27 @@ async function checkAuth() {
       return false;
     }
     return true;
+  }
+}
+
+/**
+ * Update the coin display in the navbar
+ */
+async function updateNavCoins(userId) {
+  const coinEl = document.getElementById('navCoins');
+  if (!coinEl || !userId) return;
+
+  try {
+    const client = initSupabase();
+    if (!client) return;
+    const { data } = await client.from('users').select('game_coins').eq('id', userId).single();
+    if (data && data.game_coins !== undefined) {
+      coinEl.textContent = data.game_coins;
+      // Expose globally for quick access in games.html
+      window.eduplay_current_coins = data.game_coins;
+    }
+  } catch (error) {
+    console.warn("Failed to fetch nav coins:", error);
   }
 }
 

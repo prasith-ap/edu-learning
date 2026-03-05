@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Math Blaster | EduPlay Games</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800;900&family=Nunito:wght@700;800&display=swap"
+        rel="stylesheet">
+
+    <!-- Shared Styles -->
+    <link rel="stylesheet" href="../css/games.css">
+</head>
+
+<body>
+
+    <!-- Game Navbar -->
+    <nav class="game-nav">
+        <div class="nav-left">
+            <a href="dashboard.html" class="brand">🎓 EduPlay</a>
+        </div>
+        <div class="nav-center">
+            <div class="game-title">🚀 Math Blaster</div>
+        </div>
+        <div class="nav-right nav-actions">
+            <button id="btnPause">⏸ Pause</button>
+            <button id="btnExit" onclick="window.location.href='dashboard.html'">✕ Exit</button>
+        </div>
+    </nav>
+
+    <!-- Game HUD -->
+    <div class="game-hud">
+        <div class="hud-left">
+            <div class="lives-display" id="livesDisplay">❤️❤️❤️</div>
+        </div>
+        <div class="hud-center">
+            <div class="score-display">SCORE: <span id="scoreValue">0</span></div>
+            <div class="level-badge" id="levelBadge">LEVEL 1</div>
+        </div>
+        <div class="hud-right">
+            <div class="equation-display" id="equationDisplay">Ready?</div>
+        </div>
+    </div>
+
+    <!-- Screen Flashes -->
+    <div id="flashGreen" class="flash-overlay flash-green"></div>
+    <div id="flashRed" class="flash-overlay flash-red"></div>
+
+    <!-- Level Up Popup -->
+    <div id="levelUpText" class="level-up-text">LEVEL UP! 🚀</div>
+
+    <!-- Physics Canvas -->
+    <canvas id="gameCanvas"></canvas>
+
+    <!-- Start Screen Overlay -->
+    <div id="startScreen" class="overlay overlay-start active">
+        <div class="card">
+            <div class="large-emoji">🚀</div>
+            <h1 class="overlay-title title-math">Math Blaster!</h1>
+            <p class="overlay-subtitle">Catch the right answer before it lands!</p>
+
+            <div class="instructions">
+                <div class="instruction-item">👁️ Read the equation at the top</div>
+                <div class="instruction-item">🖱️ Click the falling number with the correct answer</div>
+                <div class="instruction-item">❤️ You have 3 lives — don't let wrong numbers land!</div>
+            </div>
+
+            <div class="coins-preview">💡 Earn 🪙 coins for every correct catch!</div>
+
+            <button id="btnStart" class="start-btn btn-math">🚀 Launch!</button>
+        </div>
+    </div>
+
+    <!-- Game Over Screen Overlay -->
+    <div id="gameOverScreen" class="overlay">
+        <div class="card">
+            <div id="gameOverEmoji" class="large-emoji">🦉</div>
+            <div id="highScoreBanner" class="high-score-banner" style="display: none;">🌟 New High Score! 🌟</div>
+            <h1 id="gameOverTitle" class="overlay-title title-math">Game Over</h1>
+
+            <div class="stats-grid">
+                <div class="stat-box">📊 Final Score: <span id="finalScore">0</span></div>
+                <div class="stat-box">🏆 Level Reached: <span id="finalLevel">1</span></div>
+                <div class="stat-box">✅ Correct Catches: <span id="finalCatches">0</span></div>
+                <div class="stat-box" style="color: var(--accent-gold);">🪙 Coins Earned: <span id="finalCoins">0</span>
+                </div>
+            </div>
+
+            <button id="btnPlayAgain" class="start-btn btn-math" style="width: 100%;">🔄 Play Again</button>
+            <button id="btnBackDashboard" class="secondary-btn" onclick="window.location.href='dashboard.html'">🏠 Back
+                to Dashboard</button>
+        </div>
+    </div>
+
+    <!-- Pause Screen Overlay -->
+    <div id="pauseScreen" class="overlay">
+        <div class="card">
+            <div class="large-emoji">⏸️</div>
+            <h1 class="overlay-title">Game Paused</h1>
+            <button id="btnResume" class="start-btn btn-math" style="margin-top: 24px;">▶ Resume Game</button>
+        </div>
+    </div>
+
+    <!-- Supabase CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <!-- Local Scripts -->
+    <script src="../config.js"></script>
+    <script src="../js/math-blaster.js"></script>
+</body>
+
+</html>

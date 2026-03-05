@@ -1,0 +1,172 @@
+/* GAMES HUB CSS */
+/* Extends dashboard and theme styles */
+
+.games-hero {
+    text-align: center;
+    margin-top: 40px;
+    margin-bottom: 50px;
+}
+
+.games-hero h1 {
+    font-size: 3.5rem;
+    font-family: 'Fredoka One', cursive;
+    color: white;
+    text-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    margin-bottom: 10px;
+}
+
+.games-hero p {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 1.2rem;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.games-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 30px;
+    padding-bottom: 60px;
+}
+
+.game-card {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 24px;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+.game-card:hover {
+    transform: translateY(-10px) scale(1.02);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    border-color: rgba(255, 255, 255, 0.4);
+}
+
+.game-visual-zone {
+    height: 180px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.math-visual {
+    background: linear-gradient(135deg, #7C3AED, #4F46E5);
+}
+
+.word-visual {
+    background: linear-gradient(135deg, #EC4899, #F43F5E);
+}
+
+.game-emoji {
+    font-size: 5rem;
+    filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.3));
+    z-index: 2;
+    transition: transform 0.5s ease;
+}
+
+.game-card:hover .game-emoji {
+    transform: scale(1.2) rotate(10deg);
+}
+
+.game-info-zone {
+    padding: 25px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: white;
+}
+
+.game-info-zone h3 {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.5rem;
+    color: #1F2937;
+    margin-bottom: 8px;
+}
+
+.game-info-zone p {
+    color: #6B7280;
+    font-size: 0.95rem;
+    margin-bottom: 20px;
+    flex: 1;
+}
+
+.play-button {
+    width: 100%;
+    padding: 14px;
+    border-radius: 12px;
+    border: none;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 1.1rem;
+    color: white;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.math-btn {
+    background: linear-gradient(to right, #7C3AED, #4F46E5);
+    box-shadow: 0 4px 15px rgba(124, 58, 237, 0.4);
+}
+
+.word-btn {
+    background: linear-gradient(to right, #EC4899, #F43F5E);
+    box-shadow: 0 4px 15px rgba(236, 72, 153, 0.4);
+}
+
+.play-button:hover {
+    transform: translateY(-2px);
+}
+
+.play-button:active {
+    transform: translateY(1px);
+}
+
+/* Animations in visual zones */
+.game-visual-zone::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.2) 0%, transparent 60%);
+    animation: rotate 10s linear infinite;
+    z-index: 1;
+}
+
+@keyframes rotate {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.coin-reward-badge {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(4px);
+    color: #FCD34D;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: bold;
+    z-index: 3;
+    border: 1px solid rgba(252, 211, 77, 0.3);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
