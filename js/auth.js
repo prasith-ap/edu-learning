@@ -499,6 +499,7 @@ if (document.readyState === 'loading') {
  */
 async function checkAuth() {
   const protectedPages = ['dashboard.html', 'progress.html', 'quiz.html', 'courses.html', 'profile.html'];
+  const authPages = ['login.html', 'register.html'];  // Don't auto-redirect from these pages
   const publicPages = ['login.html', 'register.html', 'index.html'];
   const currentPage = window.location.pathname.split('/').pop();
 
@@ -518,8 +519,8 @@ async function checkAuth() {
 
       SessionManager.set(user.id, user.email, user.user_metadata?.username || '');
 
-      // If on public/auth pages and logged in, redirect to dashboard
-      if (publicPages.includes(currentPage)) {
+      // If on public pages (but NOT auth pages like login/register) and logged in, redirect to dashboard
+      if (publicPages.includes(currentPage) && !authPages.includes(currentPage)) {
 
         window.location.href = 'dashboard.html';
         return false;
@@ -531,7 +532,8 @@ async function checkAuth() {
       if (SessionManager.isValid()) {
 
         // Session is valid, user should be on protected pages
-        if (publicPages.includes(currentPage)) {
+        // But don't auto-redirect from login/register pages
+        if (publicPages.includes(currentPage) && !authPages.includes(currentPage)) {
           window.location.href = 'dashboard.html';
           return false;
         }

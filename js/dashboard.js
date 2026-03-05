@@ -157,6 +157,29 @@ async function loadUserData() {
   } catch (err) {
     console.error('❌ Error in loadUserData:', err);
   }
+
+  // ═══════════════════════════════════════════════════════════
+  // MASCOT AI COMPANION - WELCOME MESSAGE
+  // ═══════════════════════════════════════════════════════════
+  setTimeout(async () => {
+    const weakSubjects = calculateWeakSubjects(stats);
+    const strongSubjects = calculateStrongSubjects(stats);
+    const daysSinceLastLogin = calculateDaysSinceLastLogin(stats);
+
+    if (window.eduplay && window.eduplay.mascot && currentUser) {
+      window.eduplay.mascot.speak({
+        trigger: 'dashboard_load',
+        username: currentUser.username || 'Friend',
+        streak: calculateStreak(stats.history) || 0,
+        totalPoints: stats.totalPoints || 0,
+        daysSinceLastLogin: daysSinceLastLogin,
+        weakSubjects: weakSubjects,
+        strongSubjects: strongSubjects,
+        quizzesCompleted: stats.quizzesCompleted || 0,
+        currentLevel: calculateLevel(stats.totalPoints || 0).label
+      });
+    }
+  }, 1000); // Delay to let page settle
 }
 
 function renderStats(stats) {
@@ -366,6 +389,59 @@ function initSubjectButtons() {
     const btn = gkCard.querySelector('.start-btn');
     if (btn) btn.addEventListener('click', () => window.startQuiz('general-knowledge'));
   }
+}
+
+/* ─── HELPER FUNCTIONS FOR MASCOT SYSTEM ─── */
+
+function calculateDaysSinceLastLogin(stats) {
+  const history = stats.history || [];
+  if (history.length === 0) return 999;
+  
+  const lastQuizDate = new Date(history[history.length - 1].date || history[history.length - 1].created_at);
+  const today = new Date();
+  const diffTime = Math.abs(today - lastQuizDate);
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+  return diffDays;
+}
+
+function calculateWeakSubjects(stats) {
+  const modules = {};
+  const history = stats.history || [];
+  
+  history.forEach(q => {
+    const mod = q.module || 'general';
+    if (!modules[mod]) {
+      modules[mod] = { total: 0, count: 0 };
+    }
+    modules[mod].total += q.percentage || 0;
+    modules[mod].count++;
+  });
+  
+  return Object.entries(modules)
+    .map(([name, data]) => ({ name, avg: data.total / data.count }))
+    .sort((a, b) => a.avg - b.avg)
+    .slice(0, 2)
+    .map(s => s.name);
+}
+
+function calculateStrongSubjects(stats) {
+  const modules = {};
+  const history = stats.history || [];
+  
+  history.forEach(q => {
+    const mod = q.module || 'general';
+    if (!modules[mod]) {
+      modules[mod] = { total: 0, count: 0 };
+    }
+    modules[mod].total += q.percentage || 0;
+    modules[mod].count++;
+  });
+  
+  return Object.entries(modules)
+    .map(([name, data]) => ({ name, avg: data.total / data.count }))
+    .sort((a, b) => b.avg - a.avg)
+    .slice(0, 2)
+    .map(s => s.name);
 }
 
 // Call button init safely

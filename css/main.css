@@ -670,6 +670,7 @@ a:hover {
   font-size: 3rem;
   opacity: 0.18;
   animation: float 20s infinite linear;
+  -webkit-user-select: none;
   user-select: none;
   filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
 }
@@ -886,4 +887,719 @@ a:hover {
   background: #f5f4ff;
   border-color: #c5c3ff;
   color: #4a48aa;
+}
+
+/* ============================================
+   LIVING MASCOT AI COMPANION SYSTEM CSS
+   ============================================ */
+
+/* Mascot Container */
+.mascot-container {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  z-index: 500;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
+  pointer-events: none;
+}
+
+.mascot-container * {
+  pointer-events: auto;
+}
+
+/* Mascot Emoji */
+.mascot-emoji {
+  font-size: 64px;
+  cursor: pointer;
+  filter: drop-shadow(0 8px 20px rgba(0, 0, 0, 0.25));
+  animation: mascotBob 3s ease-in-out infinite;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.mascot-emoji:hover {
+  transform: scale(1.15);
+}
+
+.mascot-emoji.animation-active {
+  animation: none;
+}
+
+.mascot-emoji.typing-animation {
+  animation: mascotBobFast 0.5s ease-in-out infinite;
+}
+
+/* Mascot Speech Bubble */
+.mascot-bubble {
+  background: white;
+  border-radius: 20px 20px 4px 20px;
+  padding: 16px 20px;
+  max-width: 280px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+  border: 2px solid rgba(124, 58, 237, 0.2);
+  position: relative;
+  opacity: 0;
+  transform: scale(0.8) translateY(10px);
+  transform-origin: bottom right;
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  pointer-events: none;
+}
+
+.mascot-bubble.visible {
+  opacity: 1;
+  transform: scale(1) translateY(0);
+  pointer-events: all;
+}
+
+/* Bubble Text */
+.bubble-text {
+  font-family: Nunito, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #2d1b69;
+  line-height: 1.5;
+  min-height: 20px;
+  word-wrap: break-word;
+}
+
+/* Bubble Close Button */
+.bubble-close {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  font-size: 1.5rem;
+  color: #8b7bab;
+  cursor: pointer;
+  font-weight: 900;
+  line-height: 1;
+  border: none;
+  background: none;
+  padding: 4px 8px;
+  transition: color 0.2s ease;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.bubble-close:hover {
+  color: #7c3aed;
+}
+
+/* Bubble Tail (::after pseudo-element) */
+.mascot-bubble::after {
+  position: absolute;
+  bottom: -10px;
+  right: 20px;
+  border: 10px solid transparent;
+  border-top-color: white;
+  border-bottom: 0;
+  content: '';
+}
+
+/* Pulsing Dots Loading Animation */
+.pulse-dots {
+  display: inline-block;
+  animation: pulse-dot 1.4s infinite;
+  opacity: 0.6;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.pulse-dots:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.pulse-dots:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes pulse-dot {
+  0%, 60%, 100% {
+    opacity: 0.3;
+  }
+  30% {
+    opacity: 1;
+  }
+}
+
+/* ============================================
+   MASCOT ANIMATIONS
+   ============================================ */
+
+/* Normal bobbing animation */
+@keyframes mascotBob {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-15px);
+  }
+}
+
+/* Fast bobbing while typing */
+@keyframes mascotBobFast {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+/* Jump animation (quiz_complete + high score) */
+@keyframes mascot-jump {
+  0% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-30px) scale(1.1);
+  }
+  100% {
+    transform: translateY(0) scale(1);
+  }
+}
+
+.mascot-emoji.mascot-jump {
+  animation: mascot-jump 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+}
+
+/* Gentle shake animation (quiz_complete + low score) */
+@keyframes mascot-shake {
+  0%, 100% {
+    transform: translateX(0) rotate(0deg);
+  }
+  25% {
+    transform: translateX(-8px) rotate(-3deg);
+  }
+  50% {
+    transform: translateX(8px) rotate(3deg);
+  }
+  75% {
+    transform: translateX(-8px) rotate(-3deg);
+  }
+}
+
+.mascot-emoji.mascot-shake {
+  animation: mascot-shake 0.6s ease-in-out !important;
+}
+
+/* Spin animation (level_up) */
+@keyframes mascot-spin {
+  0% {
+    transform: rotate(0deg) scale(1);
+  }
+  100% {
+    transform: rotate(360deg) scale(1.15);
+  }
+}
+
+.mascot-emoji.mascot-spin {
+  animation: mascot-spin 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55) !important;
+}
+
+/* Wave animation (long_absence) */
+@keyframes mascot-wave {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(14deg);
+  }
+  75% {
+    transform: rotate(-14deg);
+  }
+}
+
+.mascot-emoji.mascot-wave {
+  animation: mascot-wave 0.6s ease-in-out !important;
+  transform-origin: 70% 70%;
+}
+
+/* Wiggle animation (mascot_click) */
+@keyframes mascot-wiggle {
+  0%, 100% {
+    transform: rotate(0deg) skewX(0deg);
+  }
+  25% {
+    transform: rotate(-5deg) skewX(-2deg);
+  }
+  50% {
+    transform: rotate(5deg) skewX(2deg);
+  }
+  75% {
+    transform: rotate(-5deg) skewX(-2deg);
+  }
+}
+
+.mascot-emoji.mascot-wiggle {
+  animation: mascot-wiggle 0.5s ease-in-out !important;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media (max-width: 768px) {
+  .mascot-container {
+    bottom: 20px;
+    right: 20px;
+  }
+
+  .mascot-emoji {
+    font-size: 48px;
+  }
+
+  .mascot-bubble {
+    max-width: 240px;
+  }
+
+  .bubble-text {
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .mascot-container {
+    bottom: 15px;
+    right: 15px;
+  }
+
+  .mascot-emoji {
+    font-size: 40px;
+  }
+
+  .mascot-bubble {
+    max-width: 200px;
+    padding: 12px 16px;
+  }
+
+  .bubble-text {
+    font-size: 0.85rem;
+  }
+
+  .bubble-close {
+    top: 4px;
+    right: 6px;
+    font-size: 1.25rem;
+  }
+}
+
+/* ============================================
+   INTERACTIVE CHAT WINDOW CSS
+   Colorful, Fun, & Childish Design
+   ============================================ */
+
+.mascot-chat-window {
+  position: fixed;
+  bottom: 120px;
+  right: 30px;
+  width: 380px;
+  max-height: 600px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+  border-radius: 30px;
+  box-shadow: 0 20px 60px rgba(102, 126, 234, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  border: 3px solid #fff9e6;
+  z-index: 2000;
+  display: flex;
+  flex-direction: column;
+  animation: chatPopIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  font-family: 'Nunito', sans-serif;
+}
+
+.mascot-chat-window.closing {
+  animation: chatPopOut 0.3s ease-out forwards;
+}
+
+@keyframes chatPopIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.3) translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes chatPopOut {
+  0% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.3) translateY(30px);
+  }
+}
+
+/* Chat Container */
+.chat-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Chat Header */
+.chat-header {
+  background: linear-gradient(135deg, #ff6b9d 0%, #c44569 100%);
+  padding: 18px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 3px solid #fff9e6;
+  box-shadow: 0 4px 15px rgba(196, 69, 105, 0.3);
+}
+
+.chat-header-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.chat-mascot-emoji {
+  font-size: 42px;
+  animation: bounce 2s ease-in-out infinite;
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+.chat-header-text h3 {
+  margin: 0;
+  font-size: 1.3rem;
+  font-weight: 900;
+  color: #fff;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.chat-header-text p {
+  margin: 4px 0 0 0;
+  font-size: 0.75rem;
+  color: #fff9e6;
+  font-weight: 700;
+}
+
+.chat-status {
+  display: inline-block;
+  background: rgba(255, 255, 255, 0.3);
+  padding: 2px 8px;
+  border-radius: 12px;
+}
+
+.chat-close {
+  background: rgba(255, 255, 255, 0.25);
+  border: 2px solid white;
+  color: white;
+  font-size: 1.5rem;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  line-height: 1;
+}
+
+.chat-close:hover {
+  background: rgba(255, 255, 255, 0.4);
+  transform: scale(1.1) rotate(90deg);
+}
+
+/* Chat Messages Area */
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  background: linear-gradient(180deg, #f8f9ff 0%, #fff0f9 100%);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.chat-messages::-webkit-scrollbar {
+  width: 6px;
+}
+
+.chat-messages::-webkit-scrollbar-track {
+  background: rgba(102, 126, 234, 0.1);
+  border-radius: 10px;
+}
+
+.chat-messages::-webkit-scrollbar-thumb {
+  background: rgba(102, 126, 234, 0.4);
+  border-radius: 10px;
+}
+
+.chat-messages::-webkit-scrollbar-thumb:hover {
+  background: rgba(102, 126, 234, 0.6);
+}
+
+/* Chat Messages */
+.chat-message {
+  display: flex;
+  animation: messageSlide 0.4s ease-out;
+}
+
+@keyframes messageSlide {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.ollie-message {
+  justify-content: flex-start;
+}
+
+.user-message {
+  justify-content: flex-end;
+}
+
+/* Message Bubbles */
+.message-bubble {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  max-width: 85%;
+  animation: bubbleBounce 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes bubbleBounce {
+  0% {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.ollie-bubble {
+  flex-direction: row;
+}
+
+.user-bubble {
+  flex-direction: row-reverse;
+}
+
+.bubble-emoji {
+  font-size: 1.8rem;
+  flex-shrink: 0;
+}
+
+.bubble-text {
+  background: white;
+  border-radius: 20px;
+  padding: 12px 16px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1.4;
+  word-wrap: break-word;
+  color: #2d1b69;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
+.ollie-bubble .bubble-text {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.user-bubble .bubble-text {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  color: white;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+/* Input Area */
+.chat-input-container {
+  padding: 14px;
+  background: white;
+  border-top: 3px dashed rgba(102, 126, 234, 0.3);
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.chat-input {
+  flex: 1;
+  border: 2px solid #667eea;
+  border-radius: 25px;
+  padding: 10px 16px;
+  font-size: 0.9rem;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 600;
+  color: #2d1b69;
+  background: linear-gradient(135deg, #f0f4ff 0%, #fff0f9 100%);
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.chat-input:focus {
+  border-color: #764ba2;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+  transform: scale(1.02);
+}
+
+.chat-input::placeholder {
+  color: #c5a3d4;
+}
+
+.chat-send-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  font-size: 0.8rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.chat-send-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+}
+
+.chat-send-btn:active {
+  transform: scale(0.95);
+}
+
+.send-emoji {
+  font-size: 1.2rem;
+  animation: sendFly 0.6s ease-in-out infinite;
+}
+
+@keyframes sendFly {
+  0%, 100% {
+    transform: translateX(0) translateY(0);
+  }
+  50% {
+    transform: translateX(8px) translateY(-8px);
+  }
+}
+
+/* Responsive - Tablet */
+@media (max-width: 768px) {
+  .mascot-chat-window {
+    width: 320px;
+    bottom: 110px;
+    right: 20px;
+    max-height: 500px;
+  }
+
+  .chat-header-text h3 {
+    font-size: 1.1rem;
+  }
+
+  .message-bubble {
+    max-width: 90%;
+  }
+
+  .bubble-text {
+    padding: 10px 14px;
+    font-size: 0.9rem;
+  }
+}
+
+/* Responsive - Mobile */
+@media (max-width: 480px) {
+  .mascot-chat-window {
+    width: calc(100vw - 30px);
+    max-width: 300px;
+    bottom: 100px;
+    right: 15px;
+    height: 70vh;
+    max-height: 450px;
+    border-radius: 25px;
+  }
+
+  .chat-header {
+    padding: 14px 16px;
+  }
+
+  .chat-mascot-emoji {
+    font-size: 36px;
+  }
+
+  .chat-header-text h3 {
+    font-size: 1rem;
+  }
+
+  .chat-header-text p {
+    font-size: 0.7rem;
+  }
+
+  .chat-close {
+    width: 36px;
+    height: 36px;
+    font-size: 1.3rem;
+  }
+
+  .chat-messages {
+    padding: 12px;
+    gap: 10px;
+  }
+
+  .message-bubble {
+    max-width: 95%;
+  }
+
+  .bubble-emoji {
+    font-size: 1.5rem;
+  }
+
+  .bubble-text {
+    padding: 8px 12px;
+    font-size: 0.85rem;
+    border-radius: 16px;
+  }
+
+  .chat-input {
+    font-size: 0.85rem;
+    padding: 8px 14px;
+  }
+
+  .chat-send-btn {
+    width: 40px;
+    height: 40px;
+    font-size: 0.7rem;
+  }
+
+  .send-emoji {
+    font-size: 1rem;
+  }
+
+  .chat-input-container {
+    padding: 10px 12px;
+    gap: 6px;
+  }
 }

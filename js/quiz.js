@@ -751,6 +751,28 @@ async function showResults() {
 
   // Save to DB
   saveDataToSupabase(percentage);
+
+  // ═══════════════════════════════════════════════════════════
+  // MASCOT AI COMPANION - POST-QUIZ FEEDBACK
+  // ═══════════════════════════════════════════════════════════
+  setTimeout(async () => {
+    if (window.eduplay && window.eduplay.mascot) {
+      const username = localStorage.getItem('eduplay_username') || 'Friend';
+      const weakSubjects = calculateQuizWeakSubjects(currentModule) || [];
+      const strongSubjects = calculateQuizStrongSubjects(currentModule) || [];
+      
+      window.eduplay.mascot.speak({
+        trigger: 'quiz_complete',
+        username: username,
+        score: score,
+        percentage: percentage,
+        module: currentModule,
+        streak: streak,
+        weakSubjects: weakSubjects,
+        strongSubjects: strongSubjects
+      });
+    }
+  }, 500); // Brief delay for UI to settle
 }
 
 async function saveDataToSupabase(percentage) {
@@ -959,4 +981,18 @@ function initCosmicCanvas(module) {
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
   });
+}
+
+/* ─── HELPER FUNCTIONS FOR MASCOT SYSTEM ─── */
+
+function calculateQuizWeakSubjects(currentModule) {
+  // For now, return empty or the current module as weak if score is low
+  // In a real app, you'd analyze quiz history
+  return [];
+}
+
+function calculateQuizStrongSubjects(currentModule) {
+  // For now, return empty or the current module as strong if score is high
+  // In a real app, you'd analyze quiz history
+  return [];
 }
