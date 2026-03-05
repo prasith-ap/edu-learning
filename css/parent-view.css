@@ -476,18 +476,18 @@ body.pv-dimmed > *:not(.pv-overlay):not(.pin-overlay) {
   font-style: italic;
 }
 
-/* ── Nova Progress in Parent View ── */
-.pv-nova-grid {
+/* ── Stella Progress in Parent View ── */
+.pv-stella-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 24px;
   align-items: start;
 }
 @media (max-width: 600px) {
-  .pv-nova-grid { grid-template-columns: 1fr; }
+  .pv-stella-grid { grid-template-columns: 1fr; }
 }
 
-.pv-nova-level-badge {
+.pv-stella-level-badge {
   background: linear-gradient(135deg, #7C3AED, #EC4899);
   border-radius: 16px;
   padding: 20px;
@@ -496,7 +496,7 @@ body.pv-dimmed > *:not(.pv-overlay):not(.pin-overlay) {
   margin-bottom: 12px;
 }
 
-.pv-nova-level-num {
+.pv-stella-level-num {
   font-family: 'Baloo 2', cursive;
   font-size: 80px;
   font-weight: 900;
@@ -504,13 +504,13 @@ body.pv-dimmed > *:not(.pv-overlay):not(.pin-overlay) {
   display: block;
 }
 
-.pv-nova-level-name {
+.pv-stella-level-name {
   font-family: 'Nunito', sans-serif;
   font-size: 1rem;
   font-weight: 800;
 }
 
-.pv-nova-meta {
+.pv-stella-meta {
   font-family: 'Nunito', sans-serif;
   font-size: 0.85rem;
   color: #6B7280;
@@ -544,14 +544,14 @@ body.pv-dimmed > *:not(.pv-overlay):not(.pin-overlay) {
   color: #7C3AED;
 }
 
-.pv-nova-total-words {
+.pv-stella-total-words {
   font-family: 'Nunito', sans-serif;
   font-size: 0.85rem;
   color: #6B7280;
   margin-top: 10px;
 }
 
-.pv-nova-empty {
+.pv-stella-empty {
   text-align: center;
   padding: 24px;
   background: #F9FAFB;
@@ -560,7 +560,7 @@ body.pv-dimmed > *:not(.pv-overlay):not(.pin-overlay) {
   color: #6B7280;
 }
 
-.pv-nova-learn-btn {
+.pv-stella-learn-btn {
   background: linear-gradient(135deg, #7C3AED, #EC4899);
   color: white;
   border: none;
@@ -573,7 +573,7 @@ body.pv-dimmed > *:not(.pv-overlay):not(.pin-overlay) {
   transition: transform 0.2s;
 }
 
-.pv-nova-learn-btn:hover { transform: translateY(-2px); }
+.pv-stella-learn-btn:hover { transform: translateY(-2px); }
 
 /* ── Badge Timeline ── */
 .pv-badge-timeline {
@@ -756,8 +756,8 @@ body.pv-dimmed > *:not(.pv-overlay):not(.pin-overlay) {
   margin-top: 14px;
 }
 
-/* ── Nova Progress Bar ── */
-.pv-nova-prog-label {
+/* ── Stella Progress Bar ── */
+.pv-stella-prog-label {
   font-family: 'Nunito', sans-serif;
   font-size: 0.8rem;
   color: #6B7280;
@@ -765,14 +765,14 @@ body.pv-dimmed > *:not(.pv-overlay):not(.pin-overlay) {
   margin-bottom: 4px;
 }
 
-.pv-nova-prog-bar {
+.pv-stella-prog-bar {
   height: 8px;
   background: #E5E7EB;
   border-radius: 50px;
   overflow: hidden;
 }
 
-.pv-nova-prog-fill {
+.pv-stella-prog-fill {
   height: 100%;
   background: linear-gradient(90deg, #7C3AED, #EC4899);
   border-radius: 50px;

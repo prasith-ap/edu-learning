@@ -1,14 +1,14 @@
 /* =========================================
-   NOVA AI — nova.css
+   STELLA AI — stella.css
    EduPlay Education Platform
    ========================================= */
 
 /* Custom cursor */
-.nova-page * {
+.stella-page * {
     cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Ctext y='20' font-size='20'%3E✨%3C/text%3E%3C/svg%3E"), auto;
 }
 
-.nova-page {
+.stella-page {
     min-height: 100vh;
     background: #0F0A1E;
     color: white;
@@ -18,7 +18,7 @@
 }
 
 /* ── Navbar ── */
-.nova-navbar {
+.stella-navbar {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -32,7 +32,7 @@
     z-index: 100;
 }
 
-.nova-brand {
+.stella-brand {
     font-family: 'Baloo 2', cursive;
     font-size: 1.1rem;
     font-weight: 900;
@@ -42,14 +42,14 @@
     background-clip: text;
 }
 
-.nova-nav-title {
+.stella-nav-title {
     font-family: 'Nunito', sans-serif;
     font-size: 0.95rem;
     font-weight: 800;
     color: rgba(255, 255, 255, 0.8);
 }
 
-.nova-back-btn {
+.stella-back-btn {
     background: rgba(255, 255, 255, 0.1);
     border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 50px;
@@ -62,13 +62,13 @@
     transition: all 0.2s;
 }
 
-.nova-back-btn:hover {
+.stella-back-btn:hover {
     background: rgba(255, 255, 255, 0.18);
     transform: translateX(-2px);
 }
 
 /* ── Layout ── */
-.nova-layout {
+.stella-layout {
     display: grid;
     grid-template-columns: 300px 1fr;
     gap: 24px;
@@ -81,32 +81,32 @@
 }
 
 @media (max-width: 768px) {
-    .nova-layout {
+    .stella-layout {
         grid-template-columns: 1fr;
     }
 
-    .nova-left-panel {
+    .stella-left-panel {
         order: 2;
     }
 
-    .nova-right-panel {
+    .stella-right-panel {
         order: 1;
         min-height: 60vh;
     }
 }
 
 /* ── Left Panel ── */
-.nova-left-panel {
+.stella-left-panel {
     display: flex;
     flex-direction: column;
     gap: 16px;
     overflow-y: auto;
 }
 
-.nova-character-card,
-.nova-level-card,
-.nova-stats-card,
-.nova-focus-card {
+.stella-character-card,
+.stella-level-card,
+.stella-stats-card,
+.stella-focus-card {
     background: rgba(255, 255, 255, 0.05);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
@@ -116,19 +116,19 @@
 }
 
 /* ── Character ── */
-.nova-character-card {
+.stella-character-card {
     text-align: center;
     padding: 24px;
 }
 
-.nova-char {
+.stella-char {
     font-size: 64px;
     display: block;
     margin-bottom: 8px;
     line-height: 1;
 }
 
-.nova-char-name {
+.stella-char-name {
     font-family: 'Baloo 2', cursive;
     font-size: 1.5rem;
     font-weight: 900;
@@ -138,7 +138,7 @@
     background-clip: text;
 }
 
-.nova-char-tagline {
+.stella-char-tagline {
     font-family: 'Nunito', sans-serif;
     font-size: 0.85rem;
     color: rgba(255, 255, 255, 0.6);
@@ -146,11 +146,11 @@
 }
 
 /* ── Level Card ── */
-.nova-level-card {
+.stella-level-card {
     text-align: center;
 }
 
-.nova-level-label {
+.stella-level-label {
     font-family: 'Nunito', sans-serif;
     font-size: 0.8rem;
     font-weight: 700;
@@ -160,7 +160,7 @@
     margin-bottom: 8px;
 }
 
-.nova-level-badge {
+.stella-level-badge {
     border-radius: 16px;
     padding: 14px;
     margin: 10px 0;
@@ -170,23 +170,23 @@
     gap: 10px;
 }
 
-.nova-level-1 {
+.stella-level-1 {
     background: linear-gradient(135deg, #16A34A, #4ADE80);
 }
 
-.nova-level-2 {
+.stella-level-2 {
     background: linear-gradient(135deg, #1D4ED8, #60A5FA);
 }
 
-.nova-level-3 {
+.stella-level-3 {
     background: linear-gradient(135deg, #7C3AED, #A78BFA);
 }
 
-.nova-level-4 {
+.stella-level-4 {
     background: linear-gradient(135deg, #B45309, #FCD34D);
 }
 
-.nova-level-5 {
+.stella-level-5 {
     background: linear-gradient(135deg, #7C3AED, #EC4899, #F59E0B, #10B981, #3B82F6);
     background-size: 300%;
     animation: rainbow 3s linear infinite;
@@ -206,25 +206,25 @@
     }
 }
 
-.nova-level-emoji {
+.stella-level-emoji {
     font-size: 32px;
 }
 
-.nova-level-name {
+.stella-level-name {
     font-family: 'Nunito', sans-serif;
     font-size: 1rem;
     font-weight: 800;
     color: white;
 }
 
-.nova-level-num {
+.stella-level-num {
     font-family: 'Baloo 2', cursive;
     font-size: 1.4rem;
     font-weight: 900;
     color: white;
 }
 
-.nova-xp-bar-container {
+.stella-xp-bar-container {
     height: 8px;
     background: rgba(255, 255, 255, 0.1);
     border-radius: 50px;
@@ -232,7 +232,7 @@
     margin-top: 4px;
 }
 
-.nova-xp-bar {
+.stella-xp-bar {
     height: 100%;
     background: linear-gradient(90deg, #7C3AED, #EC4899);
     border-radius: 50px;
@@ -240,7 +240,7 @@
     transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.nova-xp-label {
+.stella-xp-label {
     font-family: 'Nunito', sans-serif;
     font-size: 0.75rem;
     color: rgba(255, 255, 255, 0.5);
@@ -248,25 +248,25 @@
 }
 
 /* ── Stats Card ── */
-.nova-stats-card {
+.stella-stats-card {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     text-align: center;
     gap: 8px;
 }
 
-.nova-stat {
+.stella-stat {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 2px;
 }
 
-.nova-stat-icon {
+.stella-stat-icon {
     font-size: 1.2rem;
 }
 
-.nova-stat-value {
+.stella-stat-value {
     font-family: 'Baloo 2', cursive;
     font-size: 1.4rem;
     font-weight: 900;
@@ -274,14 +274,14 @@
     line-height: 1;
 }
 
-.nova-stat-label {
+.stella-stat-label {
     font-family: 'Nunito', sans-serif;
     font-size: 0.7rem;
     color: rgba(255, 255, 255, 0.5);
 }
 
 /* ── Focus Card ── */
-.nova-focus-title {
+.stella-focus-title {
     font-family: 'Nunito', sans-serif;
     font-size: 0.9rem;
     font-weight: 800;
@@ -289,7 +289,7 @@
     margin-bottom: 10px;
 }
 
-.nova-focus-item {
+.stella-focus-item {
     font-family: 'Nunito', sans-serif;
     font-size: 0.82rem;
     color: rgba(255, 255, 255, 0.6);
@@ -298,7 +298,7 @@
 }
 
 /* ── Right Panel (Chat) ── */
-.nova-right-panel {
+.stella-right-panel {
     display: flex;
     flex-direction: column;
     background: rgba(255, 255, 255, 0.05);
@@ -310,7 +310,7 @@
 }
 
 /* ── Chat Topbar ── */
-.nova-chat-topbar {
+.stella-chat-topbar {
     padding: 14px 20px;
     display: flex;
     justify-content: space-between;
@@ -319,7 +319,7 @@
     flex-shrink: 0;
 }
 
-.nova-status {
+.stella-status {
     display: flex;
     align-items: center;
     gap: 8px;
@@ -329,7 +329,7 @@
     color: rgba(255, 255, 255, 0.9);
 }
 
-.nova-status-dot {
+.stella-status-dot {
     width: 8px;
     height: 8px;
     background: #10B981;
@@ -351,13 +351,13 @@
     }
 }
 
-.nova-chat-controls {
+.stella-chat-controls {
     display: flex;
     align-items: center;
     gap: 10px;
 }
 
-.nova-session-timer {
+.stella-session-timer {
     font-family: 'Nunito', sans-serif;
     font-size: 0.8rem;
     font-weight: 700;
@@ -367,7 +367,7 @@
     border-radius: 50px;
 }
 
-.nova-voice-toggle {
+.stella-voice-toggle {
     background: rgba(255, 255, 255, 0.08);
     border: 1px solid rgba(255, 255, 255, 0.15);
     border-radius: 50%;
@@ -379,15 +379,15 @@
     color: white;
 }
 
-.nova-voice-toggle:hover {
+.stella-voice-toggle:hover {
     background: rgba(255, 255, 255, 0.18);
 }
 
-.nova-voice-toggle.muted {
+.stella-voice-toggle.muted {
     opacity: 0.5;
 }
 
-.nova-end-btn {
+.stella-end-btn {
     background: rgba(239, 68, 68, 0.15);
     border: 1px solid rgba(239, 68, 68, 0.3);
     border-radius: 50px;
@@ -400,12 +400,12 @@
     transition: all 0.2s;
 }
 
-.nova-end-btn:hover {
+.stella-end-btn:hover {
     background: rgba(239, 68, 68, 0.25);
 }
 
 /* ── Chat Area ── */
-.nova-chat-area {
+.stella-chat-area {
     flex: 1;
     overflow-y: auto;
     padding: 20px;
@@ -415,21 +415,21 @@
     min-height: 300px;
 }
 
-.nova-chat-area::-webkit-scrollbar {
+.stella-chat-area::-webkit-scrollbar {
     width: 4px;
 }
 
-.nova-chat-area::-webkit-scrollbar-track {
+.stella-chat-area::-webkit-scrollbar-track {
     background: transparent;
 }
 
-.nova-chat-area::-webkit-scrollbar-thumb {
+.stella-chat-area::-webkit-scrollbar-thumb {
     background: rgba(255, 255, 255, 0.2);
     border-radius: 4px;
 }
 
 /* ── Bubbles ── */
-.nova-bubble {
+.stella-bubble {
     display: flex;
     align-items: flex-start;
     gap: 10px;
@@ -457,13 +457,13 @@
     }
 }
 
-.nova-avatar {
+.stella-avatar {
     font-size: 20px;
     flex-shrink: 0;
     margin-top: 4px;
 }
 
-.nova-bubble-text {
+.stella-bubble-text {
     background: linear-gradient(135deg, rgba(30, 16, 64, 0.9), rgba(45, 27, 105, 0.9));
     border: 1px solid rgba(167, 139, 250, 0.3);
     border-radius: 4px 20px 20px 20px;
@@ -518,14 +518,14 @@
 }
 
 /* New word highlights */
-.nova-new-word {
+.stella-new-word {
     color: #FFD93D;
     border-bottom: 1px dashed #FFD93D;
     cursor: help;
     position: relative;
 }
 
-.nova-word-tooltip {
+.stella-word-tooltip {
     position: absolute;
     bottom: calc(100% + 6px);
     left: 0;
@@ -543,14 +543,14 @@
 }
 
 /* Typing indicator */
-.nova-typing {
+.stella-typing {
     display: flex;
     align-items: flex-start;
     gap: 10px;
     align-self: flex-start;
 }
 
-.nova-typing-dots {
+.stella-typing-dots {
     background: linear-gradient(135deg, rgba(30, 16, 64, 0.9), rgba(45, 27, 105, 0.9));
     border: 1px solid rgba(167, 139, 250, 0.3);
     border-radius: 4px 20px 20px 20px;
@@ -560,7 +560,7 @@
     align-items: center;
 }
 
-.nova-typing-dots span {
+.stella-typing-dots span {
     width: 8px;
     height: 8px;
     background: rgba(255, 255, 255, 0.5);
@@ -568,11 +568,11 @@
     animation: typingBounce 1.2s infinite;
 }
 
-.nova-typing-dots span:nth-child(2) {
+.stella-typing-dots span:nth-child(2) {
     animation-delay: 0.2s;
 }
 
-.nova-typing-dots span:nth-child(3) {
+.stella-typing-dots span:nth-child(3) {
     animation-delay: 0.4s;
 }
 
@@ -592,7 +592,7 @@
 }
 
 /* ── Input Area ── */
-.nova-input-area {
+.stella-input-area {
     padding: 16px 20px;
     display: flex;
     align-items: center;
@@ -601,7 +601,7 @@
     flex-shrink: 0;
 }
 
-.nova-mic-btn {
+.stella-mic-btn {
     width: 48px;
     height: 48px;
     background: linear-gradient(135deg, #7C3AED, #EC4899);
@@ -617,11 +617,11 @@
     color: white;
 }
 
-.nova-mic-btn:hover {
+.stella-mic-btn:hover {
     transform: scale(1.05);
 }
 
-.nova-mic-btn.recording {
+.stella-mic-btn.recording {
     background: linear-gradient(135deg, #EF4444, #FF6B6B);
     animation: recordingPulse 1s infinite;
 }
@@ -638,7 +638,7 @@
     }
 }
 
-.nova-input {
+.stella-input {
     flex: 1;
     background: rgba(255, 255, 255, 0.08);
     border: 1.5px solid rgba(255, 255, 255, 0.2);
@@ -652,16 +652,16 @@
     transition: border-color 0.2s, box-shadow 0.2s;
 }
 
-.nova-input::placeholder {
+.stella-input::placeholder {
     color: rgba(255, 255, 255, 0.3);
 }
 
-.nova-input:focus {
+.stella-input:focus {
     border-color: #7C3AED;
     box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.2);
 }
 
-.nova-send-btn {
+.stella-send-btn {
     width: 44px;
     height: 44px;
     background: #7C3AED;
@@ -679,18 +679,18 @@
     transform: scale(0.8);
 }
 
-.nova-send-btn.visible {
+.stella-send-btn.visible {
     opacity: 1;
     transform: scale(1);
 }
 
-.nova-send-btn:hover {
+.stella-send-btn:hover {
     background: #6D28D9;
     transform: scale(1.05);
 }
 
 /* ── Voice Indicator ── */
-.nova-voice-indicator {
+.stella-voice-indicator {
     position: fixed;
     bottom: 0;
     left: 0;
@@ -704,23 +704,23 @@
     z-index: 200;
 }
 
-.nova-voice-indicator.hidden {
+.stella-voice-indicator.hidden {
     display: none;
 }
 
-.nova-mic-pulse {
+.stella-mic-pulse {
     font-size: 1.4rem;
     animation: recordingPulse 1s infinite;
 }
 
-#novaVoiceStatus {
+#stellaVoiceStatus {
     font-family: 'Nunito', sans-serif;
     font-size: 0.9rem;
     font-weight: 700;
     color: #FCA5A5;
 }
 
-#novaVoiceTranscript {
+#stellaVoiceTranscript {
     font-family: 'Nunito', sans-serif;
     font-size: 0.85rem;
     color: rgba(255, 255, 255, 0.7);
@@ -728,7 +728,7 @@
     font-style: italic;
 }
 
-#novaCancelVoice {
+#stellaCancelVoice {
     background: rgba(239, 68, 68, 0.2);
     border: 1px solid rgba(239, 68, 68, 0.4);
     border-radius: 50px;
@@ -741,28 +741,28 @@
 }
 
 /* ── Character Animations ── */
-.nova-idle {
-    animation: novaFloat 3s ease-in-out infinite;
+.stella-idle {
+    animation: stellaFloat 3s ease-in-out infinite;
 }
 
-.nova-thinking {
-    animation: novaPulse 1.5s ease-in-out infinite;
+.stella-thinking {
+    animation: stellaPulse 1.5s ease-in-out infinite;
     opacity: 0.85;
 }
 
-.nova-speaking {
-    animation: novaTwinkle 0.4s ease-in-out infinite;
+.stella-speaking {
+    animation: stellaTwinkle 0.4s ease-in-out infinite;
 }
 
-.nova-happy {
-    animation: novaHappy 0.6s ease forwards;
+.stella-happy {
+    animation: stellaHappy 0.6s ease forwards;
 }
 
-.nova-encouraging {
-    animation: novaEncourage 2s ease-in-out infinite;
+.stella-encouraging {
+    animation: stellaEncourage 2s ease-in-out infinite;
 }
 
-@keyframes novaFloat {
+@keyframes stellaFloat {
 
     0%,
     100% {
@@ -774,7 +774,7 @@
     }
 }
 
-@keyframes novaPulse {
+@keyframes stellaPulse {
 
     0%,
     100% {
@@ -788,7 +788,7 @@
     }
 }
 
-@keyframes novaTwinkle {
+@keyframes stellaTwinkle {
 
     0%,
     100% {
@@ -800,7 +800,7 @@
     }
 }
 
-@keyframes novaHappy {
+@keyframes stellaHappy {
     0% {
         transform: scale(1) rotate(0deg);
     }
@@ -818,7 +818,7 @@
     }
 }
 
-@keyframes novaEncourage {
+@keyframes stellaEncourage {
 
     0%,
     100% {
@@ -833,7 +833,7 @@
 }
 
 /* ── Session Summary Overlay ── */
-.nova-summary-overlay {
+.stella-summary-overlay {
     position: fixed;
     inset: 0;
     background: rgba(0, 0, 0, 0.75);
@@ -845,12 +845,12 @@
     animation: fadeIn 0.3s ease;
 }
 
-.nova-summary-overlay.hidden {
+.stella-summary-overlay.hidden {
     display: none;
 }
 
 /* ── Level Up Overlay ── */
-.nova-levelup-overlay {
+.stella-levelup-overlay {
     position: fixed;
     inset: 0;
     background: rgba(0, 0, 0, 0.85);
@@ -862,7 +862,7 @@
     animation: fadeIn 0.3s ease;
 }
 
-.nova-levelup-overlay.hidden {
+.stella-levelup-overlay.hidden {
     display: none;
 }
 
@@ -877,7 +877,7 @@
 }
 
 /* ── Cards inside overlays ── */
-.nova-summary-card,
+.stella-summary-card,
 .levelup-card {
     background: rgba(20, 10, 50, 0.97);
     border: 1px solid rgba(255, 255, 255, 0.15);
@@ -900,11 +900,11 @@
     }
 }
 
-.levelup-nova {
+.levelup-stella {
     font-size: 80px;
     display: block;
     margin-bottom: 12px;
-    animation: novaHappy 0.8s ease forwards;
+    animation: stellaHappy 0.8s ease forwards;
 }
 
 .levelup-title {
@@ -947,7 +947,7 @@
 }
 
 .levelup-card button,
-.nova-summary-card button {
+.stella-summary-card button {
     background: linear-gradient(135deg, #7C3AED, #EC4899);
     border: none;
     border-radius: 50px;
@@ -962,11 +962,11 @@
 }
 
 .levelup-card button:hover,
-.nova-summary-card button:hover {
+.stella-summary-card button:hover {
     transform: scale(1.05);
 }
 
-.nova-summary-card button.secondary {
+.stella-summary-card button.secondary {
     background: rgba(255, 255, 255, 0.1);
     border: 1px solid rgba(255, 255, 255, 0.2);
 }
@@ -1044,8 +1044,8 @@
     }
 }
 
-/* ── Dashboard Nova Card ── */
-.nova-dashboard-card {
+/* ── Dashboard Stella Card ── */
+.stella-dashboard-card {
     background: linear-gradient(135deg, #1a0533 0%, #2d1b69 100%);
     border: 1px solid rgba(255, 215, 0, 0.25);
     border-radius: 24px;
@@ -1060,25 +1060,25 @@
     text-decoration: none;
 }
 
-.nova-dashboard-card:hover {
+.stella-dashboard-card:hover {
     transform: translateY(-4px);
     border-color: rgba(255, 215, 0, 0.5);
     box-shadow: 0 8px 40px rgba(255, 215, 0, 0.15);
 }
 
-.nova-card-left {
+.stella-card-left {
     display: flex;
     align-items: center;
     gap: 16px;
 }
 
-.nova-card-char {
+.stella-card-char {
     font-size: 48px;
     display: block;
-    animation: novaFloat 3s infinite ease-in-out;
+    animation: stellaFloat 3s infinite ease-in-out;
 }
 
-.nova-card-title {
+.stella-card-title {
     font-family: 'Baloo 2', cursive;
     font-size: 1.1rem;
     font-weight: 900;
@@ -1086,25 +1086,25 @@
     margin: 0 0 4px;
 }
 
-.nova-card-sub {
+.stella-card-sub {
     font-family: 'Nunito', sans-serif;
     font-size: 0.85rem;
     color: rgba(255, 255, 255, 0.6);
     margin: 0 0 6px;
 }
 
-.nova-card-level {
+.stella-card-level {
     font-family: 'Nunito', sans-serif;
     font-size: 0.82rem;
     font-weight: 700;
     color: #FFD93D;
 }
 
-.nova-card-right {
+.stella-card-right {
     text-align: right;
 }
 
-.nova-card-stats {
+.stella-card-stats {
     display: flex;
     flex-direction: column;
     gap: 4px;
@@ -1114,7 +1114,7 @@
     color: rgba(255, 255, 255, 0.6);
 }
 
-.nova-card-btn {
+.stella-card-btn {
     background: linear-gradient(135deg, #F59E0B, #F97316);
     color: #1a1a2e;
     border: none;
@@ -1127,7 +1127,7 @@
     transition: transform 0.2s;
 }
 
-.nova-card-btn:hover {
+.stella-card-btn:hover {
     transform: scale(1.05);
 }
 

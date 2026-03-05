@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stella — English Coach | EduPlay</title>
+  <meta name="description" content="Chat with Stella, your AI English learning companion! Practice speaking and improve your English level.">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800;900&family=Nunito:wght@700;800;900&family=Fredoka+One&display=swap" rel="stylesheet">
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="../css/stella.css">
+
+  <!-- Supabase SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+
+<body>
+  <!-- Stars Canvas Background -->
+  <canvas id="starsCanvas" style="position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;opacity:0.6;"></canvas>
+
+  <div class="stella-page" style="position:relative;z-index:1;">
+
+    <!-- NAVBAR -->
+    <nav class="stella-navbar">
+      <span class="stella-brand">🎓 EduPlay</span>
+      <span class="stella-nav-title">✨ Stella — English Coach</span>
+      <a href="dashboard.html" class="stella-back-btn">← Dashboard</a>
+    </nav>
+
+    <!-- MAIN LAYOUT -->
+    <div class="stella-layout">
+
+      <!-- LEFT PANEL -->
+      <aside class="stella-left-panel" id="stellaLeftPanel">
+
+        <!-- Character Card -->
+        <div class="stella-character-card">
+          <span class="stella-char stella-idle" id="stellaCharacter">⭐</span>
+          <div class="stella-char-name">Stella</div>
+          <div class="stella-char-tagline">Your English Learning Star!</div>
+        </div>
+
+        <!-- Level Card -->
+        <div class="stella-level-card" id="stellaLevelCard">
+          <div class="stella-level-label">Your Level</div>
+          <div class="stella-level-badge stella-level-1" id="stellaLevelBadge">
+            <span class="stella-level-emoji" id="stellaLevelEmoji">🌱</span>
+            <span class="stella-level-name" id="stellaLevelName">Beginner</span>
+            <span class="stella-level-num" id="stellaLevelNum">1</span>
+          </div>
+          <div class="stella-xp-bar-container">
+            <div class="stella-xp-bar" id="stellaXPBar"></div>
+          </div>
+          <div class="stella-xp-label" id="stellaXPLabel">Keep chatting to level up!</div>
+        </div>
+
+        <!-- Stats Card -->
+        <div class="stella-stats-card" id="stellaStatsCard">
+          <div class="stella-stat">
+            <span class="stella-stat-icon">🗣️</span>
+            <span class="stella-stat-value" id="statSessions">0</span>
+            <span class="stella-stat-label">Sessions</span>
+          </div>
+          <div class="stella-stat">
+            <span class="stella-stat-icon">📚</span>
+            <span class="stella-stat-value" id="statWords">0</span>
+            <span class="stella-stat-label">Words</span>
+          </div>
+          <div class="stella-stat">
+            <span class="stella-stat-icon">🔥</span>
+            <span class="stella-stat-value" id="statStreak">0</span>
+            <span class="stella-stat-label">Day Streak</span>
+          </div>
+        </div>
+
+        <!-- Focus Card -->
+        <div class="stella-focus-card" id="stellaFocusCard">
+          <div class="stella-focus-title">📝 Today's Focus</div>
+          <div class="stella-focus-items" id="stellaFocusItems">
+            <div class="stella-focus-item">💬 Natural conversation</div>
+            <div class="stella-focus-item">📖 Vocabulary building</div>
+            <div class="stella-focus-item">✏️ Grammar practice</div>
+          </div>
+        </div>
+
+      </aside>
+
+      <!-- RIGHT PANEL: Chat -->
+      <main class="stella-right-panel">
+
+        <!-- Chat Topbar -->
+        <div class="stella-chat-topbar">
+          <div class="stella-status" id="stellaStatus">
+            <span class="stella-status-dot"></span>
+            <span id="stellaStatusText">Stella is ready! ✨</span>
+          </div>
+          <div class="stella-chat-controls">
+            <span class="stella-session-timer" id="stellaSessionTimer">00:00</span>
+            <button class="stella-voice-toggle" id="stellaVoiceToggle" title="Toggle Stella's voice">🔊</button>
+            <button class="stella-end-btn" id="stellaEndBtn">Finish Session 📊</button>
+          </div>
+        </div>
+
+        <!-- Chat Area -->
+        <div class="stella-chat-area" id="stellaChatArea">
+          <!-- Messages appear here -->
+        </div>
+
+        <!-- Input Area -->
+        <div class="stella-input-area">
+          <button class="stella-mic-btn" id="stellaMicBtn" title="Speak to Stella">🎤</button>
+          <input type="text" class="stella-input" id="stellaInput"
+                 placeholder="Type your message to Stella..."
+                 autocomplete="off" />
+          <button class="stella-send-btn" id="stellaSendBtn">➤</button>
+        </div>
+
+        <!-- Voice Indicator (bottom bar when recording) -->
+        <div class="stella-voice-indicator hidden" id="stellaVoiceIndicator">
+          <span class="stella-mic-pulse">🎤</span>
+          <span id="stellaVoiceStatus">Listening...</span>
+          <span id="stellaVoiceTranscript"></span>
+          <button id="stellaCancelVoice">Cancel</button>
+        </div>
+
+      </main>
+
+    </div>
+  </div>
+
+  <!-- Session Summary Overlay -->
+  <div class="stella-summary-overlay hidden" id="stellaSummaryOverlay"></div>
+
+  <!-- Level Up Overlay -->
+  <div class="stella-levelup-overlay hidden" id="stellaLevelUpOverlay"></div>
+
+  <!-- Scripts -->
+  <script src="../config.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/stella.js"></script>
+
+  <!-- Stars Canvas Script -->
+  <script>
+    (function () {
+      const canvas = document.getElementById('starsCanvas');
+      const ctx = canvas.getContext('2d');
+      let stars = [];
+
+      function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }
+
+      function init() {
+        resize();
+        stars = [];
+        for (let i = 0; i < 80; i++) {
+          stars.push({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height,
+            r: Math.random() * 1.5 + 0.3,
+            a: Math.random(),
+            speed: Math.random() * 0.008 + 0.003
+          });
+        }
+      }
+
+      function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        stars.forEach(s => {
+          s.a += s.speed;
+          ctx.beginPath();
+          ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(255,255,255,${Math.abs(Math.sin(s.a)) * 0.8 + 0.1})`;
+          ctx.fill();
+        });
+        requestAnimationFrame(draw);
+      }
+
+      window.addEventListener('resize', init);
+      init();
+      draw();
+    })();
+  </script>
+</body>
+
+</html>

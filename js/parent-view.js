@@ -18,7 +18,7 @@
         childData: null,
         quizHistory: [],
         badges: [],
-        novaProgress: null,
+        stellaProgress: null,
         isActive: false,
         sessionStart: null,
         sessionTimerInterval: null,
@@ -70,7 +70,7 @@
         } catch (e) { console.warn('PV session log failed', e); }
     }
 
-    async function fetchNovaProgress() {
+    async function fetchStellaProgress() {
         try {
             const { data } = await PVState.supabase
                 .from('user_english_progress')
@@ -142,7 +142,7 @@
         <div class="pv-section" id="pvChartSection"></div>
         <div class="pv-section" id="pvAreasSection"></div>
         <div class="pv-section" id="pvMoodSection"></div>
-        <div class="pv-section" id="pvNovaSection"></div>
+        <div class="pv-section" id="pvStellaSection"></div>
         <div class="pv-section" id="pvBadgesSection"></div>
         <div class="pv-section pv-report-section" id="pvReportSection"></div>
       </div>
@@ -409,8 +409,8 @@
             btn.innerHTML = '✓ Parent View ON';
         }
 
-        // Fetch nova progress
-        PVState.novaProgress = await fetchNovaProgress();
+        // Fetch stella progress
+        PVState.stellaProgress = await fetchStellaProgress();
 
         // Show overlay
         const overlay = document.getElementById('parentViewOverlay');
@@ -429,7 +429,7 @@
         renderPerformanceChart();
         renderAreas();
         renderMoodAnalysis();
-        renderNovaProgress();
+        renderStellaProgress();
         renderBadgeTimeline();
         renderReportSection();
     }
@@ -794,19 +794,19 @@
     }
 
     // ── Nova Progress ──────────────────────────────────────────────────────
-    function renderNovaProgress() {
-        const np = PVState.novaProgress;
-        const section = document.getElementById('pvNovaSection');
+    function renderStellaProgress() {
+        const np = PVState.stellaProgress;
+        const section = document.getElementById('pvStellaSection');
         const childName = PVState.childData?.username || 'Your child';
 
         if (!np || np.total_sessions === 0) {
             section.innerHTML = `
-        <h3 class="pv-section-title">✨ English Speaking Progress (Nova AI)</h3>
-        <div class="pv-nova-empty">
-          <p>Nova AI English Coach hasn't been used yet.</p>
+        <h3 class="pv-section-title">✨ English Speaking Progress (Stella AI)</h3>
+        <div class="pv-stella-empty">
+          <p>Stella AI English Coach hasn't been used yet.</p>
           <p>Encourage ${childName} to try it!</p>
-          <button class="pv-nova-learn-btn" onclick="ParentView.exit(); setTimeout(() => window.location.href='nova.html', 600)">
-            Learn about Nova →
+          <button class="pv-stella-learn-btn" onclick="ParentView.exit(); setTimeout(() => window.location.href='stella.html', 600)">
+            Learn about Stella →
           </button>
         </div>
       `;
@@ -832,21 +832,21 @@
         ).join('');
 
         section.innerHTML = `
-      <h3 class="pv-section-title">✨ English Speaking Progress (Nova AI)</h3>
-      <div class="pv-nova-grid">
+      <h3 class="pv-section-title">✨ English Speaking Progress (Stella AI)</h3>
+      <div class="pv-stella-grid">
         <div>
-          <div class="pv-nova-level-badge">
-            <span class="pv-nova-level-num">${level}</span>
-            <span class="pv-nova-level-name">${lvlName}</span>
+          <div class="pv-stella-level-badge">
+            <span class="pv-stella-level-num">${level}</span>
+            <span class="pv-stella-level-name">${lvlName}</span>
           </div>
-          <div class="pv-nova-meta">
+          <div class="pv-stella-meta">
             <span>🗣️ ${np.total_sessions} conversation${np.total_sessions !== 1 ? 's' : ''}</span>
             <span>📅 Last chatted: ${lastDate}</span>
             <span>🔥 ${np.session_streak || 0} day streak</span>
           </div>
-          <div class="pv-nova-prog-label">Progress to Level ${Math.min(5, level + 1)}:</div>
-          <div class="pv-nova-prog-bar">
-            <div class="pv-nova-prog-fill" style="width:${progressPct}%"></div>
+          <div class="pv-stella-prog-label">Progress to Level ${Math.min(5, level + 1)}:</div>
+          <div class="pv-stella-prog-bar">
+            <div class="pv-stella-prog-fill" style="width:${progressPct}%"></div>
           </div>
         </div>
         <div>
@@ -854,7 +854,7 @@
           <div class="pv-words-pills">
             ${pillsHTML || '<span class="pv-stat-label">No words tracked yet</span>'}
           </div>
-          <div class="pv-nova-total-words">📖 ${totalWords} total words learned</div>
+          <div class="pv-stella-total-words">📖 ${totalWords} total words learned</div>
         </div>
       </div>
     `;
@@ -914,7 +914,7 @@
     function generateAndEmailReport() {
         const h = PVState.quizHistory;
         const ud = PVState.childData;
-        const np = PVState.novaProgress;
+        const np = PVState.stellaProgress;
         const badges = PVState.badges;
 
         const reportDate = new Date().toLocaleDateString();
@@ -923,7 +923,7 @@
         const quizzesTotal = ud?.stats?.quizzesCompleted || ud?.quizzes_completed || h.length;
         const overallAccuracy = calcOverallAccuracy(h);
         const streak = calculateStreak(h);
-        const novaLevel = np ? `Level ${np.current_level} — ${['', 'Beginner', 'Explorer', 'Adventurer', 'Champion', 'Master'][np.current_level]}` : 'Not started';
+        const stellaLevel = np ? `Level ${np.current_level} — ${['', 'Beginner', 'Explorer', 'Adventurer', 'Champion', 'Master'][np.current_level]}` : 'Not started';
 
         const now = new Date();
         const weekAgo = new Date(now - 7 * 86400000);
@@ -959,7 +959,7 @@ Total Points: ${totalPoints}
 Quizzes Completed: ${quizzesTotal}
 Overall Accuracy: ${overallAccuracy}%
 Learning Streak: ${streak} days
-English Level (Nova AI): ${novaLevel}
+English Level (Stella AI): ${stellaLevel}
 
 THIS WEEK
 ---------
@@ -988,7 +988,7 @@ RECOMMENDATIONS
 ---------------
 - Encourage daily 10-minute learning sessions
 - Focus on: ${weakAreas[0]?.name?.replace(/_/g, ' ') || 'all subjects equally'}
-- ${!np ? 'Try Nova AI English Coach for speaking practice' : 'Continue Nova AI sessions to reach Level ' + Math.min(5, (np.current_level || 1) + 1)}
+- ${!np ? 'Try Stella AI English Coach for speaking practice' : 'Continue Stella AI sessions to reach Level ' + Math.min(5, (np.current_level || 1) + 1)}
 
 ---
 Generated by EduPlay — Learning made fun!`;

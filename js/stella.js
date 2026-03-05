@@ -1,6 +1,6 @@
 /**
- * EduPlay — Nova AI English Coach
- * js/nova.js
+ * EduPlay — Stella AI English Coach
+ * js/stella.js
  *
  * Complete engine: Groq integration, voice input/output,
  * English level system, session management, Supabase sync.
@@ -9,7 +9,7 @@
  *   - CONFIG.GROQ_API_KEY (from config.js)
  *   - CONFIG.GROQ_ENDPOINT (from config.js)
  *   - CONFIG.SUPABASE_URL / CONFIG.SUPABASE_ANON_KEY (from config.js)
- *   - CONFIG.NOVA_API_KEY (optional — placeholder for future TTS API)
+ *   - CONFIG.ELEVENLABS_API_KEY (optional — placeholder for future TTS API)
  *   - window.eduplay from auth.js
  */
 
@@ -18,11 +18,11 @@
 
     // ── Constants ──────────────────────────────────────────────────────────
     const LEVEL_CONFIGS = {
-        1: { name: 'Beginner', emoji: '🌱', class: 'nova-level-1', sessionsToNext: 5 },
-        2: { name: 'Explorer', emoji: '🔍', class: 'nova-level-2', sessionsToNext: 8 },
-        3: { name: 'Adventurer', emoji: '⚡', class: 'nova-level-3', sessionsToNext: 10 },
-        4: { name: 'Champion', emoji: '🏆', class: 'nova-level-4', sessionsToNext: 12 },
-        5: { name: 'Master', emoji: '👑', class: 'nova-level-5', sessionsToNext: 999 },
+        1: { name: 'Beginner', emoji: '🌱', class: 'stella-level-1', sessionsToNext: 5 },
+        2: { name: 'Explorer', emoji: '🔍', class: 'stella-level-2', sessionsToNext: 8 },
+        3: { name: 'Adventurer', emoji: '⚡', class: 'stella-level-3', sessionsToNext: 10 },
+        4: { name: 'Champion', emoji: '🏆', class: 'stella-level-4', sessionsToNext: 12 },
+        5: { name: 'Master', emoji: '👑', class: 'stella-level-5', sessionsToNext: 999 },
     };
 
     const TOPICS = {
@@ -36,7 +36,7 @@
     const CONFETTI_COLORS = ['#FFD93D', '#FF6B35', '#7C3AED', '#10B981', '#EC4899', '#3B82F6'];
 
     // ── State ──────────────────────────────────────────────────────────────
-    const NovaState = {
+    const StellaState = {
         supabase: null,
         userId: null,
         childData: {},
@@ -67,14 +67,14 @@
 
     // ── Supabase helpers ──────────────────────────────────────────────────
     function getSupabase() {
-        if (NovaState.supabase) return NovaState.supabase;
+        if (StellaState.supabase) return StellaState.supabase;
         if (window.supabase && window.CONFIG) {
-            NovaState.supabase = window.supabase.createClient(
+            StellaState.supabase = window.supabase.createClient(
                 window.CONFIG.SUPABASE_URL,
                 window.CONFIG.SUPABASE_ANON_KEY
             );
         }
-        return NovaState.supabase;
+        return StellaState.supabase;
     }
 
     async function loadProgress() {
@@ -83,7 +83,7 @@
             const { data } = await sb
                 .from('user_english_progress')
                 .select('*')
-                .eq('user_id', NovaState.userId)
+                .eq('user_id', StellaState.userId)
                 .single();
             return data;
         } catch { return null; }
@@ -92,11 +92,11 @@
     async function saveProgressToSupabase() {
         try {
             const sb = getSupabase();
-            const np = NovaState.progress;
+            const np = StellaState.progress;
             const wordsArr = np?.words_learned || [];
 
             // Merge new session words into progress words
-            NovaState.sessionWords.forEach(w => {
+            StellaState.sessionWords.forEach(w => {
                 const word = typeof w === 'string' ? w : w.word;
                 if (!word) return;
                 const existing = wordsArr.findIndex(x => (typeof x === 'string' ? x : x.word) === word);
@@ -104,11 +104,11 @@
             });
 
             const upsertData = {
-                user_id: NovaState.userId,
-                current_level: NovaState.currentLevel,
-                max_level_reached: Math.max(NovaState.currentLevel, np?.max_level_reached || 1),
+                user_id: StellaState.userId,
+                current_level: StellaState.currentLevel,
+                max_level_reached: Math.max(StellaState.currentLevel, np?.max_level_reached || 1),
                 total_sessions: (np?.total_sessions || 0) + 1,
-                total_messages: (np?.total_messages || 0) + NovaState.messageCount,
+                total_messages: (np?.total_messages || 0) + StellaState.messageCount,
                 words_learned: wordsArr,
                 focus_areas: getLastFocusAreas(),
                 last_session_date: new Date().toISOString().split('T')[0],
@@ -132,28 +132,28 @@
             }
 
             await sb.from('user_english_progress').upsert(upsertData, { onConflict: 'user_id' });
-        } catch (e) { console.warn('Nova: save progress failed', e); }
+        } catch (e) { console.warn('Stella: save progress failed', e); }
     }
 
-    async function saveNovaSession() {
+    async function saveStellaSession() {
         try {
             const sb = getSupabase();
-            const duration = Math.floor((Date.now() - NovaState.sessionStart) / 1000);
+            const duration = Math.floor((Date.now() - StellaState.sessionStart) / 1000);
             const { data } = await sb.from('nova_sessions').insert({
-                user_id: NovaState.userId,
+                user_id: StellaState.userId,
                 duration_seconds: duration,
-                message_count: NovaState.messageCount,
-                level_at_start: NovaState.levelAtSessionStart,
-                level_at_end: NovaState.currentLevel,
-                words_learned: NovaState.sessionWords,
-                corrections_count: NovaState.sessionCorrections,
+                message_count: StellaState.messageCount,
+                level_at_start: StellaState.levelAtSessionStart,
+                level_at_end: StellaState.currentLevel,
+                words_learned: StellaState.sessionWords,
+                corrections_count: StellaState.sessionCorrections,
                 focus_areas: getLastFocusAreas(),
             }).select().single();
 
             // Save individual vocab entries
-            if (NovaState.sessionWords.length > 0) {
-                const vocabItems = NovaState.sessionWords.map(w => ({
-                    user_id: NovaState.userId,
+            if (StellaState.sessionWords.length > 0) {
+                const vocabItems = StellaState.sessionWords.map(w => ({
+                    user_id: StellaState.userId,
                     word: typeof w === 'string' ? w : w.word,
                     definition: w.definition || null,
                     example_sentence: w.example || null,
@@ -169,11 +169,11 @@
             }
 
             return data;
-        } catch (e) { console.warn('Nova: save session failed', e); return null; }
+        } catch (e) { console.warn('Stella: save session failed', e); return null; }
     }
 
     function getLastFocusAreas() {
-        const last = NovaState.recentAssessments.slice(-2);
+        const last = StellaState.recentAssessments.slice(-2);
         const areas = [];
         last.forEach(a => { if (a.nextFocusAreas) areas.push(...a.nextFocusAreas); });
         return [...new Set(areas)].slice(0, 4);
@@ -181,8 +181,8 @@
 
     // ── Groq API ──────────────────────────────────────────────────────────
     function buildSystemPrompt() {
-        const c = NovaState.childData;
-        const lvl = NovaState.currentLevel;
+        const c = StellaState.childData;
+        const lvl = StellaState.currentLevel;
         const levelDesc = {
             1: 'uses very short phrases (1-5 words), basic vocabulary only',
             2: 'forms simple sentences (5-8 words), makes basic grammar errors',
@@ -192,7 +192,7 @@
         };
         const focuses = getLastFocusAreas();
 
-        return `You are Nova, a patient and encouraging English learning companion for children. You are talking with ${c.username || 'the student'}, aged ${c.age || 8}. Their current English level is ${lvl} out of 5 (${LEVEL_CONFIGS[lvl].name}).
+        return `You are Stella, a patient and encouraging English learning companion for children. You are talking with ${c.username || 'the student'}, aged ${c.age || 8}. Their current English level is ${lvl} out of 5 (${LEVEL_CONFIGS[lvl].name}).
 
 At this level, ${c.username || 'the student'} typically ${levelDesc[lvl]}.
 
@@ -202,7 +202,7 @@ YOUR RULES:
 3. Never use the word "wrong" — say "good try!" or "almost!"
 4. Use their name naturally every 2-3 messages
 5. If they make a grammar mistake: weave the correction naturally into your next sentence without pointing it out directly
-   EXAMPLE: Child says "I goed to park" → Nova says "Oh fun! I love when kids go to the park! 🎉 What did you do there?"
+   EXAMPLE: Child says "I goed to park" → Stella says "Oh fun! I love when kids go to the park! 🎉 What did you do there?"
 6. Introduce exactly ONE new vocabulary word per 3-4 messages, naturally in context
 7. Add 1-2 emojis per message, never more
 8. Ask ONE question at the end of each message
@@ -238,7 +238,7 @@ You MUST respond in this exact JSON format:
 }`;
     }
 
-    async function callNova(userMessage) {
+    async function callStella(userMessage) {
         const GROQ_API_KEY = window.CONFIG?.GROQ_API_KEY;
         const GROQ_ENDPOINT = window.CONFIG?.GROQ_ENDPOINT || 'https://api.groq.com/openai/v1/chat/completions';
         const GROQ_MODEL = window.CONFIG?.GROQ_MODEL || 'llama-3.3-70b-versatile';
@@ -247,8 +247,8 @@ You MUST respond in this exact JSON format:
 
         const messages = [
             { role: 'system', content: buildSystemPrompt() },
-            ...NovaState.conversationHistory.slice(-10).map(m => ({
-                role: m.sender === 'nova' ? 'assistant' : 'user',
+            ...StellaState.conversationHistory.slice(-10).map(m => ({
+                role: m.sender === 'stella' ? 'assistant' : 'user',
                 content: m.text,
             })),
             { role: 'user', content: userMessage },
@@ -286,7 +286,7 @@ You MUST respond in this exact JSON format:
                 newWords: [],
                 assessment: {
                     sentenceLength: 2, vocabularyRange: 2, grammarAccuracy: 2,
-                    confidence: 3, suggestedLevel: NovaState.currentLevel,
+                    confidence: 3, suggestedLevel: StellaState.currentLevel,
                     nextFocusAreas: [],
                 },
             };
@@ -294,16 +294,16 @@ You MUST respond in this exact JSON format:
     }
 
     // ── Opening Message ───────────────────────────────────────────────────
-    function buildOpeningMessage() {
-        const p = NovaState.progress;
-        const c = NovaState.childData;
+    function buildStellaOpening() {
+        const p = StellaState.progress;
+        const c = StellaState.childData;
         const name = c?.username || 'friend';
 
         if (!p || p.total_sessions === 0) {
-            NovaState.isDiagnosticMode = true;
-            NovaState.diagnosticStep = 1;
+            StellaState.isDiagnosticMode = true;
+            StellaState.diagnosticStep = 1;
             return {
-                message: `Hi ${name}! I'm Nova, your English learning star! ✨ I'm SO excited to chat with you! Tell me — what's your favorite animal? 🐾`,
+                message: `Hi ${name}! I'm Stella, your English learning star! ⭐ I'm SO excited to chat with you! Tell me — what's your favorite animal? 🐾`,
                 isDiagnostic: true,
             };
         }
@@ -322,32 +322,32 @@ You MUST respond in this exact JSON format:
     }
 
     // ── UI Helpers ─────────────────────────────────────────────────────────
-    function setNovaState(state) {
-        const char = document.getElementById('novaCharacter');
+    function setStellaState(state) {
+        const char = document.getElementById('stellaCharacter');
         if (!char) return;
-        char.className = `nova-char nova-${state}`;
+        char.className = `stella-char stella-${state}`;
     }
 
     function setStatus(text) {
-        const el = document.getElementById('novaStatusText');
+        const el = document.getElementById('stellaStatusText');
         if (el) el.textContent = text;
     }
 
     function updateLevelUI(level, animate = false) {
         const cfg = LEVEL_CONFIGS[level] || LEVEL_CONFIGS[1];
-        const badge = document.getElementById('novaLevelBadge');
-        const emoji = document.getElementById('novaLevelEmoji');
-        const name = document.getElementById('novaLevelName');
-        const num = document.getElementById('novaLevelNum');
-        const bar = document.getElementById('novaXPBar');
-        const label = document.getElementById('novaXPLabel');
+        const badge = document.getElementById('stellaLevelBadge');
+        const emoji = document.getElementById('stellaLevelEmoji');
+        const name = document.getElementById('stellaLevelName');
+        const num = document.getElementById('stellaLevelNum');
+        const bar = document.getElementById('stellaXPBar');
+        const label = document.getElementById('stellaXPLabel');
 
         if (emoji) emoji.textContent = cfg.emoji;
         if (name) name.textContent = cfg.name;
         if (num) num.textContent = level;
 
         if (badge) {
-            badge.className = `nova-level-badge ${cfg.class}`;
+            badge.className = `stella-level-badge ${cfg.class}`;
             if (animate) {
                 badge.style.transform = 'scale(1.3)';
                 setTimeout(() => { badge.style.transform = 'scale(1)'; badge.style.transition = 'transform 0.4s ease'; }, 100);
@@ -355,7 +355,7 @@ You MUST respond in this exact JSON format:
         }
 
         // XP bar: based on total sessions mod sessions_to_next
-        const p = NovaState.progress;
+        const p = StellaState.progress;
         if (bar && p) {
             const sessForLevel = cfg.sessionsToNext;
             const pct = Math.min(100, ((p.total_sessions % sessForLevel) / sessForLevel) * 100);
@@ -367,7 +367,7 @@ You MUST respond in this exact JSON format:
     }
 
     function renderLeftPanelStats() {
-        const p = NovaState.progress;
+        const p = StellaState.progress;
         const sessions = document.getElementById('statSessions');
         const words = document.getElementById('statWords');
         const streak = document.getElementById('statStreak');
@@ -376,12 +376,12 @@ You MUST respond in this exact JSON format:
         if (words) words.textContent = Array.isArray(p?.words_learned) ? p.words_learned.length : 0;
         if (streak) streak.textContent = p?.session_streak || 0;
 
-        const focusEl = document.getElementById('novaFocusItems');
+        const focusEl = document.getElementById('stellaFocusItems');
         if (focusEl) {
             const focuses = getLastFocusAreas();
             if (focuses.length) {
                 focusEl.innerHTML = focuses.map(f =>
-                    `<div class="nova-focus-item">✨ ${f.replace(/_/g, ' ')}</div>`
+                    `<div class="stella-focus-item">✨ ${f.replace(/_/g, ' ')}</div>`
                 ).join('');
             }
         }
@@ -389,13 +389,13 @@ You MUST respond in this exact JSON format:
 
     // ── Display Messages ──────────────────────────────────────────────────
     function showTypingIndicator() {
-        const area = document.getElementById('novaChatArea');
+        const area = document.getElementById('stellaChatArea');
         const typing = document.createElement('div');
-        typing.className = 'nova-typing';
-        typing.id = 'novaTyping';
+        typing.className = 'stella-typing';
+        typing.id = 'stellaTyping';
         typing.innerHTML = `
-      <span class="nova-avatar">✨</span>
-      <div class="nova-typing-dots">
+      <span class="stella-avatar">⭐</span>
+      <div class="stella-typing-dots">
         <span></span><span></span><span></span>
       </div>
     `;
@@ -405,11 +405,11 @@ You MUST respond in this exact JSON format:
     }
 
     function removeTypingIndicator() {
-        document.getElementById('novaTyping')?.remove();
+        document.getElementById('stellaTyping')?.remove();
     }
 
     function displayChildMessage(text) {
-        const area = document.getElementById('novaChatArea');
+        const area = document.getElementById('stellaChatArea');
         const wrap = document.createElement('div');
         wrap.className = 'child-bubble';
         wrap.innerHTML = `<span class="child-bubble-text">${escapeHTML(text)}</span>`;
@@ -418,10 +418,10 @@ You MUST respond in this exact JSON format:
         return wrap;
     }
 
-    function displayNovaMessage(text, newWords = []) {
-        const area = document.getElementById('novaChatArea');
+    function displayStellaMessage(text, newWords = []) {
+        const area = document.getElementById('stellaChatArea');
         const bubble = document.createElement('div');
-        bubble.className = 'nova-bubble';
+        bubble.className = 'stella-bubble';
 
         // Highlight new words
         let processedText = escapeHTML(text);
@@ -431,20 +431,20 @@ You MUST respond in this exact JSON format:
                 const def = w.definition || '';
                 const re = new RegExp(`\\b(${escapeRegex(word)})\\b`, 'gi');
                 processedText = processedText.replace(re, (m) =>
-                    `<span class="nova-new-word" data-word="${escapeAttr(word)}" data-def="${escapeAttr(def)}">${m}</span>`
+                    `<span class="stella-new-word" data-word="${escapeAttr(word)}" data-def="${escapeAttr(def)}">${m}</span>`
                 );
             });
         }
 
         bubble.innerHTML = `
-      <span class="nova-avatar">✨</span>
-      <div class="nova-bubble-text">${processedText}</div>
+      <span class="stella-avatar">⭐</span>
+      <div class="stella-bubble-text">${processedText}</div>
     `;
 
         area.appendChild(bubble);
 
         // Word tooltips
-        bubble.querySelectorAll('.nova-new-word').forEach(span => {
+        bubble.querySelectorAll('.stella-new-word').forEach(span => {
             span.addEventListener('mouseenter', showWordTooltip);
             span.addEventListener('mouseleave', hideWordTooltip);
             span.addEventListener('click', () => speakText(span.dataset.word));
@@ -489,7 +489,7 @@ You MUST respond in this exact JSON format:
         if (!def) return;
 
         const tip = document.createElement('div');
-        tip.className = 'nova-word-tooltip';
+        tip.className = 'stella-word-tooltip';
         tip.textContent = `📖 "${def}"`;
         tip.id = 'activeWordTip';
         span.style.position = 'relative';
@@ -503,69 +503,69 @@ You MUST respond in this exact JSON format:
     // ── Main Send Flow ─────────────────────────────────────────────────────
     async function sendMessage(text) {
         text = text.trim();
-        if (!text || NovaState.isProcessing) return;
+        if (!text || StellaState.isProcessing) return;
 
-        NovaState.isProcessing = true;
-        NovaState.lastChildMessage = text;
+        StellaState.isProcessing = true;
+        StellaState.lastChildMessage = text;
 
         // 1. Display child bubble
         displayChildMessage(text);
 
         // 2. Clear input
-        const input = document.getElementById('novaInput');
+        const input = document.getElementById('stellaInput');
         if (input) input.value = '';
         updateSendBtn('');
 
-        // 3. Nova thinking
-        setNovaState('thinking');
-        setStatus('Nova is thinking... 💭');
+        // 3. Stella thinking
+        setStellaState('thinking');
+        setStatus('Stella is thinking... 💭');
         const typing = showTypingIndicator();
 
         try {
             // 4. Call Groq
-            const response = await callNova(text);
+            const response = await callStella(text);
             removeTypingIndicator();
-            await processNovaResponse(response, text);
+            await processStellaResponse(response, text);
         } catch (err) {
             removeTypingIndicator();
-            console.error('Nova callNova error:', err);
+            console.error('Stella callStella error:', err);
             const errMsg = 'Hmm, I\'m having trouble thinking... 🤔 Let\'s try again in a moment!';
-            displayNovaMessage(errMsg);
+            displayStellaMessage(errMsg);
             speakText(errMsg);
-            setNovaState('idle');
-            setStatus('Nova is ready! ✨');
+            setStellaState('idle');
+            setStatus('Stella is ready! ⭐');
         }
 
-        NovaState.isProcessing = false;
+        StellaState.isProcessing = false;
 
         // Diagnostic flow
-        if (NovaState.isDiagnosticMode) {
-            NovaState.diagnosticStep++;
-            if (NovaState.diagnosticStep > 3) {
-                NovaState.isDiagnosticMode = false;
+        if (StellaState.isDiagnosticMode) {
+            StellaState.diagnosticStep++;
+            if (StellaState.diagnosticStep > 3) {
+                StellaState.isDiagnosticMode = false;
                 finalizeInitialLevel();
             }
         }
     }
 
-    async function processNovaResponse(response, childText) {
+    async function processStellaResponse(response, childText) {
         const msg = response.message || '';
         const newWords = response.newWords || [];
         const corrections = response.corrections || [];
         const assessment = response.assessment;
 
         // Display
-        displayNovaMessage(msg, newWords);
+        displayStellaMessage(msg, newWords);
 
         // Corrections
         if (corrections.length > 0) {
             attachCorrectionToLastChildBubble(corrections);
-            NovaState.sessionCorrections += corrections.length;
+            StellaState.sessionCorrections += corrections.length;
         }
 
         // Track words
         newWords.forEach(w => {
-            if (w.word) NovaState.sessionWords.push(w);
+            if (w.word) StellaState.sessionWords.push(w);
         });
 
         // Level assessment
@@ -575,103 +575,103 @@ You MUST respond in this exact JSON format:
         speakText(msg);
 
         // History
-        NovaState.conversationHistory.push(
+        StellaState.conversationHistory.push(
             { sender: 'child', text: childText },
-            { sender: 'nova', text: msg }
+            { sender: 'stella', text: msg }
         );
-        NovaState.messageCount++;
+        StellaState.messageCount++;
 
-        setNovaState('idle');
-        setStatus('Nova is ready! ✨');
+        setStellaState('idle');
+        setStatus('Stella is ready! ⭐');
     }
 
     function finalizeInitialLevel() {
-        if (NovaState.recentAssessments.length === 0) return;
-        const avg = NovaState.recentAssessments.reduce((s, a) => s + a.suggestedLevel, 0) / NovaState.recentAssessments.length;
+        if (StellaState.recentAssessments.length === 0) return;
+        const avg = StellaState.recentAssessments.reduce((s, a) => s + a.suggestedLevel, 0) / StellaState.recentAssessments.length;
         const level = Math.max(1, Math.min(5, Math.round(avg)));
-        if (level !== NovaState.currentLevel) {
-            NovaState.currentLevel = level;
+        if (level !== StellaState.currentLevel) {
+            StellaState.currentLevel = level;
             updateLevelUI(level, false);
         }
         const levelName = LEVEL_CONFIGS[level].name;
         const announceMsg = `I think you're at Level ${level} — ${levelName}! Let's start our adventure! 🌟`;
         setTimeout(() => {
-            displayNovaMessage(announceMsg);
+            displayStellaMessage(announceMsg);
             speakText(announceMsg);
         }, 500);
     }
 
     // ── Assessment & Level System ─────────────────────────────────────────
     function updateAssessment(assessment) {
-        NovaState.recentAssessments.push(assessment);
-        if (NovaState.recentAssessments.length > 8) NovaState.recentAssessments.shift();
+        StellaState.recentAssessments.push(assessment);
+        if (StellaState.recentAssessments.length > 8) StellaState.recentAssessments.shift();
 
-        if (NovaState.recentAssessments.length < 3) return;
+        if (StellaState.recentAssessments.length < 3) return;
 
-        const last3 = NovaState.recentAssessments.slice(-3);
-        const allAbove = last3.every(a => a.suggestedLevel > NovaState.currentLevel);
+        const last3 = StellaState.recentAssessments.slice(-3);
+        const allAbove = last3.every(a => a.suggestedLevel > StellaState.currentLevel);
         const avgLast3 = last3.reduce((s, a) => s + a.suggestedLevel, 0) / 3;
 
-        if (allAbove && Math.round(avgLast3) > NovaState.currentLevel && NovaState.currentLevel < 5) {
+        if (allAbove && Math.round(avgLast3) > StellaState.currentLevel && StellaState.currentLevel < 5) {
             triggerLevelUp(Math.round(avgLast3));
             return;
         }
 
-        if (NovaState.recentAssessments.length >= 5) {
-            const last5 = NovaState.recentAssessments.slice(-5);
-            const allBelow = last5.every(a => a.suggestedLevel < NovaState.currentLevel);
-            if (allBelow && NovaState.currentLevel > 1) {
-                NovaState.currentLevel--;
-                updateLevelUI(NovaState.currentLevel, false);
+        if (StellaState.recentAssessments.length >= 5) {
+            const last5 = StellaState.recentAssessments.slice(-5);
+            const allBelow = last5.every(a => a.suggestedLevel < StellaState.currentLevel);
+            if (allBelow && StellaState.currentLevel > 1) {
+                StellaState.currentLevel--;
+                updateLevelUI(StellaState.currentLevel, false);
             }
         }
     }
 
     function triggerLevelUp(newLevel) {
-        const oldLevel = NovaState.currentLevel;
-        NovaState.currentLevel = newLevel;
-        NovaState.leveledUp = true;
-        NovaState.newLevelAfterUp = newLevel;
+        const oldLevel = StellaState.currentLevel;
+        StellaState.currentLevel = newLevel;
+        StellaState.leveledUp = true;
+        StellaState.newLevelAfterUp = newLevel;
 
         updateLevelUI(newLevel, true);
 
-        const overlay = document.getElementById('novaLevelUpOverlay');
+        const overlay = document.getElementById('stellaLevelUpOverlay');
         overlay.innerHTML = buildLevelUpHTML(newLevel);
         overlay.classList.remove('hidden');
 
         spawnConfetti(20);
-        setNovaState('happy');
+        setStellaState('happy');
 
-        const name = NovaState.childData?.username || 'friend';
+        const name = StellaState.childData?.username || 'friend';
         speakText(`Wow ${name}! You levelled up to Level ${newLevel}! You are incredible!`);
     }
 
     function buildLevelUpHTML(newLevel) {
         const cfg = LEVEL_CONFIGS[newLevel] || LEVEL_CONFIGS[1];
-        const name = NovaState.childData?.username || 'friend';
+        const name = StellaState.childData?.username || 'friend';
         return `
       <div class="levelup-card">
-        <span class="levelup-nova">✨</span>
+        <span class="levelup-stella">✨</span>
         <div class="levelup-title">LEVEL UP!</div>
         <div class="levelup-badge">${cfg.emoji} Level ${newLevel}</div>
         <div class="levelup-name">${cfg.name}</div>
         <div class="levelup-msg">Amazing work ${name}! Your English is getting stronger every day! 🌟</div>
-        <button onclick="window.nova_closeLevelUp()">🚀 Keep Chatting!</button>
+        <button onclick="window.stella_closeLevelUp()">🚀 Keep Chatting!</button>
       </div>
     `;
     }
 
-    window.nova_closeLevelUp = function () {
-        document.getElementById('novaLevelUpOverlay').classList.add('hidden');
-        setNovaState('idle');
+    window.stella_closeLevelUp = function () {
+        document.getElementById('stellaLevelUpOverlay').classList.add('hidden');
+        setStellaState('idle');
     };
 
     // ── Session Timer ─────────────────────────────────────────────────────
     function startSessionTimer() {
-        const el = document.getElementById('novaSessionTimer');
-        NovaState.sessionStart = Date.now();
-        NovaState.sessionTimer = setInterval(() => {
-            const elapsed = Math.floor((Date.now() - NovaState.sessionStart) / 1000);
+        const el = document.getElementById('stellaSessionTimer');
+        StellaState.sessionStart = Date.now();
+        StellaState.sessionTimer = setInterval(() => {
+            const elapsed = Math.floor((Date.now() - StellaState.sessionStart) / 1000);
             const m = Math.floor(elapsed / 60).toString().padStart(2, '0');
             const s = (elapsed % 60).toString().padStart(2, '0');
             if (el) el.textContent = `${m}:${s}`;
@@ -680,61 +680,61 @@ You MUST respond in this exact JSON format:
 
     // ── End Session ───────────────────────────────────────────────────────
     async function endSession() {
-        clearInterval(NovaState.sessionTimer);
+        clearInterval(StellaState.sessionTimer);
         stopCurrentAudio(); // Stop ElevenLabs / browser audio
 
         setStatus('Saving session...');
 
-        const sessionData = await saveNovaSession();
+        const sessionData = await saveStellaSession();
         await saveProgressToSupabase();
 
         showSessionSummary();
     }
 
     function showSessionSummary() {
-        const overlay = document.getElementById('novaSummaryOverlay');
+        const overlay = document.getElementById('stellaSummaryOverlay');
         overlay.innerHTML = buildSummaryHTML();
         overlay.classList.remove('hidden');
-        if (NovaState.messageCount >= 5) spawnConfetti(15);
+        if (StellaState.messageCount >= 5) spawnConfetti(15);
     }
 
     function buildSummaryHTML() {
-        const count = NovaState.messageCount;
+        const count = StellaState.messageCount;
         let perfEmoji = '', perfTitle = '';
         if (count >= 10) { perfEmoji = '🌟'; perfTitle = 'Amazing session!'; }
         else if (count >= 5) { perfEmoji = '⭐'; perfTitle = 'Great session!'; }
         else { perfEmoji = '💫'; perfTitle = 'Good start!'; }
 
-        const wordsHTML = NovaState.sessionWords.length
-            ? `<div class="summary-words">${NovaState.sessionWords.map(w =>
-                `<span class="summary-word-pill" onclick="nova_speakWord('${escapeAttr(typeof w === 'string' ? w : w.word)}')">${typeof w === 'string' ? w : w.word}</span>`
+        const wordsHTML = StellaState.sessionWords.length
+            ? `<div class="summary-words">${StellaState.sessionWords.map(w =>
+                `<span class="summary-word-pill" onclick="stella_speakWord('${escapeAttr(typeof w === 'string' ? w : w.word)}')">${typeof w === 'string' ? w : w.word}</span>`
             ).join('')
             }</div>`
             : '';
 
-        const levelDisplay = NovaState.leveledUp
-            ? `🎉 Level Up! Now at Level ${NovaState.newLevelAfterUp} — ${LEVEL_CONFIGS[NovaState.newLevelAfterUp]?.name}`
-            : `Level ${NovaState.currentLevel} — ${LEVEL_CONFIGS[NovaState.currentLevel]?.name}`;
+        const levelDisplay = StellaState.leveledUp
+            ? `🎉 Level Up! Now at Level ${StellaState.newLevelAfterUp} — ${LEVEL_CONFIGS[StellaState.newLevelAfterUp]?.name}`
+            : `Level ${StellaState.currentLevel} — ${LEVEL_CONFIGS[StellaState.currentLevel]?.name}`;
 
         return `
-      <div class="nova-summary-card">
+      <div class="stella-summary-card">
         <span class="summary-emoji">${perfEmoji}</span>
         <div class="summary-title">${perfTitle}</div>
-        <div class="summary-sub">${count} messages • ${NovaState.sessionWords.length} new words</div>
+        <div class="summary-sub">${count} messages • ${StellaState.sessionWords.length} new words</div>
         ${wordsHTML}
         <div class="summary-level">${levelDisplay}</div>
-        <button onclick="document.getElementById('novaSummaryOverlay').classList.add('hidden')">🌟 Chat More!</button>
+        <button onclick="document.getElementById('stellaSummaryOverlay').classList.add('hidden')">🌟 Chat More!</button>
         <button class="secondary" onclick="window.location.href='dashboard.html'">🏠 Dashboard</button>
       </div>
     `;
     }
 
-    window.nova_speakWord = function (word) { speakText(word); };
+    window.stella_speakWord = function (word) { speakText(word); };
 
     // ── Voice INPUT (Web Speech API) ──────────────────────────────────────
     function initVoiceInput() {
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        const micBtn = document.getElementById('novaMicBtn');
+        const micBtn = document.getElementById('stellaMicBtn');
 
         if (!SpeechRecognition) {
             if (micBtn) {
@@ -750,16 +750,16 @@ You MUST respond in this exact JSON format:
         recognition.continuous = false;
         recognition.interimResults = true;
         recognition.maxAlternatives = 1;
-        NovaState.recognition = recognition;
+        StellaState.recognition = recognition;
 
         recognition.onstart = () => {
-            NovaState.isRecording = true;
+            StellaState.isRecording = true;
             if (micBtn) micBtn.classList.add('recording');
-            const indicator = document.getElementById('novaVoiceIndicator');
+            const indicator = document.getElementById('stellaVoiceIndicator');
             if (indicator) indicator.classList.remove('hidden');
-            const status = document.getElementById('novaVoiceStatus');
+            const status = document.getElementById('stellaVoiceStatus');
             if (status) status.textContent = 'Listening... speak now! 🎤';
-            setNovaState('idle');
+            setStellaState('idle');
         };
 
         recognition.onresult = (event) => {
@@ -767,19 +767,19 @@ You MUST respond in this exact JSON format:
                 .map(r => r[0].transcript)
                 .join('');
 
-            const transcriptEl = document.getElementById('novaVoiceTranscript');
+            const transcriptEl = document.getElementById('stellaVoiceTranscript');
             if (transcriptEl) transcriptEl.textContent = transcript;
 
             if (event.results[0].isFinal) {
                 stopRecording();
-                const input = document.getElementById('novaInput');
+                const input = document.getElementById('stellaInput');
                 if (input) {
                     input.value = transcript;
                     updateSendBtn(transcript);
                 }
                 // Auto-send after 2s if no editing
-                if (NovaState.autoSendTimer) clearTimeout(NovaState.autoSendTimer);
-                NovaState.autoSendTimer = setTimeout(() => {
+                if (StellaState.autoSendTimer) clearTimeout(StellaState.autoSendTimer);
+                StellaState.autoSendTimer = setTimeout(() => {
                     if (input && input.value === transcript) {
                         sendMessage(transcript);
                     }
@@ -793,34 +793,34 @@ You MUST respond in this exact JSON format:
                 : err.error === 'not-allowed' ? 'Microphone permission needed for voice chat!'
                     : 'Voice error — try typing instead!';
             setStatus(msg);
-            setTimeout(() => setStatus('Nova is ready! ✨'), 3000);
+            setTimeout(() => setStatus('Stella is ready! ⭐'), 3000);
         };
 
         recognition.onend = () => stopRecording();
 
         if (micBtn) {
             micBtn.addEventListener('click', () => {
-                if (NovaState.isRecording) stopRecording();
+                if (StellaState.isRecording) stopRecording();
                 else startRecording();
             });
         }
 
-        document.getElementById('novaCancelVoice')?.addEventListener('click', stopRecording);
+        document.getElementById('stellaCancelVoice')?.addEventListener('click', stopRecording);
     }
 
     function startRecording() {
         try {
-            NovaState.recognition?.start();
+            StellaState.recognition?.start();
         } catch (e) { console.warn('Recognition already started', e); }
     }
 
     function stopRecording() {
-        NovaState.isRecording = false;
-        try { NovaState.recognition?.stop(); } catch { }
-        document.getElementById('novaMicBtn')?.classList.remove('recording');
-        const indicator = document.getElementById('novaVoiceIndicator');
+        StellaState.isRecording = false;
+        try { StellaState.recognition?.stop(); } catch { }
+        document.getElementById('stellaMicBtn')?.classList.remove('recording');
+        const indicator = document.getElementById('stellaVoiceIndicator');
         if (indicator) indicator.classList.add('hidden');
-        setNovaState('idle');
+        setStellaState('idle');
     }
 
     // ── Voice OUTPUT — ElevenLabs TTS (with SpeechSynthesis fallback) ─────
@@ -828,19 +828,19 @@ You MUST respond in this exact JSON format:
     /** Stop whatever is currently playing */
     function stopCurrentAudio() {
         // ElevenLabs AudioContext source
-        if (NovaState.currentAudioSource) {
-            try { NovaState.currentAudioSource.stop(); } catch { }
-            NovaState.currentAudioSource = null;
+        if (StellaState.currentAudioSource) {
+            try { StellaState.currentAudioSource.stop(); } catch { }
+            StellaState.currentAudioSource = null;
         }
         // HTML Audio element fallback
-        if (NovaState.currentAudio) {
-            NovaState.currentAudio.pause();
-            NovaState.currentAudio.src = '';
-            NovaState.currentAudio = null;
+        if (StellaState.currentAudio) {
+            StellaState.currentAudio.pause();
+            StellaState.currentAudio.src = '';
+            StellaState.currentAudio = null;
         }
         // Browser SpeechSynthesis fallback
         if (window.speechSynthesis) window.speechSynthesis.cancel();
-        NovaState.isSpeaking = false;
+        StellaState.isSpeaking = false;
     }
 
     /** Strip emojis and extra whitespace from text before sending to TTS */
@@ -860,7 +860,7 @@ You MUST respond in this exact JSON format:
      * @param {Function|null} onEnd  — called when audio finishes
      */
     async function speakText(text, onEnd = null) {
-        if (!NovaState.voiceEnabled) return;
+        if (!StellaState.voiceEnabled) return;
 
         // Stop previous audio immediately
         stopCurrentAudio();
@@ -878,13 +878,13 @@ You MUST respond in this exact JSON format:
             apiKey.trim() === '';
 
         if (isKeyMissing) {
-            console.info('Nova TTS: No ElevenLabs key — using browser SpeechSynthesis');
+            console.info('Stella TTS: No ElevenLabs key — using browser SpeechSynthesis');
             speakWithBrowser(cleanText, onEnd);
             return;
         }
 
-        setNovaState('speaking');
-        NovaState.isSpeaking = true;
+        setStellaState('speaking');
+        StellaState.isSpeaking = true;
 
         try {
             const endpoint =
@@ -911,7 +911,7 @@ You MUST respond in this exact JSON format:
 
             if (!resp.ok) {
                 const errText = await resp.text().catch(() => '');
-                console.warn(`Nova TTS: ElevenLabs ${resp.status}`, errText);
+                console.warn(`Stella TTS: ElevenLabs ${resp.status}`, errText);
                 // Graceful fallback
                 speakWithBrowser(cleanText, onEnd);
                 return;
@@ -923,32 +923,32 @@ You MUST respond in this exact JSON format:
             const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             audioCtx.decodeAudioData(arrayBuffer, (buffer) => {
                 // If another message interrupted, bail
-                if (!NovaState.isSpeaking) { setNovaState('idle'); return; }
+                if (!StellaState.isSpeaking) { setStellaState('idle'); return; }
 
                 const source = audioCtx.createBufferSource();
                 source.buffer = buffer;
                 source.connect(audioCtx.destination);
 
-                NovaState.currentAudioSource = source;
+                StellaState.currentAudioSource = source;
 
                 source.onended = () => {
-                    NovaState.isSpeaking = false;
-                    NovaState.currentAudioSource = null;
-                    setNovaState('idle');
+                    StellaState.isSpeaking = false;
+                    StellaState.currentAudioSource = null;
+                    setStellaState('idle');
                     if (onEnd) onEnd();
                 };
 
                 source.start(0);
 
             }, (err) => {
-                console.warn('Nova TTS: Audio decode failed', err);
-                NovaState.isSpeaking = false;
+                console.warn('Stella TTS: Audio decode failed', err);
+                StellaState.isSpeaking = false;
                 speakWithBrowser(cleanText, onEnd);
             });
 
         } catch (err) {
-            console.warn('Nova TTS: ElevenLabs fetch failed', err);
-            NovaState.isSpeaking = false;
+            console.warn('Stella TTS: ElevenLabs fetch failed', err);
+            StellaState.isSpeaking = false;
             // Fallback to browser
             speakWithBrowser(cleanText, onEnd);
         }
@@ -958,7 +958,7 @@ You MUST respond in this exact JSON format:
     function speakWithBrowser(cleanText, onEnd = null) {
         if (!window.speechSynthesis) { if (onEnd) onEnd(); return; }
 
-        setNovaState('speaking');
+        setStellaState('speaking');
         const utterance = new SpeechSynthesisUtterance(cleanText);
 
         const trySpeak = () => {
@@ -975,9 +975,9 @@ You MUST respond in this exact JSON format:
             utterance.pitch = 1.15;
             utterance.volume = 0.9;
 
-            utterance.onstart = () => setNovaState('speaking');
-            utterance.onend = () => { setNovaState('idle'); if (onEnd) onEnd(); };
-            utterance.onerror = () => { setNovaState('idle'); if (onEnd) onEnd(); };
+            utterance.onstart = () => setStellaState('speaking');
+            utterance.onend = () => { setStellaState('idle'); if (onEnd) onEnd(); };
+            utterance.onerror = () => { setStellaState('idle'); if (onEnd) onEnd(); };
 
             window.speechSynthesis.speak(utterance);
         };
@@ -991,27 +991,27 @@ You MUST respond in this exact JSON format:
 
     // ── Voice toggle ──────────────────────────────────────────────────────
     function initVoiceToggle() {
-        const btn = document.getElementById('novaVoiceToggle');
-        NovaState.voiceEnabled = localStorage.getItem('nova_voice_enabled') !== 'false';
+        const btn = document.getElementById('stellaVoiceToggle');
+        StellaState.voiceEnabled = localStorage.getItem('stella_voice_enabled') !== 'false';
         if (btn) {
-            btn.textContent = NovaState.voiceEnabled ? '🔊' : '🔇';
-            if (!NovaState.voiceEnabled) btn.classList.add('muted');
+            btn.textContent = StellaState.voiceEnabled ? '🔊' : '🔇';
+            if (!StellaState.voiceEnabled) btn.classList.add('muted');
             btn.addEventListener('click', () => {
-                NovaState.voiceEnabled = !NovaState.voiceEnabled;
-                localStorage.setItem('nova_voice_enabled', NovaState.voiceEnabled);
-                btn.textContent = NovaState.voiceEnabled ? '🔊' : '🔇';
-                btn.classList.toggle('muted', !NovaState.voiceEnabled);
+                StellaState.voiceEnabled = !StellaState.voiceEnabled;
+                localStorage.setItem('stella_voice_enabled', StellaState.voiceEnabled);
+                btn.textContent = StellaState.voiceEnabled ? '🔊' : '🔇';
+                btn.classList.toggle('muted', !StellaState.voiceEnabled);
                 // Stop any currently playing ElevenLabs or browser audio
-                if (!NovaState.voiceEnabled) stopCurrentAudio();
+                if (!StellaState.voiceEnabled) stopCurrentAudio();
             });
         }
     }
 
     // ── Input Events ──────────────────────────────────────────────────────
     function initInputEvents() {
-        const input = document.getElementById('novaInput');
-        const sendbtn = document.getElementById('novaSendBtn');
-        const endBtn = document.getElementById('novaEndBtn');
+        const input = document.getElementById('stellaInput');
+        const sendbtn = document.getElementById('stellaSendBtn');
+        const endBtn = document.getElementById('stellaEndBtn');
 
         input?.addEventListener('input', () => updateSendBtn(input.value));
         input?.addEventListener('keydown', e => {
@@ -1020,9 +1020,9 @@ You MUST respond in this exact JSON format:
                 sendMessage(input.value);
             }
             // Cancel auto-send if typing
-            if (NovaState.autoSendTimer) {
-                clearTimeout(NovaState.autoSendTimer);
-                NovaState.autoSendTimer = null;
+            if (StellaState.autoSendTimer) {
+                clearTimeout(StellaState.autoSendTimer);
+                StellaState.autoSendTimer = null;
             }
         });
 
@@ -1034,7 +1034,7 @@ You MUST respond in this exact JSON format:
     }
 
     function updateSendBtn(val) {
-        const btn = document.getElementById('novaSendBtn');
+        const btn = document.getElementById('stellaSendBtn');
         if (!btn) return;
         if (val.trim()) btn.classList.add('visible');
         else btn.classList.remove('visible');
@@ -1073,7 +1073,7 @@ You MUST respond in this exact JSON format:
     }
 
     // ── Init ──────────────────────────────────────────────────────────────
-    async function initNova() {
+    async function initStella() {
         // Get user from auth
         try {
             if (window.eduplay?.getCurrentUser) {
@@ -1082,39 +1082,39 @@ You MUST respond in this exact JSON format:
                     window.location.href = 'login.html';
                     return;
                 }
-                NovaState.userId = user.id || user.auth_id;
-                NovaState.childData = user;
+                StellaState.userId = user.id || user.auth_id;
+                StellaState.childData = user;
             } else if (window.eduplay?.session?.getUser) {
                 const user = window.eduplay.session.getUser();
                 if (!user) { window.location.href = 'login.html'; return; }
-                NovaState.userId = user.id;
-                NovaState.childData = user;
+                StellaState.userId = user.id;
+                StellaState.childData = user;
             }
         } catch (e) {
-            console.error('Nova: auth error', e);
+            console.error('Stella: auth error', e);
         }
 
-        if (!NovaState.userId) {
+        if (!StellaState.userId) {
             // Try Supabase session directly
             try {
                 const sb = getSupabase();
                 const { data: { session } } = await sb.auth.getSession();
                 if (!session) { window.location.href = 'login.html'; return; }
-                NovaState.userId = session.user.id;
+                StellaState.userId = session.user.id;
                 const { data: profile } = await sb.from('users').select('*').eq('id', session.user.id).single();
-                NovaState.childData = profile || { id: session.user.id, username: session.user.email?.split('@')[0] || 'Explorer' };
-            } catch (e) { console.error('Nova: fallback auth failed', e); return; }
+                StellaState.childData = profile || { id: session.user.id, username: session.user.email?.split('@')[0] || 'Explorer' };
+            } catch (e) { console.error('Stella: fallback auth failed', e); return; }
         }
 
         // Load progress
-        NovaState.progress = await loadProgress();
-        if (NovaState.progress) {
-            NovaState.currentLevel = NovaState.progress.current_level || 1;
+        StellaState.progress = await loadProgress();
+        if (StellaState.progress) {
+            StellaState.currentLevel = StellaState.progress.current_level || 1;
         }
-        NovaState.levelAtSessionStart = NovaState.currentLevel;
+        StellaState.levelAtSessionStart = StellaState.currentLevel;
 
         // Setup UI
-        updateLevelUI(NovaState.currentLevel);
+        updateLevelUI(StellaState.currentLevel);
         renderLeftPanelStats();
         startSessionTimer();
         initVoiceInput();
@@ -1122,22 +1122,22 @@ You MUST respond in this exact JSON format:
         initInputEvents();
 
         // Show opening message
-        const opening = buildOpeningMessage();
+        const opening = buildStellaOpening();
         setTimeout(() => {
-            displayNovaMessage(opening.message);
+            displayStellaMessage(opening.message);
             speakText(opening.message);
         }, 600);
     }
 
     // Boot when DOM ready
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initNova);
+        document.addEventListener('DOMContentLoaded', initStella);
     } else {
-        initNova();
+        initStella();
     }
 
     // ── Dashboard integration ─────────────────────────────────────────────
-    window.loadNovaProgress = async function (userId) {
+    window.loadStellaProgress = async function (userId) {
         try {
             const sb = getSupabase();
             const { data } = await sb

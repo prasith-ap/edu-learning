@@ -192,24 +192,24 @@ async function loadUserData() {
       }
     }
 
-    // ── Nova Dashboard Card ───────────────────────────────────
+    // ── Stella Dashboard Card ───────────────────────────────────
     try {
       const userId = currentUser.id || currentUser.auth_id;
-      if (userId && window.loadNovaProgress) {
-        window.loadNovaProgress(userId).then(progress => {
+      if (userId && window.loadStellaProgress) {
+        window.loadStellaProgress(userId).then(progress => {
           const levelNames = ['', 'Beginner', 'Explorer', 'Adventurer', 'Champion', 'Master'];
           const lvl = progress?.current_level || 0;
-          const lvlEl = document.getElementById('dashNovaLevel');
+          const lvlEl = document.getElementById('dashStellaLevel');
           if (lvlEl) {
             lvlEl.textContent = lvl > 0
               ? `Level ${lvl}: ${levelNames[lvl] || ''}`
               : 'Start your first session!';
           }
-          const sessEl = document.getElementById('dashNovaSessions');
+          const sessEl = document.getElementById('dashStellaSessions');
           if (sessEl) {
             sessEl.textContent = progress ? `${progress.total_sessions} session${progress.total_sessions !== 1 ? 's' : ''}` : '0 sessions';
           }
-          const wordsEl = document.getElementById('dashNovaWords');
+          const wordsEl = document.getElementById('dashStellaWords');
           if (wordsEl) {
             const wc = Array.isArray(progress?.words_learned) ? progress.words_learned.length : 0;
             wordsEl.textContent = `📚 ${wc} word${wc !== 1 ? 's' : ''}`;
@@ -217,7 +217,7 @@ async function loadUserData() {
         }).catch(() => { });
       }
     } catch (e) {
-      console.warn('Nova card load failed:', e);
+      console.warn('Stella card load failed:', e);
     }
 
   } catch (err) {
