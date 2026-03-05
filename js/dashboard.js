@@ -167,6 +167,59 @@ async function loadUserData() {
     // Coins are already fetched and displayed by auth.js updateNavCoins via checkAuth
     // No need to create a second Supabase client here
 
+    // ── Parent View Init ──────────────────────────────────────
+    if (window.ParentView) {
+      try {
+        // Get or create Supabase client
+        let sb = window._dashboardSupabase;
+        if (!sb && window.supabase && window.CONFIG) {
+          sb = window.supabase.createClient(
+            window.CONFIG.SUPABASE_URL,
+            window.CONFIG.SUPABASE_ANON_KEY
+          );
+          window._dashboardSupabase = sb;
+        }
+        const userId = currentUser.id || currentUser.auth_id;
+        if (sb && userId) {
+          // Compute badges from stats for parent view
+          const pvBadges = (stats.badges && stats.badges.length > 0)
+            ? stats.badges
+            : computeBadgesFromStats(stats);
+          ParentView.init(sb, userId, currentUser, stats.history || [], pvBadges);
+        }
+      } catch (pvErr) {
+        console.warn('ParentView init failed:', pvErr);
+      }
+    }
+
+    // ── Nova Dashboard Card ───────────────────────────────────
+    try {
+      const userId = currentUser.id || currentUser.auth_id;
+      if (userId && window.loadNovaProgress) {
+        window.loadNovaProgress(userId).then(progress => {
+          const levelNames = ['', 'Beginner', 'Explorer', 'Adventurer', 'Champion', 'Master'];
+          const lvl = progress?.current_level || 0;
+          const lvlEl = document.getElementById('dashNovaLevel');
+          if (lvlEl) {
+            lvlEl.textContent = lvl > 0
+              ? `Level ${lvl}: ${levelNames[lvl] || ''}`
+              : 'Start your first session!';
+          }
+          const sessEl = document.getElementById('dashNovaSessions');
+          if (sessEl) {
+            sessEl.textContent = progress ? `${progress.total_sessions} session${progress.total_sessions !== 1 ? 's' : ''}` : '0 sessions';
+          }
+          const wordsEl = document.getElementById('dashNovaWords');
+          if (wordsEl) {
+            const wc = Array.isArray(progress?.words_learned) ? progress.words_learned.length : 0;
+            wordsEl.textContent = `📚 ${wc} word${wc !== 1 ? 's' : ''}`;
+          }
+        }).catch(() => { });
+      }
+    } catch (e) {
+      console.warn('Nova card load failed:', e);
+    }
+
   } catch (err) {
     console.error('❌ Error in loadUserData:', err);
   }

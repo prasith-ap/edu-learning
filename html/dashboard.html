@@ -17,9 +17,13 @@
   <link rel="stylesheet" href="../css/main.css"> <!-- Base styles if any -->
   <link rel="stylesheet" href="../css/theme.css">
   <link rel="stylesheet" href="../css/dashboard.css">
+  <link rel="stylesheet" href="../css/parent-view.css">
+  <link rel="stylesheet" href="../css/nova.css">
 
   <!-- Supabase SDK -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Chart.js for Parent View analytics -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body>
@@ -70,8 +74,13 @@
         <a href="dashboard.html" class="nav-link active">Dashboard</a>
         <a href="progress.html" class="nav-link">My Progress</a>
         <a href="games.html" class="nav-link">Games</a>
+        <a href="nova.html" class="nav-link">✨ Nova</a>
       </div>
       <div class="nav-right">
+        <!-- Parent View Button -->
+        <button class="parent-view-btn" id="parentViewBtn" onclick="ParentView.handleNavbarClick()">
+          👨‍👩‍👧 Parent View
+        </button>
         <!-- Coin Display -->
         <div class="stat-chip"
           style="margin-right: 15px; background: linear-gradient(135deg, #F59E0B, #FCD34D); padding: 5px 15px; border-radius: 20px; color: #78350F; font-weight: bold; border: 2px solid white; box-shadow: 0 4px 10px rgba(245, 158, 11, 0.3);">
@@ -162,6 +171,26 @@
         <div class="stat-accent"></div>
       </div>
     </section>
+
+    <!-- NOVA AI CARD -->
+    <a href="nova.html" class="nova-dashboard-card" id="novaDashCard">
+      <div class="nova-card-left">
+        <span class="nova-card-char">✨</span>
+        <div class="nova-card-info">
+          <h3 class="nova-card-title">Chat with Nova!</h3>
+          <p class="nova-card-sub">Practice English and improve your level! 🌟</p>
+          <div class="nova-card-level" id="dashNovaLevel">Loading...</div>
+        </div>
+      </div>
+      <div class="nova-card-right">
+        <div class="nova-card-stats">
+          <span id="dashNovaSessions">0 sessions</span>
+          <span id="dashNovaWords">📚 0 words</span>
+        </div>
+        <button class="nova-card-btn" onclick="event.preventDefault(); window.location.href='nova.html'">Talk to Nova
+          →</button>
+      </div>
+    </a>
 
     <!-- SECTION 6: SUBJECT CARDS -->
     <section class="subjects-section" id="subjectsSection">
@@ -295,6 +324,7 @@
   <script src="../js/auth.js"></script>
   <script src="../js/theme-engine.js"></script>
   <script src="../js/mascot.js"></script>
+  <script src="../js/parent-view.js"></script>
   <script src="../js/dashboard.js"></script>
 
   <!-- Living Mascot AI Companion - Ollie the 🦉 Wise Owl -->

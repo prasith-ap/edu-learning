@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nova — English Coach | EduPlay</title>
+  <meta name="description" content="Chat with Nova, your AI English learning companion! Practice speaking and improve your English level.">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800;900&family=Nunito:wght@700;800;900&family=Fredoka+One&display=swap" rel="stylesheet">
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="../css/nova.css">
+
+  <!-- Supabase SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+
+<body>
+  <!-- Stars Canvas Background -->
+  <canvas id="starsCanvas" style="position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;opacity:0.6;"></canvas>
+
+  <div class="nova-page" style="position:relative;z-index:1;">
+
+    <!-- NAVBAR -->
+    <nav class="nova-navbar">
+      <span class="nova-brand">🎓 EduPlay</span>
+      <span class="nova-nav-title">✨ Nova — English Coach</span>
+      <a href="dashboard.html" class="nova-back-btn">← Dashboard</a>
+    </nav>
+
+    <!-- MAIN LAYOUT -->
+    <div class="nova-layout">
+
+      <!-- LEFT PANEL -->
+      <aside class="nova-left-panel" id="novaLeftPanel">
+
+        <!-- Character Card -->
+        <div class="nova-character-card">
+          <span class="nova-char nova-idle" id="novaCharacter">✨</span>
+          <div class="nova-char-name">Nova</div>
+          <div class="nova-char-tagline">Your English Learning Star!</div>
+        </div>
+
+        <!-- Level Card -->
+        <div class="nova-level-card" id="novaLevelCard">
+          <div class="nova-level-label">Your Level</div>
+          <div class="nova-level-badge nova-level-1" id="novaLevelBadge">
+            <span class="nova-level-emoji" id="novaLevelEmoji">🌱</span>
+            <span class="nova-level-name" id="novaLevelName">Beginner</span>
+            <span class="nova-level-num" id="novaLevelNum">1</span>
+          </div>
+          <div class="nova-xp-bar-container">
+            <div class="nova-xp-bar" id="novaXPBar"></div>
+          </div>
+          <div class="nova-xp-label" id="novaXPLabel">Keep chatting to level up!</div>
+        </div>
+
+        <!-- Stats Card -->
+        <div class="nova-stats-card" id="novaStatsCard">
+          <div class="nova-stat">
+            <span class="nova-stat-icon">🗣️</span>
+            <span class="nova-stat-value" id="statSessions">0</span>
+            <span class="nova-stat-label">Sessions</span>
+          </div>
+          <div class="nova-stat">
+            <span class="nova-stat-icon">📚</span>
+            <span class="nova-stat-value" id="statWords">0</span>
+            <span class="nova-stat-label">Words</span>
+          </div>
+          <div class="nova-stat">
+            <span class="nova-stat-icon">🔥</span>
+            <span class="nova-stat-value" id="statStreak">0</span>
+            <span class="nova-stat-label">Day Streak</span>
+          </div>
+        </div>
+
+        <!-- Focus Card -->
+        <div class="nova-focus-card" id="novaFocusCard">
+          <div class="nova-focus-title">📝 Today's Focus</div>
+          <div class="nova-focus-items" id="novaFocusItems">
+            <div class="nova-focus-item">💬 Natural conversation</div>
+            <div class="nova-focus-item">📖 Vocabulary building</div>
+            <div class="nova-focus-item">✏️ Grammar practice</div>
+          </div>
+        </div>
+
+      </aside>
+
+      <!-- RIGHT PANEL: Chat -->
+      <main class="nova-right-panel">
+
+        <!-- Chat Topbar -->
+        <div class="nova-chat-topbar">
+          <div class="nova-status" id="novaStatus">
+            <span class="nova-status-dot"></span>
+            <span id="novaStatusText">Nova is ready! ✨</span>
+          </div>
+          <div class="nova-chat-controls">
+            <span class="nova-session-timer" id="novaSessionTimer">00:00</span>
+            <button class="nova-voice-toggle" id="novaVoiceToggle" title="Toggle Nova's voice">🔊</button>
+            <button class="nova-end-btn" id="novaEndBtn">Finish Session 📊</button>
+          </div>
+        </div>
+
+        <!-- Chat Area -->
+        <div class="nova-chat-area" id="novaChatArea">
+          <!-- Messages appear here -->
+        </div>
+
+        <!-- Input Area -->
+        <div class="nova-input-area">
+          <button class="nova-mic-btn" id="novaMicBtn" title="Speak to Nova">🎤</button>
+          <input type="text" class="nova-input" id="novaInput"
+                 placeholder="Type your message to Nova..."
+                 autocomplete="off" />
+          <button class="nova-send-btn" id="novaSendBtn">➤</button>
+        </div>
+
+        <!-- Voice Indicator (bottom bar when recording) -->
+        <div class="nova-voice-indicator hidden" id="novaVoiceIndicator">
+          <span class="nova-mic-pulse">🎤</span>
+          <span id="novaVoiceStatus">Listening...</span>
+          <span id="novaVoiceTranscript"></span>
+          <button id="novaCancelVoice">Cancel</button>
+        </div>
+
+      </main>
+
+    </div>
+  </div>
+
+  <!-- Session Summary Overlay -->
+  <div class="nova-summary-overlay hidden" id="novaSummaryOverlay"></div>
+
+  <!-- Level Up Overlay -->
+  <div class="nova-levelup-overlay hidden" id="novaLevelUpOverlay"></div>
+
+  <!-- Scripts -->
+  <script src="../config.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/nova.js"></script>
+
+  <!-- Stars Canvas Script -->
+  <script>
+    (function () {
+      const canvas = document.getElementById('starsCanvas');
+      const ctx = canvas.getContext('2d');
+      let stars = [];
+
+      function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }
+
+      function init() {
+        resize();
+        stars = [];
+        for (let i = 0; i < 80; i++) {
+          stars.push({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height,
+            r: Math.random() * 1.5 + 0.3,
+            a: Math.random(),
+            speed: Math.random() * 0.008 + 0.003
+          });
+        }
+      }
+
+      function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        stars.forEach(s => {
+          s.a += s.speed;
+          ctx.beginPath();
+          ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(255,255,255,${Math.abs(Math.sin(s.a)) * 0.8 + 0.1})`;
+          ctx.fill();
+        });
+        requestAnimationFrame(draw);
+      }
+
+      window.addEventListener('resize', init);
+      init();
+      draw();
+    })();
+  </script>
+</body>
+
+</html>
