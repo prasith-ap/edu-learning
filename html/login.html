@@ -1,84 +1,632 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login | EduPlay</title>
-  <!-- Google Fonts: Source Sans Pro (Similar to Coursera) -->
+  <title>Welcome to EduPlay! 🎓</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600;700&display=swap" rel="stylesheet">
-  
-  <link rel="stylesheet" href="../css/main.css">
-  <!-- Ensure auth.css is loaded or removed if integrated into main.css. 
-       Since I integrated styles into main.css, I can skip auth.css or keep it if it has unique styles not yet migrated.
-       To be safe, I'll rely on main.css primarily. -->
+  <link
+    href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800;900&family=Nunito:wght@600;700;800;900&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="../css/auth.css">
 </head>
+
 <body>
 
-  <!-- Minimal Navbar for Auth Page -->
-  <nav class="navbar">
-    <div class="container">
-      <a href="index.html" class="navbar-brand">
-        EduPlay
-      </a>
+  <!-- Page veil (fades out on load) -->
+  <div class="page-veil" id="pageVeil"></div>
+
+  <!-- Star canvas -->
+  <canvas id="starCanvas"></canvas>
+
+  <!-- Moon -->
+  <div class="moon" id="moonEl">
+    <div class="moon-eye left"></div>
+    <div class="moon-eye right"></div>
+    <div class="moon-mouth"></div>
+  </div>
+
+  <!-- Tree -->
+  <div class="tree-wrap" id="treeEl">
+    <div class="tree-crown-wrap">
+      <div class="tree-crown">
+        <div class="crown-circle crown-left"></div>
+        <div class="crown-circle crown-right"></div>
+        <div class="crown-circle crown-main"></div>
+      </div>
     </div>
-  </nav>
-
-  <div class="auth-container">
-    <div class="auth-card fade-in">
-      <div class="auth-header">
-        <h1>Welcome Back</h1>
-        <p>Log in to continue your learning journey.</p>
-      </div>
-
-      <form id="loginForm">
-        <div class="form-group">
-          <label for="username">Username</label>
-          <input type="text" id="username" name="username" placeholder="Enter your username" required autocomplete="username">
-        </div>
-
-        <div class="form-group">
-          <label for="password">Password</label>
-          <input type="password" id="password" name="password" placeholder="Enter your password" required autocomplete="current-password">
-        </div>
-
-        <!-- Error/Success Messages -->
-        <div id="errorMessage" class="alert alert-error hidden"></div>
-        <div id="successMessage" class="alert alert-success hidden"></div>
-
-        <button type="submit" class="btn btn-primary btn-block">Log In</button>
-      </form>
-
-      <div class="auth-footer">
-        <p>New to EduPlay? <a href="register.html">Sign up for free</a></p>
-        <p><a href="index.html">Back to Home</a></p>
-      </div>
+    <div class="tree-trunk">
+      <div class="tree-platform"></div>
+      <div class="tree-window"></div>
     </div>
   </div>
 
-  <footer class="footer">
-    <div class="container copyright">
-      <p>&copy; 2026 EduPlay. All rights reserved.</p>
+  <!-- Grass -->
+  <div class="grass-wrap">
+    <div class="hill hill-back"></div>
+    <div class="hill hill-front">
+      <span class="shroom">🍄</span>
+      <span class="shroom">🍄</span>
+      <span class="shroom">🍄</span>
     </div>
-  </footer>
+  </div>
+
+  <!-- Owl character -->
+  <div class="owl-char" id="owlChar">🦉</div>
+
+  <!-- Owl speech bubble -->
+  <div class="owl-bubble" id="owlBubble"></div>
+
+  <!-- Rabbit character -->
+  <div class="rabbit-char" id="rabbitChar">🐰</div>
+
+  <!-- ══════════════════════════════════════
+     AUTH SCENE — 3D flip container
+══════════════════════════════════════ -->
+  <div class="auth-scene entering" id="authScene">
+    <a href="index.html" class="card-topper" title="Back to Home" style="text-decoration:none;color:inherit;">🎓</a>
+
+    <div class="auth-card-inner" id="cardInner">
+
+      <!-- ── FRONT: LOGIN ─────────────────── -->
+      <div class="auth-card-front" id="loginCard">
+        <div class="door-knob"></div>
+
+        <div class="form-mascot">🦉</div>
+        <h1 class="form-title">Welcome Back!</h1>
+        <p class="form-subtitle">Your friends missed you! 🎉</p>
+
+        <!-- shared error/success (single instance on page) -->
+        <div id="errorMessage" class="hidden" style="display:none;"></div>
+        <div id="successMessage" class="hidden" style="display:none;"></div>
+
+        <form id="loginForm" novalidate>
+          <div class="field-group">
+            <label class="field-label" for="username">👤 Username</label>
+            <input class="field-input" type="text" id="username" name="username" placeholder="Your explorer name"
+              autocomplete="username" required>
+            <span class="field-check">✓</span>
+          </div>
+
+          <div class="field-group">
+            <label class="field-label" for="password">🔑 Password</label>
+            <input class="field-input" type="password" id="password" name="password" placeholder="Your secret password"
+              autocomplete="current-password" required>
+            <span class="field-check">✓</span>
+          </div>
+
+          <button type="submit" class="auth-btn" id="loginBtn">🚀 Let's Go!</button>
+        </form>
+
+        <div class="switch-link">
+          New here? <button type="button" id="goToRegister">Join the Adventure! 🌟</button>
+        </div>
+      </div><!-- /front -->
+
+      <!-- ── BACK: REGISTER ──────────────── -->
+      <div class="auth-card-back" id="registerCard">
+        <div class="door-knob"></div>
+
+        <div class="form-mascot">🌟</div>
+        <h1 class="form-title">Join the Adventure!</h1>
+        <p class="form-subtitle">Start your learning journey! 🚀</p>
+
+        <form id="registerForm" novalidate>
+          <!-- username — uses same ID when this form is active -->
+          <div class="field-group">
+            <label class="field-label" for="reg-username-input">👤 Username</label>
+            <input class="field-input" type="text" id="reg-username-input" name="username"
+              placeholder="Pick a cool name" autocomplete="username" required>
+            <span class="field-check">✓</span>
+          </div>
+
+          <div class="field-group">
+            <label class="field-label" for="reg-email-input">📧 Email Address</label>
+            <input class="field-input" type="email" id="reg-email-input" name="email" placeholder="name@example.com"
+              autocomplete="email" required>
+            <span class="field-check">✓</span>
+          </div>
+
+          <!-- Age selector -->
+          <div class="field-group">
+            <div class="field-label">🎂 How old are you?</div>
+            <div class="age-row" id="ageRow">
+              <button type="button" class="age-btn" data-age="6">6</button>
+              <button type="button" class="age-btn" data-age="7">7</button>
+              <button type="button" class="age-btn" data-age="8">8</button>
+              <button type="button" class="age-btn" data-age="9">9</button>
+              <button type="button" class="age-btn" data-age="10">10</button>
+              <button type="button" class="age-btn" data-age="11">11</button>
+              <button type="button" class="age-btn" data-age="12">12</button>
+            </div>
+            <!-- hidden input — auth.js reads getElementById('age') -->
+            <input type="hidden" id="reg-age-input" name="age">
+            <div class="age-error" id="ageError">Pick your age! 🎂</div>
+          </div>
+
+          <div class="field-group">
+            <label class="field-label" for="reg-password-input">🔑 Password</label>
+            <input class="field-input" type="password" id="reg-password-input" name="password"
+              placeholder="Make it strong! (6+ chars)" autocomplete="new-password" required>
+            <span class="field-check">✓</span>
+            <div class="pw-strength-wrap">
+              <div class="pw-segments">
+                <div class="pw-seg" id="seg1"></div>
+                <div class="pw-seg" id="seg2"></div>
+                <div class="pw-seg" id="seg3"></div>
+                <div class="pw-seg" id="seg4"></div>
+              </div>
+              <div class="pw-label" id="pwLabel"></div>
+            </div>
+          </div>
+
+          <div class="field-group">
+            <label class="field-label" for="reg-confirm-input">🔒 Confirm Password</label>
+            <input class="field-input" type="password" id="reg-confirm-input" name="confirmPassword"
+              placeholder="Type it again" autocomplete="new-password" required>
+            <span class="field-check">✓</span>
+          </div>
+
+          <button type="submit" class="auth-btn" id="registerBtn">🌟 Start Adventure!</button>
+        </form>
+
+        <div class="switch-link">
+          Already a member? <button type="button" id="goToLogin">Log in! 🦉</button>
+        </div>
+      </div><!-- /back -->
+
+    </div><!-- /card-inner -->
+  </div><!-- /auth-scene -->
 
   <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="../config.js"></script>
-  <script src="../js/auth.js"></script>
-
-  <!-- Inline Script to ensure message handling matches new CSS classes -->
   <script>
-    // Helper to bridge auth.js 'show' class to our 'hidden' class logic if needed
-    // standardizing the auth.js output to match our CSS would be better, but for now:
-    const originalShowError = window.showError;
-    // We will let auth.js run, but we need to make sure 'hidden' class is removed when auth.js tries to show error.
-    // Ideally I will update auth.js next, but this ensures immediate compatibility.
-    
-    // Observer to toggle 'hidden' based on content?
-    // Actually, let's just update auth.js to be compatible with 'hidden' or standard 'display: none'
-    // For now, styling 'alert' with default block display and using 'hidden' class to hide is good.
+    'use strict';
+
+    /* ══════════════════════════════════════════
+       ID BRIDGING — auth.js reads getElementById('username'),
+       getElementById('email'), getElementById('age'),
+       getElementById('password'), getElementById('confirmPassword').
+       We swap those IDs to whichever form is currently visible.
+    ══════════════════════════════════════════ */
+    const LOGIN_IDS = {
+      username: 'username',   // already correct ID on login input
+      password: 'password',
+    };
+    const REG_MAP = {
+      username: 'reg-username-input',
+      email: 'reg-email-input',
+      age: 'reg-age-input',
+      password: 'reg-password-input',
+      confirmPassword: 'reg-confirm-input',
+    };
+
+    let isShowingRegister = false;
+
+    function activateLoginIds() {
+      // Give login inputs their expected IDs
+      document.getElementById('username').id = 'username';
+      document.getElementById('password').id = 'password';
+      // Strip IDs from register inputs so they don't conflict
+      if (document.getElementById('username') &&
+        document.getElementById('username').closest('#registerCard')) {
+        // unlikely case guard
+      }
+      // Restore register inputs to their storage IDs
+      const u = document.getElementById('username');
+      const p = document.getElementById('password');
+      if (u && u.closest('#registerCard')) u.id = REG_MAP.username;
+      if (p && p.closest('#registerCard')) p.id = REG_MAP.password;
+    }
+
+    function activateRegisterIds() {
+      // Move IDs auth.js expects onto register form fields
+      const names = ['username', 'email', 'age', 'password', 'confirmPassword'];
+      names.forEach(n => {
+        const storageId = REG_MAP[n];
+        const el = document.getElementById(storageId);
+        if (el) el.id = n;
+      });
+      // Strip login fields of conflicting IDs
+      ['username', 'password'].forEach(n => {
+        const loginEl = document.querySelector(`#loginForm [name="${n}"]`);
+        if (loginEl) loginEl.id = 'login-' + n;
+      });
+    }
+
+    /* ══════════════════════════════════════════
+       FLIP LOGIC
+    ══════════════════════════════════════════ */
+    function flipToRegister() {
+      if (isShowingRegister) return;
+      isShowingRegister = true;
+
+      owlWave();
+      rabbitJump();
+      spawnSparkles();
+
+      document.getElementById('cardInner').classList.add('flipped');
+
+      setTimeout(() => {
+        activateRegisterIds();
+        const first = document.getElementById('username'); // now points to reg
+        if (first) first.focus();
+      }, 720);
+    }
+
+    function flipToLogin() {
+      if (!isShowingRegister) return;
+      isShowingRegister = false;
+
+      owlWave();
+      rabbitJump();
+      spawnSparkles();
+
+      // Restore register input IDs before flip so no conflict
+      activateLoginIds();
+
+      document.getElementById('cardInner').classList.remove('flipped');
+
+      setTimeout(() => {
+        const first = document.getElementById('username');
+        if (first) first.focus();
+      }, 720);
+    }
+
+    /* ══════════════════════════════════════════
+       SPARKLES
+    ══════════════════════════════════════════ */
+    function spawnSparkles() {
+      const scene = document.getElementById('authScene');
+      const r = scene.getBoundingClientRect();
+      const cx = r.left + r.width / 2;
+      const cy = r.top + r.height / 2;
+
+      const emojis = ['✨', '⭐', '🌟', '💫'];
+      for (let i = 0; i < 5; i++) {
+        const s = document.createElement('div');
+        s.className = 'flip-spark';
+        s.textContent = emojis[i % emojis.length];
+        s.style.left = cx + (Math.random() * 80 - 40) + 'px';
+        s.style.top = cy + (Math.random() * 80 - 40) + 'px';
+        document.body.appendChild(s);
+        setTimeout(() => s.remove(), 600);
+      }
+    }
+
+    /* ══════════════════════════════════════════
+       CHARACTER REACTIONS
+    ══════════════════════════════════════════ */
+    const owl = document.getElementById('owlChar');
+    const rabbit = document.getElementById('rabbitChar');
+    const bubble = document.getElementById('owlBubble');
+    let bubbleTimer = null;
+
+    function owlBubbleShow(msg, isSuccess = false) {
+      bubble.textContent = msg;
+      bubble.className = 'owl-bubble show' + (isSuccess ? ' success' : '');
+      clearTimeout(bubbleTimer);
+      bubbleTimer = setTimeout(() => { bubble.className = 'owl-bubble'; }, 4000);
+    }
+    function owlWave() {
+      owl.classList.add('waving');
+      setTimeout(() => owl.classList.remove('waving'), 700);
+    }
+    function owlJump() {
+      owl.classList.add('jumping');
+      setTimeout(() => owl.classList.remove('jumping'), 550);
+    }
+    function owlCoverEyes() {
+      const prev = owl.textContent;
+      owl.textContent = '🙈';
+      setTimeout(() => { owl.textContent = prev; }, 1000);
+    }
+    function owlSpin() {
+      owl.classList.add('spinning');
+      setTimeout(() => owl.classList.remove('spinning'), 700);
+    }
+    function rabbitJump() {
+      rabbit.classList.add('jumping');
+      setTimeout(() => rabbit.classList.remove('jumping'), 550);
+    }
+
+    /* ─── Input Reactions ──────────────────── */
+    function initOwlReactions() {
+      document.querySelectorAll('.field-input').forEach(inp => {
+        inp.addEventListener('focus', () => {
+          owl.classList.add('tilting');
+        });
+        inp.addEventListener('blur', () => {
+          owl.classList.remove('tilting');
+        });
+        inp.addEventListener('input', () => {
+          if (inp.value.length >= 3) {
+            inp.classList.add('valid');
+            inp.classList.remove('invalid');
+          } else {
+            inp.classList.remove('valid', 'invalid');
+          }
+        });
+      });
+    }
+
+    /* ═══ Monkey-patch showError / showSuccess to trigger owl ══ */
+    function patchAuthMessages() {
+      const origShowError = window.showError;
+      window.showError = function (msg) {
+        owlCoverEyes();
+        owlBubbleShow('Oops! ' + msg + ' 🦉');
+        if (origShowError) origShowError(msg);
+      };
+      const origShowSuccess = window.showSuccess;
+      window.showSuccess = function (msg) {
+        owlJump();
+        owlSpin();
+        owlBubbleShow('Let\'s go! 🚀✨', true);
+        spawnSuccessStars();
+        // Animate card gold
+        const front = document.querySelector(isShowingRegister ? '.auth-card-back' : '.auth-card-front');
+        if (front) {
+          front.style.animation = 'goldGlow 0.8s ease 3';
+          setTimeout(() => { front.style.animation = ''; }, 2500);
+        }
+        // Page exit
+        setTimeout(() => {
+          document.body.style.animation = 'pageExit 0.5s ease forwards';
+        }, 1200);
+        if (origShowSuccess) origShowSuccess(msg);
+      };
+    }
+
+    function spawnSuccessStars() {
+      const emojis = ['⭐', '🌟', '✨', '💫', '🎉'];
+      for (let i = 0; i < 12; i++) {
+        const s = document.createElement('div');
+        s.className = 'flip-spark';
+        s.textContent = emojis[i % emojis.length];
+        const cx = window.innerWidth / 2;
+        const cy = window.innerHeight / 2;
+        s.style.left = cx + (Math.random() * 200 - 100) + 'px';
+        s.style.top = cy + (Math.random() * 200 - 100) + 'px';
+        s.style.animationDuration = (0.4 + Math.random() * 0.4) + 's';
+        document.body.appendChild(s);
+        setTimeout(() => s.remove(), 900);
+      }
+    }
+
+    /* ══════════════════════════════════════════
+       PASSWORD STRENGTH
+    ══════════════════════════════════════════ */
+    function updatePasswordStrength(pw) {
+      const segs = [document.getElementById('seg1'), document.getElementById('seg2'),
+      document.getElementById('seg3'), document.getElementById('seg4')];
+      const label = document.getElementById('pwLabel');
+      if (!segs[0] || !label) return;
+
+      let strength = 0;
+      if (pw.length >= 6) strength = 1;
+      if (pw.length >= 6 && /[0-9]/.test(pw)) strength = 2;
+      if (pw.length >= 6 && /[0-9]/.test(pw) && /[^a-zA-Z0-9]/.test(pw)) strength = 3;
+      if (pw.length >= 8 && /[0-9]/.test(pw) && /[^a-zA-Z0-9]/.test(pw)) strength = 4;
+      if (pw.length === 0) strength = 0;
+
+      const labels = ['', 'Weak 😬', 'Okay 🙂', 'Good 👍', 'Strong! 🔒'];
+      const colors = ['', '#EF4444', '#F59E0B', '#EAB308', '#10B981'];
+
+      segs.forEach((seg, i) => {
+        seg.className = 'pw-seg' + (i < strength ? ` active s${strength}` : '');
+      });
+      label.textContent = labels[strength] || '';
+      label.style.color = colors[strength] || 'rgba(93,75,138,.6)';
+    }
+
+    /* ══════════════════════════════════════════
+       AGE SELECTOR
+    ══════════════════════════════════════════ */
+    function initAgeSelector() {
+      document.querySelectorAll('.age-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.age-btn').forEach(b => b.classList.remove('selected'));
+          btn.classList.add('selected');
+          // Set whichever element currently has id="age" (swapped by activateRegisterIds)
+          const ageInput = document.getElementById('age') || document.getElementById('reg-age-input');
+          if (ageInput) ageInput.value = btn.dataset.age;
+          document.getElementById('ageError').classList.remove('show');
+        });
+      });
+    }
+
+    /* ══════════════════════════════════════════
+       FIREFLIES
+    ══════════════════════════════════════════ */
+    function initFireflies() {
+      const drifts = ['fireflyDrift1', 'fireflyDrift2', 'fireflyDrift3', 'fireflyDrift4'];
+      const count = window.innerWidth < 640 ? 6 : 12;
+      for (let i = 0; i < count; i++) {
+        const f = document.createElement('div');
+        f.className = 'firefly';
+        f.style.top = (20 + Math.random() * 60) + '%';
+        f.style.left = (10 + Math.random() * 80) + '%';
+        const dur = (3 + Math.random() * 4).toFixed(1);
+        const delay = (Math.random() * 5).toFixed(1);
+        const drift = drifts[i % drifts.length];
+        f.style.animation = `${drift} ${dur}s ease-in-out ${delay}s infinite, fireflyGlow ${(1.5 + Math.random() * 1.5).toFixed(1)}s ${delay}s ease-in-out infinite`;
+        document.body.appendChild(f);
+      }
+    }
+
+    /* ══════════════════════════════════════════
+       STAR CANVAS
+    ══════════════════════════════════════════ */
+    function initStarCanvas() {
+      const canvas = document.getElementById('starCanvas');
+      const ctx = canvas.getContext('2d');
+      let W, H, stars = [];
+
+      function resize() {
+        W = canvas.width = window.innerWidth;
+        H = canvas.height = window.innerHeight;
+      }
+      resize();
+      window.addEventListener('resize', resize);
+
+      // Generate stars
+      for (let i = 0; i < 80; i++) {
+        const big = i < 8;
+        stars.push({
+          x: Math.random() * 1, y: Math.random() * 0.75,
+          r: big ? (2 + Math.random() * 2) : (0.5 + Math.random() * 1.5),
+          phase: Math.random() * Math.PI * 2,
+          speed: 0.4 + Math.random() * 0.8,
+          big,
+          color: Math.random() > 0.5 ? '#FFF9C4' : '#FFFFFF'
+        });
+      }
+
+      // Shooting star
+      let shooting = null;
+      function spawnShoot() {
+        shooting = { x: Math.random() * 0.5, y: Math.random() * 0.3, alpha: 1 };
+        setTimeout(spawnShoot, 10000 + Math.random() * 12000);
+      }
+      setTimeout(spawnShoot, 12000);
+
+      let t = 0;
+      function draw() {
+        ctx.clearRect(0, 0, W, H);
+        t += 0.016;
+
+        stars.forEach(s => {
+          const opacity = 0.3 + 0.7 * Math.sin(s.phase + t * s.speed);
+          ctx.save();
+          const sx = s.x * W, sy = s.y * H;
+          if (s.big) {
+            // Cross sparkle
+            ctx.globalAlpha = opacity;
+            ctx.strokeStyle = s.color;
+            ctx.lineWidth = s.r * 0.5;
+            const len = s.r * 3;
+            ctx.beginPath();
+            ctx.moveTo(sx - len, sy); ctx.lineTo(sx + len, sy);
+            ctx.moveTo(sx, sy - len); ctx.lineTo(sx, sy + len);
+            ctx.stroke();
+          }
+          ctx.globalAlpha = opacity;
+          ctx.fillStyle = s.color;
+          ctx.beginPath();
+          ctx.arc(sx, sy, s.r, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        });
+
+        // Shooting star
+        if (shooting) {
+          ctx.save();
+          ctx.globalAlpha = shooting.alpha;
+          const sx = shooting.x * W, sy = shooting.y * H;
+          const trail = ctx.createLinearGradient(sx, sy, sx + 80, sy + 30);
+          trail.addColorStop(0, 'rgba(255,255,255,0)');
+          trail.addColorStop(1, 'rgba(255,255,255,0.9)');
+          ctx.strokeStyle = trail;
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(sx, sy); ctx.lineTo(sx + 80, sy + 30);
+          ctx.stroke();
+          ctx.restore();
+          shooting.x += 0.004;
+          shooting.y += 0.0015;
+          shooting.alpha -= 0.025;
+          if (shooting.alpha <= 0) shooting = null;
+        }
+
+        requestAnimationFrame(draw);
+      }
+      draw();
+    }
+
+    /* ══════════════════════════════════════════
+       PAGE ENTRANCE ANIMATION
+    ══════════════════════════════════════════ */
+    function initPageEntrance() {
+      setTimeout(() => document.getElementById('moonEl').classList.add('visible'), 400);
+      setTimeout(() => document.getElementById('treeEl').classList.add('visible'), 800);
+      setTimeout(() => document.getElementById('owlChar').classList.add('visible'), 1400);
+      setTimeout(() => document.getElementById('rabbitChar').classList.add('visible'), 1500);
+
+      // Stagger form fields into view
+      setTimeout(() => {
+        document.querySelectorAll('.field-group').forEach((el, i) => {
+          el.style.opacity = '0';
+          el.style.transform = 'translateY(10px)';
+          setTimeout(() => {
+            el.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+            el.style.opacity = '1';
+            el.style.transform = '';
+          }, i * 80);
+        });
+        // Auto-focus first visible input
+        const first = document.getElementById('username');
+        if (first) setTimeout(() => first.focus(), 200);
+      }, 1600);
+    }
+
+    /* ══════════════════════════════════════════
+       HEIGHT SYNC for 3D scene
+    ══════════════════════════════════════════ */
+    function syncCardHeight() {
+      const front = document.getElementById('loginCard');
+      const back = document.getElementById('registerCard');
+      const inner = document.getElementById('cardInner');
+      if (!front || !back || !inner) return;
+      // temporarily reveal both to measure
+      front.style.position = 'relative';
+      back.style.position = 'relative';
+      back.style.transform = 'none';
+      back.style.opacity = '0';
+      const h = Math.max(front.offsetHeight, back.offsetHeight);
+      front.style.position = '';
+      back.style.position = '';
+      back.style.transform = '';
+      back.style.opacity = '';
+      inner.style.minHeight = h + 'px';
+    }
+
+    /* ══════════════════════════════════════════
+       MAIN INIT
+    ══════════════════════════════════════════ */
+    window.addEventListener('load', () => {
+      initPageEntrance();
+      initFireflies();
+      initStarCanvas();
+      initOwlReactions();
+      initAgeSelector();
+
+      // Password strength listener
+      const pwField = document.getElementById('reg-password-input');
+      if (pwField) {
+        pwField.addEventListener('input', () => updatePasswordStrength(pwField.value));
+      }
+
+      // Form switch buttons
+      document.getElementById('goToRegister').addEventListener('click', flipToRegister);
+      document.getElementById('goToLogin').addEventListener('click', flipToLogin);
+
+      syncCardHeight();
+
+      // Patch auth.js messages to trigger owl
+      patchAuthMessages();
+
+      // Call auth.js functions — login form is active by default
+      if (typeof initializeLoginForm === 'function') initializeLoginForm();
+      if (typeof initializeRegisterForm === 'function') initializeRegisterForm();
+    });
   </script>
+
+  <!-- Load auth.js AFTER inline script so patchAuthMessages fires after -->
+  <script src="../js/auth.js"></script>
 </body>
+
 </html>

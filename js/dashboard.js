@@ -1,3 +1,10 @@
+// Initialize authentication state purely from Supabase
+(async () => {
+  if (typeof checkAuth === "function") {
+    await checkAuth();
+  }
+})();
+
 /**
  * EduPlay Dashboard - Magical Sky Kingdom Hub
  * Orchestrates animations, background systems, and real-time data from Supabase.
@@ -115,6 +122,10 @@ function initLivingBackground() {
 
 async function loadUserData() {
   console.log('🔄 Loading user data from eduplay API...');
+
+  // stats is defined at function scope so the mascot setTimeout can access it
+  let stats = { totalPoints: 0, badges: [], quizzesCompleted: 0, history: [] };
+
   try {
     if (!window.eduplay) {
       console.error('❌ EduPlay API not found on window object!');
@@ -125,16 +136,15 @@ async function loadUserData() {
     console.log('👤 Current User Data:', currentUser);
 
     if (!currentUser) {
-      console.warn('⚠️ No user session found, redirecting to login...');
-      window.location.href = 'login.html';
+      console.warn('⚠️ getCurrentUser() returned null — session may still be loading. Skipping render.');
       return;
     }
 
     // Correctly map data from the nested .stats object provided by auth.js
-    const stats = currentUser.stats || { totalPoints: 0, badges: [], quizzesCompleted: 0, history: [] };
+    stats = currentUser.stats || stats;
 
     renderStats(stats);
-    renderBadges(stats.badges);
+    renderBadges(stats.badges, stats);
     updateModuleCards(stats.history);
     initDailyChallenge(stats.history);
 
@@ -154,20 +164,9 @@ async function loadUserData() {
       lPill.className = `level-badge ${level.class}`;
     }
 
-    // Fetch and display game coins
-    try {
-      const supabase = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
-      const userId = localStorage.getItem('eduplay_user_id');
-      if (userId) {
-        const { data: coinData } = await supabase
-          .from('users')
-          .select('game_coins')
-          .eq('id', userId)
-          .single();
-        const coinEl = document.getElementById('navCoins');
-        if (coinEl && coinData) coinEl.textContent = coinData.game_coins || 0;
-      }
-    } catch (e) { console.warn('Coin fetch failed:', e); }
+    // Coins are already fetched and displayed by auth.js updateNavCoins via checkAuth
+    // No need to create a second Supabase client here
+
   } catch (err) {
     console.error('❌ Error in loadUserData:', err);
   }
@@ -198,15 +197,30 @@ async function loadUserData() {
 
 function renderStats(stats) {
   animateCountUp(document.getElementById('totalPoints'), stats.totalPoints || 0, 1200);
-  animateCountUp(document.getElementById('badgesCount'), stats.badges ? stats.badges.length : 0, 1200);
+  // Badges count is set by renderBadges after computing from stats
   animateCountUp(document.getElementById('quizzesCompleted'), stats.quizzesCompleted || 0, 1200);
 
+  // Calculate avg score: use history if available, otherwise estimate from total_points/quizzes
+  let avg = 0;
   if (stats.history && stats.history.length > 0) {
     const totalPercentage = stats.history.reduce((acc, h) => acc + (h.percentage || 0), 0);
-    const avg = Math.round(totalPercentage / stats.history.length);
-    animateCountUp(document.getElementById('avgScore'), avg, 1200, '%');
+    avg = Math.round(totalPercentage / stats.history.length);
+  } else if (stats.quizzesCompleted > 0 && stats.totalPoints > 0) {
+    // Estimate: points per quiz out of 100 (10 questions × 10pts each)
+    const pointsPerQuiz = stats.totalPoints / stats.quizzesCompleted;
+    avg = Math.min(100, Math.round(pointsPerQuiz));
+  }
 
-    // Streak calculation (handled in utilities)
+  const avgEl = document.getElementById('avgScore');
+  if (avgEl) {
+    if (avg > 0) {
+      animateCountUp(avgEl, avg, 1200, '%');
+    } else {
+      avgEl.textContent = '--';
+    }
+  }
+
+  if (stats.history && stats.history.length > 0) {
     const streak = calculateStreak(stats.history);
     const indicator = document.getElementById('streakIndicator');
     if (indicator && streak >= 1) {
@@ -216,21 +230,49 @@ function renderStats(stats) {
   }
 }
 
-function renderBadges(badges) {
+/**
+ * Compute badges from user stats since user_badges table doesn't exist.
+ * Returns an array of badge objects based on points/quizzes.
+ */
+function computeBadgesFromStats(stats) {
+  const badges = [];
+  const points = stats.totalPoints || 0;
+  const quizzes = stats.quizzesCompleted || 0;
+
+  if (quizzes >= 1) badges.push({ name: 'First Quest', emoji: '🎯' });
+  if (quizzes >= 5) badges.push({ name: 'Quiz Explorer', emoji: '🧭' });
+  if (quizzes >= 10) badges.push({ name: 'Quiz Master', emoji: '👑' });
+  if (quizzes >= 20) badges.push({ name: 'Learning Legend', emoji: '🏆' });
+  if (points >= 100) badges.push({ name: 'Point Collector', emoji: '⭐' });
+  if (points >= 500) badges.push({ name: 'Star Learner', emoji: '🌟' });
+  if (points >= 1000) badges.push({ name: 'Knowledge Hero', emoji: '🦸' });
+  if (points >= 2000) badges.push({ name: 'Grand Champion', emoji: '🥇' });
+
+  return badges;
+}
+
+function renderBadges(badgesFromDB, stats) {
   const container = document.getElementById('badgesContainer');
-  if (!container || !badges) return;
+  if (!container) return;
+
+  // Use DB badges if available, otherwise compute from stats
+  const badges = (badgesFromDB && badgesFromDB.length > 0)
+    ? badgesFromDB
+    : computeBadgesFromStats(stats || {});
+
+  // Update badge count on the stat card
+  const badgeCountEl = document.getElementById('badgesCount');
+  if (badgeCountEl) badgeCountEl.textContent = badges.length;
 
   if (badges.length > 0) {
     container.innerHTML = '';
     badges.forEach(b => {
       const item = document.createElement('div');
       item.className = 'badge-item';
-      if (b.is_new) item.classList.add('special');
-
       item.innerHTML = `
-                <span class="badge-emoji">${b.emoji || '🏅'}</span>
-                <span class="badge-name">${b.name}</span>
-            `;
+        <span class="badge-emoji">${b.emoji || b.icon || '🏅'}</span>
+        <span class="badge-name">${b.name}</span>
+      `;
       container.appendChild(item);
     });
   }

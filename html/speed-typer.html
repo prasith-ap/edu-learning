@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Speed Typer | EduPlay Games</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800;900&family=Nunito:wght@700;800;900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="../css/games.css">
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+    <nav class="game-nav">
+        <a href="games.html" class="brand">🎓 EduPlay</a>
+        <div class="game-title">⚡ Speed Typer</div>
+        <div class="nav-actions">
+            <button id="btnPause">⏸ Pause</button>
+            <button onclick="window.location.href='games.html'">✕ Exit</button>
+        </div>
+    </nav>
+
+    <!-- MAIN GAME AREA -->
+    <div class="typer-outer" id="gameArea" style="display:none;">
+        <!-- Stats Row -->
+        <div class="typer-stats-row">
+            <div class="typer-chip gold">⭐ <span id="scoreDisplay">0</span></div>
+            <div class="typer-chip purple">⚡ Level <span id="levelDisplay">1</span></div>
+            <div class="typer-chip">
+                <span class="strikes-display" id="strikesDisplay">❤️❤️❤️</span>
+            </div>
+            <div class="typer-chip cyan">⌨️ <span id="wpmDisplay">0</span> WPM</div>
+        </div>
+
+        <!-- Timer Bar -->
+        <div class="typer-timer-wrap">
+            <div class="typer-timer-track">
+                <div class="typer-timer-fill" id="timerFill"></div>
+            </div>
+        </div>
+
+        <!-- Word Display Card -->
+        <div class="typer-word-card">
+            <span class="typer-emoji-hint" id="emojiHint">⭐</span>
+            <div class="typer-word-display word-slide-in" id="wordDisplay"></div>
+            <input type="text" class="typer-input" id="wordInput" autocomplete="off" autocorrect="off"
+                autocapitalize="off" spellcheck="false" placeholder="Type here...">
+            <div class="missed-indicator" id="missedIndicator" style="display:none;">✗ MISSED! Next word...</div>
+        </div>
+    </div>
+
+    <!-- START SCREEN -->
+    <div class="overlay overlay-start active" id="startScreen">
+        <div class="card" style="max-width:520px;overflow-y:auto;max-height:90vh;">
+            <div class="large-emoji">⚡</div>
+            <h1 class="overlay-title title-typer">Speed Typer!</h1>
+            <p class="overlay-subtitle">Type the word before time runs out!</p>
+            <div class="instructions">
+                <div class="instruction-item">👀 Read the word and the emoji hint</div>
+                <div class="instruction-item">⌨️ Type it correctly in the box below</div>
+                <div class="instruction-item">⚡ Each word gets faster — how far can you go?</div>
+            </div>
+            <p style="font-weight:800;color:#06B6D4;margin-bottom:8px;">🗂️ Category:</p>
+            <div class="category-selector" id="catSelector">
+                <button class="cat-pill active" data-cat="numbers">🔢 Numbers</button>
+                <button class="cat-pill" data-cat="animals">🐾 Animals</button>
+                <button class="cat-pill" data-cat="countries">🌍 Countries</button>
+                <button class="cat-pill" data-cat="vocabulary">📚 Vocabulary</button>
+            </div>
+            <p style="font-weight:800;color:#06B6D4;margin-bottom:8px;">⏱️ Difficulty:</p>
+            <div class="difficulty-selector" id="diffSelector">
+                <button class="diff-pill active" data-diff="easy">🌱 Easy (6s)</button>
+                <button class="diff-pill" data-diff="medium">⚡ Medium (4s)</button>
+                <button class="diff-pill" data-diff="hard">🔥 Hard (2.5s)</button>
+            </div>
+            <div class="coins-preview">✅ Each word = 🪙 2 coins + 🪙 5 per level!</div>
+            <button class="start-btn btn-typer" id="btnStart">⚡ Start Typing!</button>
+        </div>
+    </div>
+
+    <!-- GAME OVER SCREEN -->
+    <div class="overlay" id="gameOverScreen">
+        <div class="card" style="max-width:480px;">
+            <div class="large-emoji" id="goEmoji">🏆</div>
+            <h1 class="overlay-title" id="goTitle">Speed Demon! ⚡</h1>
+            <div id="newBestBanner"
+                style="display:none;background:linear-gradient(90deg,transparent,rgba(245,158,11,0.25),transparent);color:#F59E0B;font-weight:900;padding:8px;border-radius:8px;margin-bottom:12px;text-align:center;">
+                🌟 New Personal Best!
+            </div>
+            <div class="stats-grid">
+                <div class="stat-box">⭐ Score: <span id="goScore">0</span></div>
+                <div class="stat-box">⚡ Level: <span id="goLevel">1</span></div>
+                <div class="stat-box">✅ Words: <span id="goWords">0</span></div>
+                <div class="stat-box">⌨️ WPM: <span id="goWPM">0</span></div>
+                <div class="stat-box" style="grid-column:span 2;color:#F59E0B;">🪙 Coins: <span id="goCoins">0</span>
+                </div>
+            </div>
+            <div id="prevBestDiv" style="color:rgba(255,255,255,0.5);font-size:0.85rem;margin-bottom:12px;"></div>
+            <button class="start-btn btn-typer" id="btnPlayAgain" style="width:100%;margin-bottom:8px;">⚡ Play
+                Again</button>
+            <button class="secondary-btn" id="btnChangeCategory">🔀 Change Category</button>
+            <button class="secondary-btn" onclick="window.location.href='games.html'" style="margin-top:6px;">🏠 Back to
+                Games</button>
+        </div>
+    </div>
+
+    <!-- PAUSE SCREEN -->
+    <div class="overlay" id="pauseScreen">
+        <div class="card">
+            <div class="large-emoji">⏸️</div>
+            <h1 class="overlay-title">Paused</h1>
+            <button class="start-btn btn-typer" id="btnResume" style="margin-top:20px;">▶ Resume</button>
+        </div>
+    </div>
+
+    <div id="levelUpText" class="level-up-text"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../config.js"></script>
+    <script src="../js/speed-typer.js"></script>
+</body>
+
+</html>

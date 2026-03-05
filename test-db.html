@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head><title>DB Test</title></head>
+<body>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script>
+window.onload = async () => {
+  const supabase = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
+  const { data: users, error: uError } = await supabase.from('users').select('*').limit(2);
+  console.log("Users:", users, uError);
+  
+  if (users && users.length > 0) {
+    const { data: q, error: qError } = await supabase.from('quiz_results').select('*').eq('user_id', users[0].id);
+    console.log("Quiz Results:", q, qError);
+  }
+}
+</script>
+</body>
+</html>

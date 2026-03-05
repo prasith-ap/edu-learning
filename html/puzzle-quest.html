@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Puzzle Quest | EduPlay Games</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800;900&family=Nunito:wght@700;800;900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="../css/games.css">
+    <style>
+        body {
+            overflow: hidden;
+        }
+
+        .puzzle-hud {
+            position: fixed;
+            top: 60px;
+            left: 0;
+            width: 100%;
+            padding: 10px 20px;
+            box-sizing: border-box;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            background: rgba(0, 0, 0, 0.35);
+            backdrop-filter: blur(8px);
+            z-index: 10;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+        }
+
+        .hud-pieces {
+            font-family: 'Baloo 2', cursive;
+            font-weight: 800;
+            font-size: 1rem;
+            white-space: nowrap;
+        }
+
+        .hint-btn {
+            background: linear-gradient(135deg, #F59E0B, #FCD34D);
+            border: none;
+            border-radius: 20px;
+            padding: 6px 16px;
+            font-family: 'Baloo 2', cursive;
+            font-weight: 800;
+            font-size: 0.85rem;
+            color: #78350F;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s;
+            margin-left: auto;
+        }
+
+        .hint-btn:disabled {
+            background: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.3);
+            cursor: not-allowed;
+        }
+
+        .coins-hud {
+            color: #F59E0B;
+            font-family: 'Baloo 2', cursive;
+            font-weight: 800;
+            font-size: 1rem;
+            white-space: nowrap;
+        }
+
+        .countdown-text {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            font-family: 'Baloo 2', cursive;
+            font-weight: 900;
+            font-size: 2.5rem;
+            color: #EF4444;
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 15;
+        }
+
+        .countdown-text.visible {
+            opacity: 1;
+            animation: scale-bounce 0.5s infinite;
+        }
+
+        #flyingPiece {
+            position: fixed;
+            pointer-events: none;
+            z-index: 50;
+            border-radius: 6px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+            transform: scale(1.08);
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+    <nav class="game-nav">
+        <div class="nav-left">
+            <a href="games.html" class="brand">🎓 EduPlay</a>
+        </div>
+        <div class="nav-center">
+            <div class="game-title">🧩 Puzzle Quest</div>
+        </div>
+        <div class="nav-right nav-actions">
+            <button id="btnPause">⏸ Pause</button>
+            <button id="btnExit" onclick="window.location.href='games.html'">✕ Exit</button>
+        </div>
+    </nav>
+
+    <!-- HUD -->
+    <div class="puzzle-hud" id="puzzleHud" style="display:none;">
+        <div class="hud-pieces">
+            🧩 <span id="piecesPlaced">0</span>/12
+        </div>
+        <div class="piece-dots" id="pieceDots"></div>
+        <div class="puzzle-timer-bar-track" style="flex:1;">
+            <div class="puzzle-timer-bar-fill" id="timerBarFill"></div>
+        </div>
+        <div class="coins-hud">🪙 <span id="coinsHud">0</span></div>
+        <button class="hint-btn" id="hintBtn">💡 Hint (3)</button>
+    </div>
+
+    <!-- Countdown for last 30s -->
+    <div class="countdown-text" id="countdownText"></div>
+
+    <!-- Flying piece (drag ghost) -->
+    <canvas id="flyingPiece"></canvas>
+
+    <!-- PUZZLE LAYOUT -->
+    <div class="puzzle-layout" id="puzzleLayout" style="display:none;">
+        <div class="piece-tray" id="pieceTray"></div>
+        <div class="puzzle-board" id="puzzleBoard">
+            <div class="ghost-grid" id="ghostGrid"></div>
+        </div>
+    </div>
+
+    <!-- START SCREEN -->
+    <div class="overlay overlay-start active" id="startScreen">
+        <div class="card" style="max-width:520px;">
+            <div class="large-emoji">🧩</div>
+            <h1 class="overlay-title title-puzzle">Puzzle Quest!</h1>
+            <p class="overlay-subtitle">Drag the pieces and rebuild the picture!</p>
+            <div class="instructions">
+                <div class="instruction-item">👆 Drag pieces from the left tray</div>
+                <div class="instruction-item">🎯 Drop them onto the correct spot on the right</div>
+                <div class="instruction-item">💡 Use up to 3 hints if you get stuck</div>
+                <div class="instruction-item">⏱️ Complete before the timer runs out!</div>
+            </div>
+            <p style="font-weight:800;color:#F59E0B;margin-bottom:16px;">🧩 Category:</p>
+            <div class="difficulty-selector" id="categorySelector">
+                <button class="diff-pill active" data-cat="math">🔢 Math</button>
+                <button class="diff-pill" data-cat="english">📖 English</button>
+                <button class="diff-pill" data-cat="gk">🌍 General</button>
+            </div>
+            <p style="font-weight:800;color:#F59E0B;margin-bottom:16px;">⏱️ Difficulty:</p>
+            <div class="difficulty-selector" id="diffSelector">
+                <button class="diff-pill active" data-diff="easy">🌱 Easy (3m)</button>
+                <button class="diff-pill" data-diff="medium">⚡ Medium (2m)</button>
+                <button class="diff-pill" data-diff="hard">🔥 Hard (90s)</button>
+            </div>
+            <div class="coins-preview">💡 Earn 🪙 5 coins per piece + bonus on completion!</div>
+            <button class="start-btn btn-puzzle" id="btnStart">🧩 Start Puzzle!</button>
+        </div>
+    </div>
+
+    <!-- GAME OVER SCREEN -->
+    <div class="overlay" id="gameOverScreen">
+        <div class="card">
+            <div class="large-emoji" id="goEmoji">🎉</div>
+            <h1 class="overlay-title" id="goTitle">Puzzle Master!</h1>
+            <div class="stats-grid">
+                <div class="stat-box">🧩 Pieces: <span id="goPieces">12/12</span></div>
+                <div class="stat-box">⏱️ Time: <span id="goTime">0:00</span></div>
+                <div class="stat-box">💡 Hints Used: <span id="goHints">0</span></div>
+                <div class="stat-box" style="color:#F59E0B;">🪙 Coins: <span id="goCoins">0</span></div>
+            </div>
+            <div id="funFactCard"
+                style="display:none;background:rgba(255,255,255,0.06);border-radius:16px;padding:16px;margin-bottom:16px;text-align:left;">
+                <div style="font-weight:900;color:#F59E0B;margin-bottom:8px;">💡 Did you know?</div>
+                <div id="funFactText" style="font-size:0.95rem;color:rgba(255,255,255,0.85);"></div>
+            </div>
+            <button class="start-btn btn-puzzle" id="btnNewPuzzle" style="width:100%;margin-bottom:8px;">🔄 New
+                Puzzle</button>
+            <button class="secondary-btn" onclick="window.location.href='games.html'">🏠 Back to Games</button>
+        </div>
+    </div>
+
+    <!-- PAUSE SCREEN -->
+    <div class="overlay" id="pauseScreen">
+        <div class="card">
+            <div class="large-emoji">⏸️</div>
+            <h1 class="overlay-title">Game Paused</h1>
+            <button class="start-btn btn-puzzle" id="btnResume" style="margin-top:20px;">▶ Resume</button>
+        </div>
+    </div>
+
+    <!-- Flash overlays -->
+    <div id="flashGreen" class="flash-overlay flash-green"></div>
+    <div id="flashRed" class="flash-overlay flash-red"></div>
+    <div id="levelUpText" class="level-up-text"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../config.js"></script>
+    <script src="../js/puzzle-quest.js"></script>
+</body>
+
+</html>

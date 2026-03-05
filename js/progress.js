@@ -1,3 +1,10 @@
+// Initialize authentication state purely from Supabase
+(async () => {
+  if (typeof checkAuth === "function") {
+    await checkAuth();
+  }
+})();
+
 // Progress JavaScript with Supabase Integration
 
 console.log('📊 Progress.js loaded');
@@ -12,61 +19,108 @@ const modulesMeta = {
 
 async function loadProgressData() {
   try {
-    const user = window.eduplay ? await window.eduplay.getCurrentUser() : null;
-    if (!user) { window.location.href = 'login.html'; return; }
+    // ─── 1. Init Supabase ─────────────────────────────────────────────────────
+    const client = window.initSupabase ? window.initSupabase() : null;
+    if (!client) { console.error('Supabase not ready'); return; }
 
-    // 0. Update Header UI
+    const { data: { session } } = await client.auth.getSession();
+    if (!session) { window.location.href = 'login.html'; return; }
+
+    // ─── 2. Load full user row from DB ───────────────────────────────────────
+    const { data: user, error: userErr } = await client
+      .from('users')
+      .select('*')
+      .eq('id', session.user.id)
+      .single();
+
+    if (userErr || !user) {
+      console.error('Failed to load user profile:', userErr);
+      return;
+    }
+
+    // ─── 3. Header UI ────────────────────────────────────────────────────────
     const navUsername = document.getElementById('navUsername');
     if (navUsername) navUsername.textContent = user.username || 'Explorer';
-
-    const initials = (user.username || 'EX').substring(0, 2).toUpperCase();
     const avatarEl = document.getElementById('userAvatar');
-    if (avatarEl) avatarEl.textContent = initials;
+    if (avatarEl) avatarEl.textContent = (user.username || 'EX').substring(0, 2).toUpperCase();
 
-    const stats = user.stats || { totalPoints: 0, quizzesCompleted: 0, history: [] };
-    const history = stats.history || [];
-
-    // Fetch and display game coins in header
+    // ─── 4. Fetch quiz history (gracefully skip if table missing) ────────────
+    let history = [];
     try {
-      const supabase = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
-      const userId = localStorage.getItem('eduplay_user_id');
-      if (userId) {
-        const { data: coinData } = await supabase
-          .from('users')
-          .select('game_coins')
-          .eq('id', userId)
-          .single();
-        const coinEl = document.getElementById('navCoins');
-        if (coinEl && coinData) coinEl.textContent = coinData.game_coins || 0;
-        window.eduplay_current_coins = coinData?.game_coins || 0;
-      }
-    } catch (e) { console.warn('Coin fetch failed:', e); }
+      const { data: histRows, error: histErr } = await client
+        .from('quiz_results')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+      if (!histErr && histRows) history = histRows;
+    } catch (e) { /* quiz_results table doesn't exist yet */ }
 
-    // Top stats
-    document.getElementById('totalPoints').textContent = stats.totalPoints || 0;
-    document.getElementById('totalQuizzes').textContent = history.length || stats.quizzesCompleted || 0;
+    // ─── 5. Top stat cards ───────────────────────────────────────────────────
+    const totalPoints = user.total_points || 0;
+    const quizzesCompleted = user.quizzes_completed || 0;
+    const subjectScores = user.subject_scores || {};
 
-    const avgAccuracy = history.length
-      ? Math.round(history.reduce((s, q) => s + (q.percentage || 0), 0) / history.length)
-      : 0;
-    document.getElementById('avgCorrect').textContent = avgAccuracy + '%';
+    document.getElementById('totalPoints').textContent = totalPoints;
+    document.getElementById('totalQuizzes').textContent = quizzesCompleted;
 
-    // Render all sections
-    renderBestScores(history);
-    renderModuleBreakdown(history);
-    renderQuizHistory(history);
-    if (typeof renderMoodCorrelation === 'function') {
-      renderMoodCorrelation(history);
+    // Avg accuracy: prefer real history, fallback to pts-per-quiz estimate
+    let avgAccuracy = 0;
+    if (history.length > 0) {
+      avgAccuracy = Math.round(history.reduce((s, q) => s + (q.percentage || 0), 0) / history.length);
+    } else if (quizzesCompleted > 0 && totalPoints > 0) {
+      avgAccuracy = Math.min(100, Math.round(totalPoints / quizzesCompleted));
     }
+    document.getElementById('avgCorrect').textContent = avgAccuracy > 0 ? avgAccuracy + '%' : '--';
+
+    // ─── 6. Build synthetic history from subject_scores if history is empty ──
+    const syntheticHistory = toDisplayHistory(history, subjectScores, totalPoints, quizzesCompleted);
+
+    // ─── 7. Render ───────────────────────────────────────────────────────────
+    renderBestScores(syntheticHistory);
+    renderModuleBreakdown(syntheticHistory, subjectScores);
+    renderQuizHistory(history, { totalPoints, quizzesCompleted, subjectScores });
+    if (typeof renderMoodCorrelation === 'function') renderMoodCorrelation(history);
 
   } catch (error) {
     console.error('❌ Error loading progress data:', error);
-    const container = document.getElementById('historyContainer');
-    if (container) {
-      container.innerHTML = `<p style="color:var(--error);text-align:center;">Error loading data. Please refresh.</p>`;
-    }
   }
 }
+
+/**
+ * Convert real history rows OR subject_scores into a uniform display format.
+ */
+function toDisplayHistory(realHistory, subjectScores, totalPoints, quizzesCompleted) {
+  if (realHistory && realHistory.length > 0) return realHistory;
+
+  const scoreKeys = Object.keys(subjectScores || {});
+  const synthetic = [];
+
+  if (scoreKeys.length > 0) {
+    scoreKeys.forEach(key => {
+      const pts = subjectScores[key] || 0;
+      if (pts > 0) {
+        synthetic.push({
+          module: key.toLowerCase().replace(/\s+/g, '-'),
+          score: pts,
+          percentage: Math.min(100, pts),  // treat raw score as a percentage cap 100
+          created_at: new Date().toISOString()
+        });
+      }
+    });
+  } else if (totalPoints > 0) {
+    // No subject breakdown — show total under general-knowledge
+    synthetic.push({
+      module: 'general-knowledge',
+      score: totalPoints,
+      percentage: Math.min(100, quizzesCompleted > 0 ? Math.round(totalPoints / quizzesCompleted) : 50),
+      created_at: new Date().toISOString()
+    });
+  }
+
+  return synthetic;
+}
+
+
 
 // ─── Personal Best Cards ──────────────────────────────────────────────────────
 
@@ -158,25 +212,91 @@ function renderModuleBreakdown(history) {
 
 // ─── Quiz History List ────────────────────────────────────────────────────────
 
-function renderQuizHistory(history) {
+function renderQuizHistory(history, userStats) {
   const container = document.getElementById('historyContainer');
   if (!container) return;
 
+  const quizzesCompleted = userStats?.quizzesCompleted || 0;
+  const totalPoints = userStats?.totalPoints || 0;
+  const subjectScores = userStats?.subjectScores || {};
+
+  // If no DB history, build synthetic cards from user profile data
   if (!history || history.length === 0) {
+    if (quizzesCompleted === 0) {
+      container.innerHTML = `
+        <div style="text-align:center; padding:32px; color:white;">
+          <div style="font-size:2.5rem; margin-bottom:12px;">📝</div>
+          <p style="margin:0 0 16px; font-weight:bold;">No quizzes taken yet!</p>
+          <a href="dashboard.html" class="btn-astonishing primary">Start Your First Quiz</a>
+        </div>`;
+      return;
+    }
+
+    // Build estimated history entries from subject_scores
+    const scoreKeys = Object.keys(subjectScores);
+    let syntheticRows = [];
+
+    if (scoreKeys.length > 0) {
+      syntheticRows = scoreKeys
+        .filter(k => subjectScores[k] > 0)
+        .map(key => ({
+          module: key.toLowerCase().replace(/\s+/g, '-'),
+          score: subjectScores[key],
+          percentage: Math.min(100, Math.round(subjectScores[key])),
+          created_at: null  // no exact date available
+        }));
+    } else {
+      // Distribute evenly across known modules
+      const modules = ['mathematics', 'english', 'general-knowledge'];
+      const ptsEach = Math.round(totalPoints / quizzesCompleted);
+      modules.forEach(mod => {
+        syntheticRows.push({
+          module: mod,
+          score: Math.round(totalPoints / modules.length),
+          percentage: Math.min(100, ptsEach),
+          created_at: null
+        });
+      });
+    }
+
+    const cards = syntheticRows.map(quiz => {
+      const meta = modulesMeta[quiz.module] || { label: quiz.module, emoji: '📝', color: '#aaa' };
+      let gradeEmoji = quiz.percentage >= 80 ? '⭐' : quiz.percentage >= 60 ? '👍' : '💪';
+      return `
+        <div class="history-item" style="opacity:0.85;">
+          <div class="history-info">
+            <h3 style="margin:0; font-family:'Baloo 2',cursive;">${meta.emoji} ${meta.label}</h3>
+            <p style="margin:5px 0 0; opacity:0.5; font-size:0.8rem;">Historical — exact date not recorded</p>
+          </div>
+          <div class="history-stats" style="display:flex; gap:20px;">
+            <div class="history-stat">
+              <div class="history-stat-value" style="font-weight:900;font-size:1.2rem;">${quiz.score}</div>
+              <div class="history-stat-label" style="font-size:0.75rem;opacity:0.6;">Points</div>
+            </div>
+            <div class="history-stat">
+              <div class="history-stat-value" style="font-weight:900;font-size:1.2rem;">${quiz.percentage}%</div>
+              <div class="history-stat-label" style="font-size:0.75rem;opacity:0.6;">Est. Score</div>
+            </div>
+          </div>
+          <span style="padding:5px 15px;border-radius:15px;font-weight:800;background:rgba(255,255,255,0.15);">${gradeEmoji}</span>
+        </div>`;
+    }).join('');
+
     container.innerHTML = `
-      <div style="text-align:center; padding:32px; color:white;">
-        <div style="font-size:2.5rem; margin-bottom:12px;">📝</div>
-        <p style="margin:0 0 16px;">No quizzes taken yet!</p>
-        <a href="dashboard.html" class="btn-astonishing primary">Start Your First Quiz</a>
-      </div>`;
+      <div style="text-align:center; padding:16px 24px 8px; color:rgba(255,255,255,0.6); font-size:0.85rem;">
+        ⚠️ Showing estimated breakdown — exact quiz-by-quiz history starts recording from now.
+      </div>
+      ${cards}`;
     return;
   }
 
-  const sorted = [...history].sort((a, b) => new Date(b.date) - new Date(a.date));
+  // Sort newest first — use created_at (DB column)
+  const sorted = [...history].sort((a, b) => new Date(b.created_at || b.date) - new Date(a.created_at || a.date));
 
   container.innerHTML = sorted.map(quiz => {
-    const meta = modulesMeta[quiz.module] || { label: quiz.module, emoji: '📝' };
-    const date = formatDate(new Date(quiz.date));
+    const meta = modulesMeta[quiz.module] || { label: quiz.module || 'Quiz', emoji: '📝' };
+    const rawDate = quiz.created_at || quiz.date;
+    const date = rawDate ? formatDate(new Date(rawDate)) : 'Recently';
 
     let gradeClass, gradeLabel, gradeEmoji;
     if (quiz.percentage === 100) { gradeClass = 'grade-perfect'; gradeLabel = 'Perfect!'; gradeEmoji = '🏆'; }

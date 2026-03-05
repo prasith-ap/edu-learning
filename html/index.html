@@ -226,6 +226,31 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="../config.js"></script>
   <script src="../js/auth.js"></script>
+  <script>
+    (async () => {
+      const client = initSupabase();
+      if (!client) return;
+      const { data: { session } } = await client.auth.getSession();
+
+      if (session) {
+        const now = Math.floor(Date.now() / 1000);
+        if (session.expires_at > now) {
+          // Logged in, but allow them to stay on the home page if they chose to navigate here
+          const { user } = session;
+          if (user) {
+            SessionManager.set(user.id, user.email, user.user_metadata?.username || '');
+            if (typeof updateNavCoins === 'function') updateNavCoins(user.email);
+          }
+        } else {
+          try { await client.auth.signOut(); } catch (e) { }
+          Object.keys(localStorage).forEach(key => {
+            if (key.startsWith('sb-')) localStorage.removeItem(key);
+          });
+          SessionManager.clear();
+        }
+      }
+    })();
+  </script>
 </body>
 
 </html>

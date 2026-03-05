@@ -24,7 +24,12 @@ body {
   user-select: none;
 }
 
-h1, h2, h3, .brand, .score, .equation {
+h1,
+h2,
+h3,
+.brand,
+.score,
+.equation {
   font-family: 'Baloo 2', cursive;
 }
 
@@ -106,7 +111,9 @@ h1, h2, h3, .brand, .score, .equation {
   z-index: 10;
 }
 
-.hud-left, .hud-center, .hud-right {
+.hud-left,
+.hud-center,
+.hud-right {
   display: flex;
   align-items: center;
   gap: 16px;
@@ -183,7 +190,7 @@ h1, h2, h3, .brand, .score, .equation {
   text-align: center;
   max-width: 480px;
   width: 90%;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
 }
 
 .large-emoji {
@@ -252,7 +259,7 @@ h1, h2, h3, .brand, .score, .equation {
   color: white;
   cursor: pointer;
   transition: all 0.2s;
-  box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
 }
 
 .btn-math {
@@ -275,7 +282,7 @@ h1, h2, h3, .brand, .score, .equation {
 
 .secondary-btn {
   background: transparent;
-  border: 1px solid rgba(255,255,255,0.2);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 50px;
   padding: 14px 32px;
   font-family: 'Baloo 2', cursive;
@@ -289,7 +296,7 @@ h1, h2, h3, .brand, .score, .equation {
 }
 
 .secondary-btn:hover {
-  background: rgba(255,255,255,0.1);
+  background: rgba(255, 255, 255, 0.1);
 }
 
 /* Difficulty Selector */
@@ -302,7 +309,7 @@ h1, h2, h3, .brand, .score, .equation {
 
 .diff-pill {
   background: transparent;
-  border: 1px solid rgba(255,255,255,0.2);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   color: white;
   padding: 8px 16px;
   border-radius: 20px;
@@ -327,7 +334,7 @@ h1, h2, h3, .brand, .score, .equation {
 }
 
 .stat-box {
-  background: rgba(255,255,255,0.05);
+  background: rgba(255, 255, 255, 0.05);
   border-radius: 16px;
   padding: 12px 16px;
   font-weight: 700;
@@ -392,7 +399,8 @@ h1, h2, h3, .brand, .score, .equation {
   fill: transparent;
   stroke: white;
   stroke-width: 4;
-  stroke-dasharray: 188.5; /* 2 * PI * 30 */
+  stroke-dasharray: 188.5;
+  /* 2 * PI * 30 */
   stroke-dashoffset: 0;
   transition: stroke-dashoffset 1s linear, stroke 0.3s;
 }
@@ -426,57 +434,138 @@ h1, h2, h3, .brand, .score, .equation {
 
 /* Animations */
 @keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-15px); }
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-15px);
+  }
 }
 
 @keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  20% { transform: translateX(-8px); }
-  40% { transform: translateX(8px); }
-  60% { transform: translateX(-5px); }
-  80% { transform: translateX(5px); }
+
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  20% {
+    transform: translateX(-8px);
+  }
+
+  40% {
+    transform: translateX(8px);
+  }
+
+  60% {
+    transform: translateX(-5px);
+  }
+
+  80% {
+    transform: translateX(5px);
+  }
 }
 
 @keyframes pulse-gold {
-  0%, 100% { box-shadow: 0 0 0 rgba(245, 158, 11, 0); }
-  50% { box-shadow: 0 0 15px rgba(245, 158, 11, 0.5); }
+
+  0%,
+  100% {
+    box-shadow: 0 0 0 rgba(245, 158, 11, 0);
+  }
+
+  50% {
+    box-shadow: 0 0 15px rgba(245, 158, 11, 0.5);
+  }
 }
 
 @keyframes slide-in-right {
-  from { transform: translateX(50px); opacity: 0; }
-  to { transform: translateX(0); opacity: 1; }
+  from {
+    transform: translateX(50px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
 }
 
 @keyframes shimmer {
-  0% { background-position: -200% center; }
-  100% { background-position: 200% center; }
+  0% {
+    background-position: -200% center;
+  }
+
+  100% {
+    background-position: 200% center;
+  }
 }
 
 @keyframes pulse-mild {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.7; }
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.7;
+  }
 }
 
 @keyframes pulse-fast {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.5;
+  }
 }
 
 @keyframes scale-bounce {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.1); }
+
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.1);
+  }
 }
 
 @keyframes pop-in {
-  0% { transform: scale(0); opacity: 0; }
-  80% { transform: scale(1.2); opacity: 1; }
-  100% { transform: scale(1); opacity: 1; }
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+
+  80% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 @keyframes fire-pulse {
-  0% { text-shadow: 0 0 10px rgba(249, 115, 22, 0.5); transform: scale(1); }
-  100% { text-shadow: 0 0 20px rgba(239, 68, 68, 0.8), 0 0 30px rgba(245, 158, 11, 0.6); transform: scale(1.05); }
+  0% {
+    text-shadow: 0 0 10px rgba(249, 115, 22, 0.5);
+    transform: scale(1);
+  }
+
+  100% {
+    text-shadow: 0 0 20px rgba(239, 68, 68, 0.8), 0 0 30px rgba(245, 158, 11, 0.6);
+    transform: scale(1.05);
+  }
 }
 
 /* Canvas Shake */
@@ -515,7 +604,7 @@ h1, h2, h3, .brand, .score, .equation {
   font-size: 4rem;
   font-weight: 900;
   color: var(--accent-gold);
-  text-shadow: 0 0 20px rgba(245,158,11,0.5);
+  text-shadow: 0 0 20px rgba(245, 158, 11, 0.5);
   pointer-events: none;
   z-index: 25;
   opacity: 0;
@@ -527,11 +616,31 @@ h1, h2, h3, .brand, .score, .equation {
 }
 
 @keyframes burst-in {
-  0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
-  20% { transform: translate(-50%, -50%) scale(1.4); opacity: 1; }
-  30% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
-  80% { transform: translate(-50%, -50%) scale(1); opacity: 1; text-shadow: 0 0 40px rgba(245,158,11,0.8); }
-  100% { transform: translate(-50%, -50%) scale(1.2); opacity: 0; }
+  0% {
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 0;
+  }
+
+  20% {
+    transform: translate(-50%, -50%) scale(1.4);
+    opacity: 1;
+  }
+
+  30% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+
+  80% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+    text-shadow: 0 0 40px rgba(245, 158, 11, 0.8);
+  }
+
+  100% {
+    transform: translate(-50%, -50%) scale(1.2);
+    opacity: 0;
+  }
 }
 
 /* DOM Particles / Popups */
@@ -598,7 +707,7 @@ h1, h2, h3, .brand, .score, .equation {
 .accuracy-bar-bg {
   width: 100%;
   height: 8px;
-  background: rgba(255,255,255,0.1);
+  background: rgba(255, 255, 255, 0.1);
   border-radius: 4px;
   overflow: hidden;
 }
@@ -608,4 +717,1149 @@ h1, h2, h3, .brand, .score, .equation {
   background: linear-gradient(to right, var(--accent-green), #34D399);
   width: 0%;
   transition: width 1s ease-out;
+}
+
+/* =====================================================
+   GAMES HUB — Dark Cosmic Redesign
+   ===================================================== */
+
+.cosmic-bg {
+  background: linear-gradient(135deg, #0F0A1E 0%, #1A1035 50%, #2D1B69 100%);
+  min-height: 100vh;
+}
+
+.top-stats-bar {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0;
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 12px 24px;
+  margin-bottom: 0;
+}
+
+.top-stat-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 32px;
+  font-family: 'Baloo 2', cursive;
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.top-stat-item+.top-stat-item {
+  border-left: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.top-stat-item.coins {
+  color: #F59E0B;
+}
+
+.top-stat-item.games {
+  color: #A78BFA;
+}
+
+.top-stat-item.streak {
+  color: #FB923C;
+}
+
+.games-hero-dark {
+  text-align: center;
+  padding: 48px 24px 24px;
+  color: white;
+}
+
+.games-hero-dark h1 {
+  font-family: 'Baloo 2', cursive;
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  font-weight: 900;
+  background: linear-gradient(135deg, #A78BFA, #EC4899, #F59E0B);
+  -webkit-background-clip: text;
+  color: transparent;
+  margin: 0 0 8px;
+}
+
+.games-hero-dark p {
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 1.05rem;
+  margin: 0;
+}
+
+/* Game Cards — dark cosmic */
+.game-card-dark {
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 28px;
+  color: white;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.35s ease;
+  position: relative;
+  cursor: pointer;
+}
+
+.game-card-dark:hover {
+  transform: translateY(-12px) rotate(1deg);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5);
+}
+
+.game-card-dark:hover .game-emoji {
+  transform: scale(1.2);
+}
+
+.game-card-dark .game-emoji {
+  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.game-card-dark.locked {
+  opacity: 0.6;
+  filter: grayscale(40%);
+  cursor: not-allowed;
+}
+
+.game-card-dark.locked:hover {
+  transform: none;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+/* Unlock Progress Bar on locked cards */
+.unlock-progress-wrap {
+  padding: 0 16px 12px;
+}
+
+.unlock-progress-label {
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.6);
+  margin-bottom: 5px;
+  font-weight: 700;
+}
+
+.unlock-progress-track {
+  width: 100%;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.unlock-progress-fill {
+  height: 100%;
+  border-radius: 10px;
+  width: 0%;
+  transition: width 1.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Unlock burst animation */
+@keyframes unlockBurst {
+  0% {
+    transform: scale(0) rotate(-10deg);
+    opacity: 0;
+  }
+
+  50% {
+    transform: scale(1.4) rotate(5deg);
+    opacity: 1;
+  }
+
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+.unlock-burst-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: 'Baloo 2', cursive;
+  font-size: 1.8rem;
+  font-weight: 900;
+  background: linear-gradient(135deg, #F59E0B, #FCD34D);
+  -webkit-background-clip: text;
+  color: transparent;
+  pointer-events: none;
+  z-index: 10;
+  animation: unlockBurst 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes goldBorderFlash {
+
+  0%,
+  100% {
+    border-color: rgba(255, 255, 255, 0.12);
+  }
+
+  50% {
+    border-color: #F59E0B;
+    box-shadow: 0 0 20px rgba(245, 158, 11, 0.6);
+  }
+}
+
+.gold-flash {
+  animation: goldBorderFlash 0.4s ease 3;
+}
+
+/* Recently played section */
+.recent-games-section {
+  padding: 24px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.recent-games-section h2 {
+  font-family: 'Baloo 2', cursive;
+  font-size: 1.6rem;
+  font-weight: 900;
+  color: white;
+  margin: 0 0 16px;
+}
+
+.recent-chips-row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.recent-chip {
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 16px;
+  padding: 12px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 160px;
+  animation: fadeInUp 0.5s ease backwards;
+}
+
+.recent-chip-title {
+  font-family: 'Baloo 2', cursive;
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: white;
+}
+
+.recent-chip-stats {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.6);
+  display: flex;
+  gap: 8px;
+}
+
+.recent-chip-date {
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* =====================================================
+   PUZZLE QUEST
+   ===================================================== */
+
+.puzzle-layout {
+  display: grid;
+  grid-template-columns: 32% 68%;
+  gap: 0;
+  height: calc(100vh - 108px);
+  /* 60px nav + 48px HUD */
+  margin-top: 108px;
+  overflow: hidden;
+}
+
+.piece-tray {
+  background: rgba(0, 0, 0, 0.2);
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 16px;
+  overflow-y: auto;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  align-content: start;
+}
+
+.piece-tray::-webkit-scrollbar {
+  width: 4px;
+}
+
+.piece-tray::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.piece-tray::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 2px;
+}
+
+.tray-piece {
+  border-radius: 8px;
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+  cursor: grab;
+  overflow: hidden;
+  position: relative;
+}
+
+.tray-piece:hover {
+  transform: translateY(-4px);
+  border-color: rgba(167, 139, 250, 0.6);
+  box-shadow: 0 4px 12px rgba(167, 139, 250, 0.3);
+}
+
+.tray-piece:active {
+  cursor: grabbing;
+}
+
+.puzzle-board {
+  padding: 16px 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.ghost-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  gap: 3px;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+}
+
+.ghost-cell {
+  border: 1px dashed rgba(255, 255, 255, 0.2);
+  position: relative;
+  transition: background 0.2s, box-shadow 0.2s;
+}
+
+.ghost-cell.hover-correct {
+  background: rgba(16, 185, 129, 0.2);
+  box-shadow: inset 0 0 0 2px rgba(16, 185, 129, 0.5);
+}
+
+.ghost-cell.hover-wrong {
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.ghost-cell.placed {
+  border-color: transparent;
+}
+
+@keyframes puzzleSnap {
+  0% {
+    transform: scale(1.12);
+  }
+
+  50% {
+    transform: scale(0.96);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+.snap-flash {
+  animation: puzzleSnap 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.puzzle-piece-placed {
+  width: 100%;
+  height: 100%;
+  animation: puzzleSnap 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Puzzle HUD extras */
+.piece-dots {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  max-width: 160px;
+}
+
+.piece-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  transition: background 0.3s;
+}
+
+.piece-dot.done {
+  background: var(--accent-green);
+  box-shadow: 0 0 6px rgba(16, 185, 129, 0.6);
+}
+
+.puzzle-timer-bar-track {
+  width: 100%;
+  height: 10px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50px;
+  overflow: hidden;
+  margin: 0 8px;
+  flex: 1;
+}
+
+.puzzle-timer-bar-fill {
+  height: 100%;
+  border-radius: 50px;
+  background: var(--accent-green);
+  transition: width 1s linear, background 0.5s;
+  width: 100%;
+}
+
+.puzzle-timer-bar-fill.warning {
+  background: var(--accent-gold);
+}
+
+.puzzle-timer-bar-fill.danger {
+  background: var(--accent-red);
+  animation: timerPulse 0.5s infinite alternate;
+}
+
+@keyframes timerPulse {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0.6;
+  }
+}
+
+/* Hint glow for ghost cell */
+.ghost-cell.hint-glow {
+  animation: hintGlowAnim 2s ease forwards;
+}
+
+@keyframes hintGlowAnim {
+
+  0%,
+  100% {
+    box-shadow: none;
+    background: transparent;
+  }
+
+  30% {
+    box-shadow: inset 0 0 0 3px rgba(245, 158, 11, 0.8);
+    background: rgba(245, 158, 11, 0.2);
+  }
+
+  70% {
+    box-shadow: inset 0 0 0 3px rgba(245, 158, 11, 0.8);
+    background: rgba(245, 158, 11, 0.2);
+  }
+}
+
+/* Fun fact card */
+.fun-fact-card {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(135deg, rgba(30, 20, 80, 0.95), rgba(45, 27, 105, 0.95));
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  padding: 24px 32px;
+  transform: translateY(100%);
+  transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  z-index: 15;
+  text-align: center;
+}
+
+.fun-fact-card.visible {
+  transform: translateY(0);
+}
+
+/* =====================================================
+   MEMORY FLIP — 3D Card Flip
+   ===================================================== */
+
+.memory-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 120px);
+  grid-template-rows: repeat(4, 160px);
+  gap: 12px;
+  justify-content: center;
+  align-content: center;
+  margin-top: 12px;
+}
+
+.card-container {
+  width: 120px;
+  height: 160px;
+  perspective: 600px;
+  cursor: pointer;
+}
+
+.card-container.matched {
+  cursor: default;
+  pointer-events: none;
+}
+
+.card-container.locked {
+  pointer-events: none;
+}
+
+.card-inner {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-inner.flipped {
+  transform: rotateY(180deg);
+}
+
+.card-face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  box-sizing: border-box;
+  text-align: center;
+  gap: 8px;
+}
+
+.card-back {
+  background: linear-gradient(135deg, #7C3AED 0%, #EC4899 100%);
+  transform: rotateY(0deg);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  background-image: linear-gradient(135deg, #7C3AED 0%, #EC4899 100%),
+    repeating-radial-gradient(circle at center, rgba(255, 255, 255, 0.06) 0, rgba(255, 255, 255, 0.06) 2px, transparent 2px, transparent 20px);
+}
+
+.card-back::after {
+  content: '🎓';
+  font-size: 40px;
+}
+
+.card-front {
+  transform: rotateY(180deg);
+  border: 2px solid rgba(124, 58, 237, 0.3);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+.card-front.math-card {
+  background: linear-gradient(135deg, #EDE9FE, #DDD6FE);
+  color: #2D1B69;
+}
+
+.card-front.english-card {
+  background: linear-gradient(135deg, #FCE7F3, #FBCFE8);
+  color: #831843;
+}
+
+.card-front.gk-card {
+  background: linear-gradient(135deg, #E0F2FE, #BAE6FD);
+  color: #0C4A6E;
+}
+
+.card-front .card-emoji {
+  font-size: 36px;
+}
+
+.card-front .card-text {
+  font-family: 'Baloo 2', cursive;
+  font-weight: 800;
+  line-height: 1.2;
+  word-break: break-word;
+}
+
+.card-front .card-text.short {
+  font-size: 1.2rem;
+}
+
+.card-front .card-text.medium {
+  font-size: 0.9rem;
+}
+
+.card-front .card-text.long {
+  font-size: 0.75rem;
+}
+
+/* Card hover — face down only */
+.card-container:not(.matched):not(.locked) .card-back:hover {
+  transform: rotateY(0deg) translateY(-4px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+}
+
+/* Matched card state */
+@keyframes matchGlow {
+  0% {
+    box-shadow: 0 0 0 rgba(16, 185, 129, 0);
+    transform: scale(1);
+  }
+
+  30% {
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.8);
+    transform: scale(1.05);
+  }
+
+  60% {
+    transform: translateY(-5px);
+  }
+
+  100% {
+    box-shadow: 0 0 12px rgba(16, 185, 129, 0.4);
+    transform: scale(1);
+  }
+}
+
+.card-container.matched .card-inner {
+  animation: matchGlow 0.5s ease forwards;
+}
+
+.card-container.matched .card-face {
+  border-color: rgba(16, 185, 129, 0.6) !important;
+  box-shadow: 0 0 14px rgba(16, 185, 129, 0.4) !important;
+}
+
+/* Non-match shake */
+@keyframes cardShake {
+
+  0%,
+  100% {
+    transform: rotateY(180deg) translateX(0);
+  }
+
+  20% {
+    transform: rotateY(180deg) translateX(-5px);
+  }
+
+  40% {
+    transform: rotateY(180deg) translateX(5px);
+  }
+
+  60% {
+    transform: rotateY(180deg) translateX(-4px);
+  }
+
+  80% {
+    transform: rotateY(180deg) translateX(4px);
+  }
+}
+
+.card-inner.shake {
+  animation: cardShake 0.4s ease;
+}
+
+/* Peek mode */
+.memory-peek-active .card-inner:not(.matched-final) {
+  transform: rotateY(180deg) !important;
+}
+
+/* Awaiting match gold pulse */
+.card-container.awaiting .card-face:last-child {
+  box-shadow: 0 0 0 2px gold, 0 0 12px rgba(245, 158, 11, 0.4);
+  animation: awaitPulse 0.8s ease infinite alternate;
+}
+
+@keyframes awaitPulse {
+  from {
+    box-shadow: 0 0 0 2px gold, 0 0 8px rgba(245, 158, 11, 0.3);
+  }
+
+  to {
+    box-shadow: 0 0 0 2px gold, 0 0 18px rgba(245, 158, 11, 0.6);
+  }
+}
+
+/* Combo flash */
+@keyframes comboFlash {
+  0% {
+    opacity: 0;
+    transform: scale(0);
+  }
+
+  40% {
+    opacity: 1;
+    transform: scale(1.3);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.combo-burst {
+  position: fixed;
+  top: 30%;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: 'Baloo 2', cursive;
+  font-size: 2.5rem;
+  font-weight: 900;
+  background: linear-gradient(135deg, #F59E0B, #EF4444);
+  -webkit-background-clip: text;
+  color: transparent;
+  pointer-events: none;
+  animation: comboFlash 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  z-index: 50;
+}
+
+/* Memory stats row */
+.memory-stats-row {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  padding: 10px 24px;
+  background: rgba(0, 0, 0, 0.2);
+  flex-wrap: wrap;
+}
+
+.mem-stat-chip {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  padding: 6px 16px;
+  font-family: 'Baloo 2', cursive;
+  font-weight: 800;
+  font-size: 0.95rem;
+  color: white;
+}
+
+/* =====================================================
+   SPEED TYPER
+   ===================================================== */
+
+.typer-outer {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0F0A1E 0%, #1A1035 50%, #0F172A 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 80px;
+  overflow: hidden;
+}
+
+.typer-stats-row {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 12px 24px;
+  width: 100%;
+  max-width: 700px;
+  box-sizing: border-box;
+}
+
+.typer-chip {
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 20px;
+  padding: 8px 18px;
+  font-family: 'Baloo 2', cursive;
+  font-weight: 800;
+  font-size: 1rem;
+  color: white;
+  transition: all 0.3s;
+}
+
+.typer-chip.gold {
+  color: #F59E0B;
+  border-color: rgba(245, 158, 11, 0.3);
+}
+
+.typer-chip.purple {
+  color: #A78BFA;
+  border-color: rgba(167, 139, 250, 0.3);
+}
+
+.typer-chip.cyan {
+  color: #06B6D4;
+  border-color: rgba(6, 182, 212, 0.3);
+}
+
+/* Strikes */
+.strikes-display {
+  font-size: 1.5rem;
+  letter-spacing: 4px;
+}
+
+/* Timer Bar — Speed Typer specific */
+.typer-timer-wrap {
+  width: 100%;
+  max-width: 700px;
+  padding: 8px 24px;
+  box-sizing: border-box;
+}
+
+.typer-timer-track {
+  width: 100%;
+  height: 16px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 50px;
+  overflow: hidden;
+  position: relative;
+}
+
+.typer-timer-fill {
+  height: 100%;
+  border-radius: 50px;
+  background: #10B981;
+  width: 100%;
+  transition: width 50ms linear, background 0.5s;
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.5);
+}
+
+.typer-timer-fill.amber {
+  background: #F59E0B;
+  box-shadow: 0 0 8px rgba(245, 158, 11, 0.5);
+}
+
+.typer-timer-fill.danger {
+  background: #EF4444;
+  box-shadow: 0 0 12px rgba(239, 68, 68, 0.7);
+  animation: timerPulse 0.4s infinite alternate;
+}
+
+/* Word Display Card */
+.typer-word-card {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 28px;
+  padding: 40px 48px;
+  text-align: center;
+  width: 100%;
+  max-width: 640px;
+  box-sizing: border-box;
+  margin: 12px 24px;
+  position: relative;
+}
+
+.typer-emoji-hint {
+  font-size: 72px;
+  display: block;
+  margin-bottom: 12px;
+  animation: float 2s ease-in-out infinite;
+}
+
+.typer-word-display {
+  font-family: 'Baloo 2', cursive;
+  font-size: clamp(2rem, 6vw, 3.5rem);
+  font-weight: 900;
+  color: white;
+  text-shadow: 0 4px 20px rgba(255, 255, 255, 0.2);
+  letter-spacing: 3px;
+  min-height: 60px;
+  display: flex;
+  justify-content: center;
+  gap: 2px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+/* Letter spans */
+.letter {
+  transition: color 0.1s;
+}
+
+.letter.correct {
+  color: #10B981;
+  text-shadow: 0 0 8px rgba(16, 185, 129, 0.6);
+}
+
+.letter.next {
+  color: white;
+  border-bottom: 3px solid white;
+  animation: cursorBlink 0.8s step-end infinite;
+}
+
+.letter.wrong {
+  color: #EF4444;
+}
+
+.letter.pending {
+  color: rgba(255, 255, 255, 0.3);
+}
+
+@keyframes cursorBlink {
+  50% {
+    border-bottom-color: transparent;
+  }
+}
+
+/* Word slide in */
+@keyframes wordSlideIn {
+  from {
+    transform: translateX(40px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.word-slide-in {
+  animation: wordSlideIn 0.3s ease-out forwards;
+}
+
+/* Typer input */
+.typer-input {
+  width: 100%;
+  max-width: 400px;
+  height: 60px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 16px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: white;
+  text-align: center;
+  outline: none;
+  margin-top: 20px;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+  padding: 0 16px;
+}
+
+.typer-input::placeholder {
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.typer-input:focus {
+  border-color: rgba(167, 139, 250, 0.6);
+}
+
+.typer-input.border-gold {
+  border-color: rgba(245, 158, 11, 0.8);
+}
+
+.typer-input.border-red {
+  border-color: rgba(239, 68, 68, 0.8);
+}
+
+.typer-input.shake-input {
+  animation: shake 0.3s ease;
+}
+
+/* Score popup floating */
+.score-float {
+  position: fixed;
+  font-family: 'Baloo 2', cursive;
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: #F59E0B;
+  pointer-events: none;
+  z-index: 100;
+  animation: floatUp 0.8s ease-out forwards;
+}
+
+@keyframes floatUp {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  to {
+    opacity: 0;
+    transform: translateY(-60px);
+  }
+}
+
+/* Missed word indicator */
+.missed-indicator {
+  font-family: 'Nunito', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 900;
+  color: #EF4444;
+  margin-top: 8px;
+  animation: fadeInOut 1s ease forwards;
+}
+
+@keyframes fadeInOut {
+  0% {
+    opacity: 0;
+  }
+
+  20% {
+    opacity: 1;
+  }
+
+  80% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+  }
+}
+
+/* Level up overlay for Speed Typer */
+.typer-levelup {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: 'Baloo 2', cursive;
+  font-size: 2.5rem;
+  font-weight: 900;
+  background: linear-gradient(135deg, #F59E0B, #FCD34D);
+  -webkit-background-clip: text;
+  color: transparent;
+  pointer-events: none;
+  z-index: 90;
+  animation: burst-in 1.5s ease-out forwards;
+}
+
+/* Category selector pills */
+.category-selector {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.cat-pill {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: white;
+  padding: 8px 18px;
+  border-radius: 20px;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.cat-pill.active {
+  background: linear-gradient(135deg, #3B82F6, #06B6D4);
+  border-color: transparent;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+}
+
+/* Speed Typer title */
+.title-typer {
+  background: linear-gradient(to right, #3B82F6, #06B6D4);
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+.btn-typer {
+  background: linear-gradient(135deg, #3B82F6, #06B6D4);
+}
+
+.btn-typer:hover {
+  transform: translateY(-4px) scale(1.05);
+  box-shadow: 0 16px 30px rgba(59, 130, 246, 0.4);
+}
+
+/* Puzzle Quest title */
+.title-puzzle {
+  background: linear-gradient(to right, #34D399, #10B981);
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+.btn-puzzle {
+  background: linear-gradient(135deg, #10B981, #059669);
+}
+
+.btn-puzzle:hover {
+  transform: translateY(-4px) scale(1.05);
+  box-shadow: 0 16px 30px rgba(16, 185, 129, 0.4);
+}
+
+/* Memory Flip title */
+.title-memory {
+  background: linear-gradient(to right, #A78BFA, #7C3AED);
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+.btn-memory {
+  background: linear-gradient(135deg, #7C3AED, #A78BFA);
+}
+
+.btn-memory:hover {
+  transform: translateY(-4px) scale(1.05);
+  box-shadow: 0 16px 30px rgba(124, 58, 237, 0.4);
+}
+
+/* Confetti particles */
+.confetti-piece {
+  position: fixed;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  pointer-events: none;
+  z-index: 200;
+  animation: confettiFall linear forwards;
+}
+
+@keyframes confettiFall {
+  0% {
+    opacity: 1;
+    transform: translateY(-20px) rotate(0deg);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateY(100vh) rotate(720deg);
+  }
+}
+
+/* Mobile responsive */
+@media (max-width: 640px) {
+  .puzzle-layout {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+  }
+
+  .piece-tray {
+    grid-template-columns: repeat(4, 1fr);
+    height: 160px;
+    border-right: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .memory-grid {
+    grid-template-columns: repeat(4, minmax(70px, 1fr));
+    grid-template-rows: repeat(4, 95px);
+    gap: 6px;
+    padding: 0 8px;
+  }
+
+  .card-container {
+    width: 100%;
+  }
+
+  .typer-word-card {
+    padding: 24px 20px;
+  }
 }

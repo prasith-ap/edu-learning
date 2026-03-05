@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memory Flip | EduPlay Games</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800;900&family=Nunito:wght@700;800;900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="../css/games.css">
+    <style>
+        body {
+            overflow-y: auto;
+            min-height: 100vh;
+        }
+
+        .memory-page {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 60px;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #0F0A1E 0%, #1A1035 50%, #2D1B69 100%);
+        }
+
+        .timed-toggle {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 16px;
+            font-weight: 800;
+            color: white;
+        }
+
+        .toggle-switch {
+            width: 44px;
+            height: 24px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            position: relative;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .toggle-switch.on {
+            background: var(--accent-green);
+        }
+
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: white;
+            transition: transform 0.3s;
+        }
+
+        .toggle-switch.on::after {
+            transform: translateX(20px);
+        }
+
+        .memory-timer-track {
+            width: 100%;
+            max-width: 600px;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50px;
+            overflow: hidden;
+            margin: 8px auto 0;
+            display: none;
+        }
+
+        .memory-timer-fill {
+            height: 100%;
+            border-radius: 50px;
+            background: var(--accent-green);
+            transition: width 1s linear;
+        }
+
+        .loading-dots::after {
+            content: '';
+            animation: dots 1.2s infinite;
+        }
+
+        @keyframes dots {
+            0% {
+                content: '.'
+            }
+
+            33% {
+                content: '..'
+            }
+
+            66% {
+                content: '...'
+            }
+
+            100% {
+                content: ''
+            }
+        }
+
+        .peek-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            border-radius: 20px;
+            padding: 6px 14px;
+            font-family: 'Nunito', sans-serif;
+            font-weight: 800;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .peek-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .peek-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+
+<body class="memory-page">
+
+    <!-- NAVBAR -->
+    <nav class="game-nav">
+        <div class="nav-left">
+            <a href="games.html" class="brand">🎓 EduPlay</a>
+        </div>
+        <div class="nav-center game-title">🃏 Memory Flip</div>
+        <div class="nav-right nav-actions">
+            <button id="btnPause">⏸ Pause</button>
+            <button onclick="window.location.href='games.html'">✕ Exit</button>
+        </div>
+    </nav>
+
+    <!-- STATS ROW -->
+    <div class="memory-stats-row" id="statsRow" style="width:100%;display:none;">
+        <div class="mem-stat-chip">⭐ <span id="scoreChip">0</span></div>
+        <div class="mem-stat-chip">🃏 <span id="pairsChip">0</span>/8</div>
+        <div class="mem-stat-chip">🔄 Wrong: <span id="wrongChip">0</span></div>
+        <div class="mem-stat-chip">🔥 Combo: <span id="comboChip">0</span>x</div>
+        <div class="mem-stat-chip">🪙 <span id="coinsChip">0</span></div>
+        <button class="peek-btn" id="peekBtn">👁️ Peek</button>
+        <div class="mem-stat-chip" id="timerChip" style="display:none;">⏱️ <span id="timerChipVal">120</span>s</div>
+    </div>
+
+    <!-- Timer bar (timed mode) -->
+    <div class="memory-timer-track" id="memTimerTrack">
+        <div class="memory-timer-fill" id="memTimerFill"></div>
+    </div>
+
+    <!-- 4×4 CARD GRID -->
+    <div class="memory-grid" id="memoryGrid" style="display:none;"></div>
+
+    <!-- START SCREEN -->
+    <div class="overlay overlay-start active" id="startScreen">
+        <div class="card" style="max-width:520px;">
+            <div class="large-emoji">🃏</div>
+            <h1 class="overlay-title title-memory">Memory Flip!</h1>
+            <p class="overlay-subtitle">Match the pairs before you run out of flips!</p>
+            <div class="instructions">
+                <div class="instruction-item">🃏 Flip two cards at a time</div>
+                <div class="instruction-item">🧠 Remember where cards are!</div>
+                <div class="instruction-item">🔥 Build combos for bonus points</div>
+                <div class="instruction-item">👁️ Use Peek once to see all cards for 2s</div>
+            </div>
+            <p style="font-weight:800;color:#A78BFA;margin-bottom:8px;">📚 Subject:</p>
+            <div class="difficulty-selector" id="modeSelector">
+                <button class="diff-pill active" data-mode="math">🔢 Math</button>
+                <button class="diff-pill" data-mode="english">📖 English</button>
+                <button class="diff-pill" data-mode="gk">🌍 General</button>
+            </div>
+            <p style="font-weight:800;color:#A78BFA;margin-bottom:8px;">⚡ Difficulty:</p>
+            <div class="difficulty-selector" id="diffSelector">
+                <button class="diff-pill active" data-diff="easy">🌱 Easy</button>
+                <button class="diff-pill" data-diff="medium">⚡ Medium</button>
+                <button class="diff-pill" data-diff="hard">🔥 Hard</button>
+            </div>
+            <div class="timed-toggle">
+                <span>⏱️ Timed Mode (120s)</span>
+                <div class="toggle-switch" id="timedToggle"></div>
+            </div>
+            <button class="start-btn btn-memory" id="btnStart">🃏 Deal Cards!</button>
+        </div>
+    </div>
+
+    <!-- LOADING (Groq generation) -->
+    <div class="overlay" id="loadingScreen">
+        <div class="card">
+            <div class="large-emoji">🤖</div>
+            <h2 class="overlay-title title-memory">Creating Cards<span class="loading-dots"></span></h2>
+            <p class="overlay-subtitle" style="margin-top:8px;">Generating fresh pairs for you!</p>
+        </div>
+    </div>
+
+    <!-- GAME OVER SCREEN -->
+    <div class="overlay" id="gameOverScreen">
+        <div class="card" style="max-width:500px;">
+            <div class="large-emoji" id="goEmoji">🎉</div>
+            <h1 class="overlay-title" id="goTitle">Memory Champion!</h1>
+            <div class="stats-grid">
+                <div class="stat-box">🃏 Pairs: <span id="goPairs">8/8</span></div>
+                <div class="stat-box">🔄 Wrong Flips: <span id="goWrong">0</span></div>
+                <div class="stat-box">⏱️ Time: <span id="goTime">0:00</span></div>
+                <div class="stat-box">🔥 Best Combo: <span id="goCombo">0</span>x</div>
+                <div class="stat-box" style="grid-column:span 2;color:#F59E0B;">🪙 Coins Earned: <span
+                        id="goCoins">0</span></div>
+            </div>
+            <div id="perfectBanner"
+                style="display:none;background:linear-gradient(90deg,transparent,rgba(245,158,11,0.2),transparent);color:#F59E0B;font-weight:900;padding:10px;border-radius:8px;margin-bottom:12px;text-align:center;">
+                🌟 Perfect Memory! 💯
+            </div>
+            <button class="start-btn btn-memory" id="btnNewGame" style="width:100%;margin-bottom:8px;">🔄 New
+                Game</button>
+            <button class="secondary-btn" id="btnChangeSubject">🔀 Change Subject</button>
+            <button class="secondary-btn" onclick="window.location.href='games.html'" style="margin-top:6px;">🏠 Back to
+                Games</button>
+        </div>
+    </div>
+
+    <!-- PAUSE SCREEN -->
+    <div class="overlay" id="pauseScreen">
+        <div class="card">
+            <div class="large-emoji">⏸️</div>
+            <h1 class="overlay-title">Paused</h1>
+            <button class="start-btn btn-memory" id="btnResume" style="margin-top:20px;">▶ Resume</button>
+        </div>
+    </div>
+
+    <div id="levelUpText" class="level-up-text"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../config.js"></script>
+    <script src="../js/memory-flip.js"></script>
+</body>
+
+</html>
