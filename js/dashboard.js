@@ -156,7 +156,7 @@ async function loadUserData() {
     document.getElementById('welcomeMessage').textContent = `Welcome back, ${currentUser.username || 'Explorer'}! 👋`;
 
     const initials = (currentUser.username || 'EX').substring(0, 2).toUpperCase();
-    const avatarEl = document.getElementById('userAvatar');
+    const avatarEl = document.getElementById('navAvatar');
     if (avatarEl) avatarEl.textContent = initials;
 
     // Level Update

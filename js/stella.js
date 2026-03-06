@@ -499,8 +499,12 @@ RESPOND ONLY IN THIS EXACT JSON FORMAT — NO TEXT OUTSIDE
     }
     // ── Scroll Handling ───────────────────────────────────────────────────
     let userScrolledUp = false;
+    let isAutoScrolling = false;
+    let scrollTimeout;
 
     document.getElementById('stellaChatArea')?.addEventListener('scroll', (e) => {
+        if (isAutoScrolling) return; // Ignore events triggered by smooth scrolling
+
         const chatArea = e.target;
         const distanceFromBottom = chatArea.scrollHeight - chatArea.scrollTop - chatArea.clientHeight;
         userScrolledUp = distanceFromBottom > 100;
@@ -517,10 +521,19 @@ RESPOND ONLY IN THIS EXACT JSON FORMAT — NO TEXT OUTSIDE
             return;
         }
 
+        isAutoScrolling = true;
         chatArea.scrollTo({
             top: chatArea.scrollHeight,
             behavior: smooth ? 'smooth' : 'instant'
         });
+
+        // Reset auto-scroll flag after animation finishes
+        clearTimeout(scrollTimeout);
+        scrollTimeout = setTimeout(() => {
+            isAutoScrolling = false;
+            userScrolledUp = false; // We are now safely at the bottom
+        }, 800);
+
         hideScrollBtn();
     }
 
@@ -1245,8 +1258,20 @@ RESPOND ONLY IN THIS EXACT JSON FORMAT — NO TEXT OUTSIDE
         StellaState.levelAtSessionStart = StellaState.currentLevel;
 
         // Setup UI
+        // Setup basic UI
         updateLevelUI(StellaState.currentLevel);
         renderLeftPanelStats();
+
+        // Stop here. The user must click 'Start Session' to proceed.
+    }
+
+    // ── Start Session Flow ────────────────────────────────────────────────
+    window.startStellaSession = function () {
+        // Hide overlay
+        const overlay = document.getElementById('stellaStartOverlay');
+        if (overlay) overlay.classList.add('hidden');
+
+        // Setup chat interaction
         startSessionTimer();
         initVoiceInput();
         initVoiceToggle();
@@ -1259,7 +1284,7 @@ RESPOND ONLY IN THIS EXACT JSON FORMAT — NO TEXT OUTSIDE
             scrollToBottom(true, true);
             speakText(opening.message);
         }, 600);
-    }
+    };
 
     // Boot when DOM ready
     if (document.readyState === 'loading') {
