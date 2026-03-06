@@ -24,6 +24,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <!-- Chart.js for Parent View analytics -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="../css/navbar.css">
 </head>
 
 <body>
@@ -65,31 +66,50 @@
   </div>
 
   <!-- NAVBAR -->
-  <nav class="glass-nav" id="mainNav">
-    <div class="nav-content container">
-      <div class="nav-left">
-        <a href="dashboard.html" class="brand">🎓 EduPlay</a>
+  <nav class="dashboard-navbar" id="dashboardNavbar">
+
+    <!-- LEFT: Brand -->
+    <a href="dashboard.html" class="nav-brand">
+      <span class="nav-brand-icon">🎓</span>
+      <span class="nav-brand-text">EduPlay</span>
+    </a>
+
+    <!-- CENTER: Navigation links -->
+    <div class="nav-links">
+      <a href="dashboard.html" class="nav-link active" data-i18n="nav.dashboard">Dashboard</a>
+      <a href="progress.html" class="nav-link" data-i18n="nav.progress">My Progress</a>
+      <a href="games.html" class="nav-link" data-i18n="nav.games">Games</a>
+      <a href="stella.html" class="nav-link nav-link-stella">
+        <span class="stella-nav-star">🌟</span>
+        <span class="stella-nav-text">Stella</span>
+      </a>
+    </div>
+
+    <!-- RIGHT: Actions -->
+    <div class="nav-actions">
+
+      <!-- Parent View button -->
+      <button class="nav-parent-btn" id="parentViewBtn" onclick="ParentView.handleNavbarClick()">
+        👨‍👩‍👧 <span>Parent View</span>
+      </button>
+
+      <!-- Coins chip -->
+      <div class="nav-coins-chip" id="navCoinsChip">
+        <span class="nav-coins-icon">🪙</span>
+        <span class="nav-coins-value" id="navCoinsValue">0</span>
       </div>
-      <div class="nav-center">
-        <a href="dashboard.html" class="nav-link active">Dashboard</a>
-        <a href="progress.html" class="nav-link">My Progress</a>
-        <a href="games.html" class="nav-link">Games</a>
-        <a href="stella.html" class="nav-link">⭐ Stella</a>
+
+      <!-- User avatar + name -->
+      <div class="nav-user">
+        <div class="nav-avatar" id="navAvatar">?</div>
+        <span class="nav-username" id="navUsername">Explorer</span>
       </div>
-      <div class="nav-right">
-        <!-- Parent View Button -->
-        <button class="parent-view-btn" id="parentViewBtn" onclick="ParentView.handleNavbarClick()">
-          👨‍👩‍👧 Parent View
-        </button>
-        <!-- Coin Display -->
-        <div class="stat-chip"
-          style="margin-right: 15px; background: linear-gradient(135deg, #F59E0B, #FCD34D); padding: 5px 15px; border-radius: 20px; color: #78350F; font-weight: bold; border: 2px solid white; box-shadow: 0 4px 10px rgba(245, 158, 11, 0.3);">
-          🪙 <span id="navCoins">0</span>
-        </div>
-        <span id="navUsername" class="username-display">Explorer</span>
-        <div id="userAvatar" class="avatar-circle">?</div>
-        <button id="logoutBtn" class="logout-btn">👋 Logout</button>
-      </div>
+
+      <!-- Logout -->
+      <button class="nav-logout-btn" id="logoutBtn">
+        Logout
+      </button>
+
     </div>
   </nav>
 
@@ -187,7 +207,8 @@
           <span id="dashStellaSessions">0 sessions</span>
           <span id="dashStellaWords">📚 0 words</span>
         </div>
-        <button class="stella-card-btn" onclick="event.preventDefault(); window.location.href='stella.html'">Talk to Stella
+        <button class="stella-card-btn" onclick="event.preventDefault(); window.location.href='stella.html'">Talk to
+          Stella
           →</button>
       </div>
     </a>

@@ -26,6 +26,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   // 3. Orchestrate Entrance Sequence (Section 1)
   initPageEntrance();
 
+  // Set active navbar link
+  setActiveNavLink();
+
   // 4. Global Interactive Listeners
   window.addEventListener('click', (e) => {
     if (window.eduplayTheme) window.eduplayTheme.spawnClickRipple(e.clientX, e.clientY);
@@ -565,3 +568,36 @@ document.getElementById('logoutBtn').addEventListener('click', () => {
   if (window.eduplay) window.eduplay.session.clear();
   window.location.href = 'login.html';
 });
+
+/* ============================================
+   ACTIVE LINK DETECTION
+   ============================================ */
+function setActiveNavLink() {
+  const currentPage = window.location.pathname;
+  document.querySelectorAll('.nav-link').forEach(link => {
+    link.classList.remove('active');
+    const href = link.getAttribute('href');
+    if (href && currentPage.includes(href.replace('.html', ''))) {
+      link.classList.add('active');
+    }
+  });
+}
+
+/* ============================================
+   COIN VALUE UPDATE WITH ANIMATION
+   ============================================ */
+function updateNavCoins(newValue, animate = true) {
+  const chip = document.getElementById('navCoinsChip');
+  const valueEl = document.getElementById('navCoinsValue');
+
+  if (!chip || !valueEl) return;
+
+  valueEl.textContent = newValue;
+
+  if (animate) {
+    chip.classList.remove('coin-added');
+    void chip.offsetWidth; // Force reflow to restart animation
+    chip.classList.add('coin-added');
+    setTimeout(() => chip.classList.remove('coin-added'), 400);
+  }
+}

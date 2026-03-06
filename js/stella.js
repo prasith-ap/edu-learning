@@ -184,7 +184,7 @@
         const c = StellaState.childData;
         const lvl = StellaState.currentLevel;
         const name = c.username || 'the student';
-        const age  = c.age     || 8;
+        const age = c.age || 8;
         const levelName = LEVEL_CONFIGS[lvl]?.name || 'Beginner';
         const focuses = getLastFocusAreas();
 
@@ -348,7 +348,7 @@ RESPOND ONLY IN THIS EXACT JSON FORMAT — NO TEXT OUTSIDE
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${ GROQ_API_KEY } `,
+                'Authorization': `Bearer ${GROQ_API_KEY} `,
             },
             body: JSON.stringify({
                 model: GROQ_MODEL,
@@ -359,7 +359,7 @@ RESPOND ONLY IN THIS EXACT JSON FORMAT — NO TEXT OUTSIDE
             }),
         });
 
-        if (!resp.ok) throw new Error(`Groq error: ${ resp.status } `);
+        if (!resp.ok) throw new Error(`Groq error: ${resp.status} `);
         const data = await resp.json();
         const content = data.choices?.[0]?.message?.content || '';
 
@@ -393,353 +393,394 @@ RESPOND ONLY IN THIS EXACT JSON FORMAT — NO TEXT OUTSIDE
             StellaState.isDiagnosticMode = true;
             StellaState.diagnosticStep = 1;
             return {
-                message: `Hi ${ name } !I'm Stella, your English learning star! ⭐ I'm SO excited to chat with you! Tell me — what's your favorite animal? 🐾`,
-        isDiagnostic: true,
+                message: `Hi ${name} !I'm Stella, your English learning star! ⭐ I'm SO excited to chat with you! Tell me — what's your favorite animal? 🐾`,
+                isDiagnostic: true,
             };
-}
+        }
 
         const lastDate = p.last_session_date ? new Date(p.last_session_date) : null;
-const daysSince = lastDate
-    ? Math.floor((Date.now() - lastDate) / 86400000)
-    : 999;
+        const daysSince = lastDate
+            ? Math.floor((Date.now() - lastDate) / 86400000)
+            : 999;
 
-if (daysSince > 3) {
-    return { message: `${name}! You're back! 🌟 I missed our chats! Ready to practice some amazing English today? Tell me — what's the most interesting thing that happened to you recently?` };
-}
+        if (daysSince > 3) {
+            return { message: `${name}! You're back! 🌟 I missed our chats! Ready to practice some amazing English today? Tell me — what's the most interesting thing that happened to you recently?` };
+        }
 
-const lastTopic = p.last_topic || 'fun topics';
-return { message: `Welcome back ${name}! Last time we talked about ${lastTopic}. Today I have some fun new words for you! 🌟 First tell me — how was your day?` };
+        const lastTopic = p.last_topic || 'fun topics';
+        return { message: `Welcome back ${name}! Last time we talked about ${lastTopic}. Today I have some fun new words for you! 🌟 First tell me — how was your day?` };
     }
 
-// ── UI Helpers ─────────────────────────────────────────────────────────
-function setStellaState(state) {
-    const char = document.getElementById('stellaCharacter');
-    if (!char) return;
-    char.className = `stella-char stella-${state}`;
-}
+    // ── UI Helpers ─────────────────────────────────────────────────────────
+    function setStellaState(state) {
+        const char = document.getElementById('stellaCharacter');
+        if (!char) return;
+        char.className = `stella-char stella-${state}`;
+    }
 
-function setStatus(text) {
-    const el = document.getElementById('stellaStatusText');
-    if (el) el.textContent = text;
-}
+    function setStatus(text) {
+        const el = document.getElementById('stellaStatusText');
+        if (el) el.textContent = text;
+    }
 
-function updateLevelUI(level, animate = false) {
-    const cfg = LEVEL_CONFIGS[level] || LEVEL_CONFIGS[1];
-    const badge = document.getElementById('stellaLevelBadge');
-    const emoji = document.getElementById('stellaLevelEmoji');
-    const name = document.getElementById('stellaLevelName');
-    const num = document.getElementById('stellaLevelNum');
-    const bar = document.getElementById('stellaXPBar');
-    const label = document.getElementById('stellaXPLabel');
+    function updateLevelUI(level, animate = false) {
+        const cfg = LEVEL_CONFIGS[level] || LEVEL_CONFIGS[1];
+        const badge = document.getElementById('stellaLevelBadge');
+        const emoji = document.getElementById('stellaLevelEmoji');
+        const name = document.getElementById('stellaLevelName');
+        const num = document.getElementById('stellaLevelNum');
+        const bar = document.getElementById('stellaXPBar');
+        const label = document.getElementById('stellaXPLabel');
 
-    if (emoji) emoji.textContent = cfg.emoji;
-    if (name) name.textContent = cfg.name;
-    if (num) num.textContent = level;
+        if (emoji) emoji.textContent = cfg.emoji;
+        if (name) name.textContent = cfg.name;
+        if (num) num.textContent = level;
 
-    if (badge) {
-        badge.className = `stella-level-badge ${cfg.class}`;
-        if (animate) {
-            badge.style.transform = 'scale(1.3)';
-            setTimeout(() => { badge.style.transform = 'scale(1)'; badge.style.transition = 'transform 0.4s ease'; }, 100);
+        if (badge) {
+            badge.className = `stella-level-badge ${cfg.class}`;
+            if (animate) {
+                badge.style.transform = 'scale(1.3)';
+                setTimeout(() => { badge.style.transform = 'scale(1)'; badge.style.transition = 'transform 0.4s ease'; }, 100);
+            }
+        }
+
+        // XP bar: based on total sessions mod sessions_to_next
+        const p = StellaState.progress;
+        if (bar && p) {
+            const sessForLevel = cfg.sessionsToNext;
+            const pct = Math.min(100, ((p.total_sessions % sessForLevel) / sessForLevel) * 100);
+            bar.style.width = pct + '%';
+        }
+
+        if (label && level < 5) label.textContent = `Keep chatting to reach ${LEVEL_CONFIGS[level + 1]?.name}!`;
+        else if (label) label.textContent = '🏆 Max level reached!';
+    }
+
+    function renderLeftPanelStats() {
+        const p = StellaState.progress;
+        const sessions = document.getElementById('statSessions');
+        const words = document.getElementById('statWords');
+        const streak = document.getElementById('statStreak');
+
+        if (sessions) sessions.textContent = p?.total_sessions || 0;
+        if (words) words.textContent = Array.isArray(p?.words_learned) ? p.words_learned.length : 0;
+        if (streak) streak.textContent = p?.session_streak || 0;
+
+        const focusEl = document.getElementById('stellaFocusItems');
+        if (focusEl) {
+            const focuses = getLastFocusAreas();
+            if (focuses.length) {
+                focusEl.innerHTML = focuses.map(f =>
+                    `<div class="stella-focus-item">✨ ${f.replace(/_/g, ' ')}</div>`
+                ).join('');
+            }
         }
     }
 
-    // XP bar: based on total sessions mod sessions_to_next
-    const p = StellaState.progress;
-    if (bar && p) {
-        const sessForLevel = cfg.sessionsToNext;
-        const pct = Math.min(100, ((p.total_sessions % sessForLevel) / sessForLevel) * 100);
-        bar.style.width = pct + '%';
-    }
-
-    if (label && level < 5) label.textContent = `Keep chatting to reach ${LEVEL_CONFIGS[level + 1]?.name}!`;
-    else if (label) label.textContent = '🏆 Max level reached!';
-}
-
-function renderLeftPanelStats() {
-    const p = StellaState.progress;
-    const sessions = document.getElementById('statSessions');
-    const words = document.getElementById('statWords');
-    const streak = document.getElementById('statStreak');
-
-    if (sessions) sessions.textContent = p?.total_sessions || 0;
-    if (words) words.textContent = Array.isArray(p?.words_learned) ? p.words_learned.length : 0;
-    if (streak) streak.textContent = p?.session_streak || 0;
-
-    const focusEl = document.getElementById('stellaFocusItems');
-    if (focusEl) {
-        const focuses = getLastFocusAreas();
-        if (focuses.length) {
-            focusEl.innerHTML = focuses.map(f =>
-                `<div class="stella-focus-item">✨ ${f.replace(/_/g, ' ')}</div>`
-            ).join('');
-        }
-    }
-}
-
-// ── Display Messages ──────────────────────────────────────────────────
-function showTypingIndicator() {
-    const area = document.getElementById('stellaChatArea');
-    const typing = document.createElement('div');
-    typing.className = 'stella-typing';
-    typing.id = 'stellaTyping';
-    typing.innerHTML = `
+    // ── Display Messages ──────────────────────────────────────────────────
+    function showTypingIndicator() {
+        const area = document.getElementById('stellaChatArea');
+        const typing = document.createElement('div');
+        typing.className = 'stella-typing';
+        typing.id = 'stellaTyping';
+        typing.innerHTML = `
       <span class="stella-avatar">⭐</span>
       <div class="stella-typing-dots">
         <span></span><span></span><span></span>
-      </div>
+        </div>
     `;
-    area.appendChild(typing);
-    area.scrollTop = area.scrollHeight;
-    return typing;
-}
-
-function removeTypingIndicator() {
-    document.getElementById('stellaTyping')?.remove();
-}
-
-function displayChildMessage(text) {
-    const area = document.getElementById('stellaChatArea');
-    const wrap = document.createElement('div');
-    wrap.className = 'child-bubble';
-    wrap.innerHTML = `<span class="child-bubble-text">${escapeHTML(text)}</span>`;
-    area.appendChild(wrap);
-    area.scrollTop = area.scrollHeight;
-    return wrap;
-}
-
-function displayStellaMessage(text, newWords = []) {
-    const area = document.getElementById('stellaChatArea');
-    const bubble = document.createElement('div');
-    bubble.className = 'stella-bubble';
-
-    // Highlight new words
-    let processedText = escapeHTML(text);
-    if (newWords.length) {
-        newWords.forEach(w => {
-            const word = w.word || w;
-            const def = w.definition || '';
-            const re = new RegExp(`\\b(${escapeRegex(word)})\\b`, 'gi');
-            processedText = processedText.replace(re, (m) =>
-                `<span class="stella-new-word" data-word="${escapeAttr(word)}" data-def="${escapeAttr(def)}">${m}</span>`
-            );
-        });
+        area.appendChild(typing);
+        scrollToBottom();
+        return typing;
     }
 
-    bubble.innerHTML = `
+    function removeTypingIndicator() {
+        document.getElementById('stellaTyping')?.remove();
+    }
+    // ── Scroll Handling ───────────────────────────────────────────────────
+    let userScrolledUp = false;
+
+    document.getElementById('stellaChatArea')?.addEventListener('scroll', (e) => {
+        const chatArea = e.target;
+        const distanceFromBottom = chatArea.scrollHeight - chatArea.scrollTop - chatArea.clientHeight;
+        userScrolledUp = distanceFromBottom > 100;
+
+        if (!userScrolledUp) hideScrollBtn();
+    });
+
+    function scrollToBottom(smooth = true, force = false) {
+        const chatArea = document.getElementById('stellaChatArea');
+        if (!chatArea) return;
+
+        if (userScrolledUp && !force) {
+            showScrollBtn();
+            return;
+        }
+
+        chatArea.scrollTo({
+            top: chatArea.scrollHeight,
+            behavior: smooth ? 'smooth' : 'instant'
+        });
+        hideScrollBtn();
+    }
+
+    function showScrollBtn() {
+        let btn = document.getElementById('scrollToBottomBtn');
+        if (btn) btn.classList.add('visible');
+    }
+
+    function hideScrollBtn() {
+        let btn = document.getElementById('scrollToBottomBtn');
+        if (btn) btn.classList.remove('visible');
+    }
+
+    window.stella_scrollToBottom_click = function () {
+        scrollToBottom(true, true);
+        hideScrollBtn();
+    };
+
+    function displayChildMessage(text) {
+        const area = document.getElementById('stellaChatArea');
+        const wrap = document.createElement('div');
+        wrap.className = 'child-bubble';
+        wrap.innerHTML = `<span class="child-bubble-text">${escapeHTML(text)}</span>`;
+        area.appendChild(wrap);
+        scrollToBottom();
+        return wrap;
+    }
+
+    function displayStellaMessage(text, newWords = []) {
+        const area = document.getElementById('stellaChatArea');
+        const bubble = document.createElement('div');
+        bubble.className = 'stella-bubble';
+
+        // Highlight new words
+        let processedText = escapeHTML(text);
+        if (newWords.length) {
+            newWords.forEach(w => {
+                const word = w.word || w;
+                const def = w.definition || '';
+                const re = new RegExp(`\\b(${escapeRegex(word)})\\b`, 'gi');
+                processedText = processedText.replace(re, (m) =>
+                    `<span class="stella-new-word" data-word="${escapeAttr(word)}" data-def="${escapeAttr(def)}">${m}</span>`
+                );
+            });
+        }
+
+        bubble.innerHTML = `
       <span class="stella-avatar">⭐</span>
       <div class="stella-bubble-text">${processedText}</div>
     `;
 
-    area.appendChild(bubble);
+        area.appendChild(bubble);
 
-    // Word tooltips
-    bubble.querySelectorAll('.stella-new-word').forEach(span => {
-        span.addEventListener('mouseenter', showWordTooltip);
-        span.addEventListener('mouseleave', hideWordTooltip);
-        span.addEventListener('click', () => speakText(span.dataset.word));
-    });
+        // Word tooltips
+        bubble.querySelectorAll('.stella-new-word').forEach(span => {
+            span.addEventListener('mouseenter', showWordTooltip);
+            span.addEventListener('mouseleave', hideWordTooltip);
+            span.addEventListener('click', () => speakText(span.dataset.word));
+        });
 
-    area.scrollTop = area.scrollHeight;
-    return bubble;
-}
+        scrollToBottom();
+        return bubble;
+    }
 
-function attachCorrectionToLastChildBubble(corrections) {
-    const allChild = document.querySelectorAll('.child-bubble');
-    const last = allChild[allChild.length - 1];
-    if (!last || !corrections.length) return;
+    function attachCorrectionToLastChildBubble(corrections) {
+        const allChild = document.querySelectorAll('.child-bubble');
+        const last = allChild[allChild.length - 1];
+        if (!last || !corrections.length) return;
 
-    const dot = document.createElement('div');
-    dot.className = 'correction-dot';
-    dot.title = 'Click for tip';
-    last.style.position = 'relative';
-    last.style.display = 'inline-block';
-    last.appendChild(dot);
+        const dot = document.createElement('div');
+        dot.className = 'correction-dot';
+        dot.title = 'Click for tip';
+        last.style.position = 'relative';
+        last.style.display = 'inline-block';
+        last.appendChild(dot);
 
-    const tooltip = document.createElement('div');
-    tooltip.className = 'correction-tooltip hidden';
-    const c = corrections[0];
-    tooltip.textContent = `✏️ We can also say: "${c.corrected}"`;
-    last.appendChild(tooltip);
+        const tooltip = document.createElement('div');
+        tooltip.className = 'correction-tooltip hidden';
+        const c = corrections[0];
+        tooltip.textContent = `✏️ We can also say: "${c.corrected}"`;
+        last.appendChild(tooltip);
 
-    dot.addEventListener('click', () => {
-        tooltip.classList.toggle('hidden');
-    });
+        dot.addEventListener('click', () => {
+            tooltip.classList.toggle('hidden');
+        });
 
-    document.addEventListener('click', e => {
-        if (!dot.contains(e.target) && !tooltip.contains(e.target)) {
-            tooltip.classList.add('hidden');
+        document.addEventListener('click', e => {
+            if (!dot.contains(e.target) && !tooltip.contains(e.target)) {
+                tooltip.classList.add('hidden');
+            }
+        });
+    }
+
+    function showWordTooltip(e) {
+        const span = e.currentTarget;
+        const def = span.dataset.def;
+        if (!def) return;
+
+        const tip = document.createElement('div');
+        tip.className = 'stella-word-tooltip';
+        tip.textContent = `📖 "${def}"`;
+        tip.id = 'activeWordTip';
+        span.style.position = 'relative';
+        span.appendChild(tip);
+    }
+
+    function hideWordTooltip(e) {
+        document.getElementById('activeWordTip')?.remove();
+    }
+
+    // ── Main Send Flow ─────────────────────────────────────────────────────
+    async function sendMessage(text) {
+        text = text.trim();
+        if (!text || StellaState.isProcessing) return;
+
+        StellaState.isProcessing = true;
+        StellaState.lastChildMessage = text;
+
+        // 1. Display child bubble
+        displayChildMessage(text);
+
+        // 2. Clear input
+        const input = document.getElementById('stellaInput');
+        if (input) input.value = '';
+        updateSendBtn('');
+
+        // 3. Stella thinking
+        setStellaState('thinking');
+        setStatus('Stella is thinking... 💭');
+        const typing = showTypingIndicator();
+
+        try {
+            // 4. Call Groq
+            const response = await callStella(text);
+            removeTypingIndicator();
+            await processStellaResponse(response, text);
+        } catch (err) {
+            removeTypingIndicator();
+            console.error('Stella callStella error:', err);
+            const errMsg = 'Hmm, I\'m having trouble thinking... 🤔 Let\'s try again in a moment!';
+            displayStellaMessage(errMsg);
+            speakText(errMsg);
+            setStellaState('idle');
+            setStatus('Stella is ready! ⭐');
         }
-    });
-}
 
-function showWordTooltip(e) {
-    const span = e.currentTarget;
-    const def = span.dataset.def;
-    if (!def) return;
+        StellaState.isProcessing = false;
 
-    const tip = document.createElement('div');
-    tip.className = 'stella-word-tooltip';
-    tip.textContent = `📖 "${def}"`;
-    tip.id = 'activeWordTip';
-    span.style.position = 'relative';
-    span.appendChild(tip);
-}
+        // Diagnostic flow
+        if (StellaState.isDiagnosticMode) {
+            StellaState.diagnosticStep++;
+            if (StellaState.diagnosticStep > 3) {
+                StellaState.isDiagnosticMode = false;
+                finalizeInitialLevel();
+            }
+        }
+    }
 
-function hideWordTooltip(e) {
-    document.getElementById('activeWordTip')?.remove();
-}
+    async function processStellaResponse(response, childText) {
+        const msg = response.message || '';
+        const newWords = response.newWords || [];
+        const corrections = response.corrections || [];
+        const assessment = response.assessment;
 
-// ── Main Send Flow ─────────────────────────────────────────────────────
-async function sendMessage(text) {
-    text = text.trim();
-    if (!text || StellaState.isProcessing) return;
+        // Display
+        displayStellaMessage(msg, newWords);
 
-    StellaState.isProcessing = true;
-    StellaState.lastChildMessage = text;
+        // Corrections
+        if (corrections.length > 0) {
+            attachCorrectionToLastChildBubble(corrections);
+            StellaState.sessionCorrections += corrections.length;
+        }
 
-    // 1. Display child bubble
-    displayChildMessage(text);
+        // Track words
+        newWords.forEach(w => {
+            if (w.word) StellaState.sessionWords.push(w);
+        });
 
-    // 2. Clear input
-    const input = document.getElementById('stellaInput');
-    if (input) input.value = '';
-    updateSendBtn('');
+        // Level assessment
+        if (assessment) updateAssessment(assessment);
 
-    // 3. Stella thinking
-    setStellaState('thinking');
-    setStatus('Stella is thinking... 💭');
-    const typing = showTypingIndicator();
+        // Speak
+        speakText(msg);
 
-    try {
-        // 4. Call Groq
-        const response = await callStella(text);
-        removeTypingIndicator();
-        await processStellaResponse(response, text);
-    } catch (err) {
-        removeTypingIndicator();
-        console.error('Stella callStella error:', err);
-        const errMsg = 'Hmm, I\'m having trouble thinking... 🤔 Let\'s try again in a moment!';
-        displayStellaMessage(errMsg);
-        speakText(errMsg);
+        // History
+        StellaState.conversationHistory.push(
+            { sender: 'child', text: childText },
+            { sender: 'stella', text: msg }
+        );
+        StellaState.messageCount++;
+
         setStellaState('idle');
         setStatus('Stella is ready! ⭐');
     }
 
-    StellaState.isProcessing = false;
+    function finalizeInitialLevel() {
+        if (StellaState.recentAssessments.length === 0) return;
+        const avg = StellaState.recentAssessments.reduce((s, a) => s + a.suggestedLevel, 0) / StellaState.recentAssessments.length;
+        const level = Math.max(1, Math.min(5, Math.round(avg)));
+        if (level !== StellaState.currentLevel) {
+            StellaState.currentLevel = level;
+            updateLevelUI(level, false);
+        }
+        const levelName = LEVEL_CONFIGS[level].name;
+        const announceMsg = `I think you're at Level ${level} — ${levelName}! Let's start our adventure! 🌟`;
+        setTimeout(() => {
+            displayStellaMessage(announceMsg);
+            speakText(announceMsg);
+        }, 500);
+    }
 
-    // Diagnostic flow
-    if (StellaState.isDiagnosticMode) {
-        StellaState.diagnosticStep++;
-        if (StellaState.diagnosticStep > 3) {
-            StellaState.isDiagnosticMode = false;
-            finalizeInitialLevel();
+    // ── Assessment & Level System ─────────────────────────────────────────
+    function updateAssessment(assessment) {
+        StellaState.recentAssessments.push(assessment);
+        if (StellaState.recentAssessments.length > 8) StellaState.recentAssessments.shift();
+
+        if (StellaState.recentAssessments.length < 3) return;
+
+        const last3 = StellaState.recentAssessments.slice(-3);
+        const allAbove = last3.every(a => a.suggestedLevel > StellaState.currentLevel);
+        const avgLast3 = last3.reduce((s, a) => s + a.suggestedLevel, 0) / 3;
+
+        if (allAbove && Math.round(avgLast3) > StellaState.currentLevel && StellaState.currentLevel < 5) {
+            triggerLevelUp(Math.round(avgLast3));
+            return;
+        }
+
+        if (StellaState.recentAssessments.length >= 5) {
+            const last5 = StellaState.recentAssessments.slice(-5);
+            const allBelow = last5.every(a => a.suggestedLevel < StellaState.currentLevel);
+            if (allBelow && StellaState.currentLevel > 1) {
+                StellaState.currentLevel--;
+                updateLevelUI(StellaState.currentLevel, false);
+            }
         }
     }
-}
 
-async function processStellaResponse(response, childText) {
-    const msg = response.message || '';
-    const newWords = response.newWords || [];
-    const corrections = response.corrections || [];
-    const assessment = response.assessment;
+    function triggerLevelUp(newLevel) {
+        const oldLevel = StellaState.currentLevel;
+        StellaState.currentLevel = newLevel;
+        StellaState.leveledUp = true;
+        StellaState.newLevelAfterUp = newLevel;
 
-    // Display
-    displayStellaMessage(msg, newWords);
+        updateLevelUI(newLevel, true);
 
-    // Corrections
-    if (corrections.length > 0) {
-        attachCorrectionToLastChildBubble(corrections);
-        StellaState.sessionCorrections += corrections.length;
+        const overlay = document.getElementById('stellaLevelUpOverlay');
+        overlay.innerHTML = buildLevelUpHTML(newLevel);
+        overlay.classList.remove('hidden');
+
+        spawnConfetti(20);
+        setStellaState('happy');
+
+        const name = StellaState.childData?.username || 'friend';
+        speakText(`Wow ${name}! You levelled up to Level ${newLevel}! You are incredible!`);
     }
 
-    // Track words
-    newWords.forEach(w => {
-        if (w.word) StellaState.sessionWords.push(w);
-    });
-
-    // Level assessment
-    if (assessment) updateAssessment(assessment);
-
-    // Speak
-    speakText(msg);
-
-    // History
-    StellaState.conversationHistory.push(
-        { sender: 'child', text: childText },
-        { sender: 'stella', text: msg }
-    );
-    StellaState.messageCount++;
-
-    setStellaState('idle');
-    setStatus('Stella is ready! ⭐');
-}
-
-function finalizeInitialLevel() {
-    if (StellaState.recentAssessments.length === 0) return;
-    const avg = StellaState.recentAssessments.reduce((s, a) => s + a.suggestedLevel, 0) / StellaState.recentAssessments.length;
-    const level = Math.max(1, Math.min(5, Math.round(avg)));
-    if (level !== StellaState.currentLevel) {
-        StellaState.currentLevel = level;
-        updateLevelUI(level, false);
-    }
-    const levelName = LEVEL_CONFIGS[level].name;
-    const announceMsg = `I think you're at Level ${level} — ${levelName}! Let's start our adventure! 🌟`;
-    setTimeout(() => {
-        displayStellaMessage(announceMsg);
-        speakText(announceMsg);
-    }, 500);
-}
-
-// ── Assessment & Level System ─────────────────────────────────────────
-function updateAssessment(assessment) {
-    StellaState.recentAssessments.push(assessment);
-    if (StellaState.recentAssessments.length > 8) StellaState.recentAssessments.shift();
-
-    if (StellaState.recentAssessments.length < 3) return;
-
-    const last3 = StellaState.recentAssessments.slice(-3);
-    const allAbove = last3.every(a => a.suggestedLevel > StellaState.currentLevel);
-    const avgLast3 = last3.reduce((s, a) => s + a.suggestedLevel, 0) / 3;
-
-    if (allAbove && Math.round(avgLast3) > StellaState.currentLevel && StellaState.currentLevel < 5) {
-        triggerLevelUp(Math.round(avgLast3));
-        return;
-    }
-
-    if (StellaState.recentAssessments.length >= 5) {
-        const last5 = StellaState.recentAssessments.slice(-5);
-        const allBelow = last5.every(a => a.suggestedLevel < StellaState.currentLevel);
-        if (allBelow && StellaState.currentLevel > 1) {
-            StellaState.currentLevel--;
-            updateLevelUI(StellaState.currentLevel, false);
-        }
-    }
-}
-
-function triggerLevelUp(newLevel) {
-    const oldLevel = StellaState.currentLevel;
-    StellaState.currentLevel = newLevel;
-    StellaState.leveledUp = true;
-    StellaState.newLevelAfterUp = newLevel;
-
-    updateLevelUI(newLevel, true);
-
-    const overlay = document.getElementById('stellaLevelUpOverlay');
-    overlay.innerHTML = buildLevelUpHTML(newLevel);
-    overlay.classList.remove('hidden');
-
-    spawnConfetti(20);
-    setStellaState('happy');
-
-    const name = StellaState.childData?.username || 'friend';
-    speakText(`Wow ${name}! You levelled up to Level ${newLevel}! You are incredible!`);
-}
-
-function buildLevelUpHTML(newLevel) {
-    const cfg = LEVEL_CONFIGS[newLevel] || LEVEL_CONFIGS[1];
-    const name = StellaState.childData?.username || 'friend';
-    return `
+    function buildLevelUpHTML(newLevel) {
+        const cfg = LEVEL_CONFIGS[newLevel] || LEVEL_CONFIGS[1];
+        const name = StellaState.childData?.username || 'friend';
+        return `
       <div class="levelup-card">
         <span class="levelup-stella">✨</span>
         <div class="levelup-title">LEVEL UP!</div>
@@ -749,64 +790,64 @@ function buildLevelUpHTML(newLevel) {
         <button onclick="window.stella_closeLevelUp()">🚀 Keep Chatting!</button>
       </div>
     `;
-}
+    }
 
-window.stella_closeLevelUp = function () {
-    document.getElementById('stellaLevelUpOverlay').classList.add('hidden');
-    setStellaState('idle');
-};
+    window.stella_closeLevelUp = function () {
+        document.getElementById('stellaLevelUpOverlay').classList.add('hidden');
+        setStellaState('idle');
+    };
 
-// ── Session Timer ─────────────────────────────────────────────────────
-function startSessionTimer() {
-    const el = document.getElementById('stellaSessionTimer');
-    StellaState.sessionStart = Date.now();
-    StellaState.sessionTimer = setInterval(() => {
-        const elapsed = Math.floor((Date.now() - StellaState.sessionStart) / 1000);
-        const m = Math.floor(elapsed / 60).toString().padStart(2, '0');
-        const s = (elapsed % 60).toString().padStart(2, '0');
-        if (el) el.textContent = `${m}:${s}`;
-    }, 1000);
-}
+    // ── Session Timer ─────────────────────────────────────────────────────
+    function startSessionTimer() {
+        const el = document.getElementById('stellaSessionTimer');
+        StellaState.sessionStart = Date.now();
+        StellaState.sessionTimer = setInterval(() => {
+            const elapsed = Math.floor((Date.now() - StellaState.sessionStart) / 1000);
+            const m = Math.floor(elapsed / 60).toString().padStart(2, '0');
+            const s = (elapsed % 60).toString().padStart(2, '0');
+            if (el) el.textContent = `${m}:${s}`;
+        }, 1000);
+    }
 
-// ── End Session ───────────────────────────────────────────────────────
-async function endSession() {
-    clearInterval(StellaState.sessionTimer);
-    stopCurrentAudio(); // Stop ElevenLabs / browser audio
+    // ── End Session ───────────────────────────────────────────────────────
+    async function endSession() {
+        clearInterval(StellaState.sessionTimer);
+        stopCurrentAudio(); // Stop ElevenLabs / browser audio
 
-    setStatus('Saving session...');
+        setStatus('Saving session...');
 
-    const sessionData = await saveStellaSession();
-    await saveProgressToSupabase();
+        const sessionData = await saveStellaSession();
+        await saveProgressToSupabase();
 
-    showSessionSummary();
-}
+        showSessionSummary();
+    }
 
-function showSessionSummary() {
-    const overlay = document.getElementById('stellaSummaryOverlay');
-    overlay.innerHTML = buildSummaryHTML();
-    overlay.classList.remove('hidden');
-    if (StellaState.messageCount >= 5) spawnConfetti(15);
-}
+    function showSessionSummary() {
+        const overlay = document.getElementById('stellaSummaryOverlay');
+        overlay.innerHTML = buildSummaryHTML();
+        overlay.classList.remove('hidden');
+        if (StellaState.messageCount >= 5) spawnConfetti(15);
+    }
 
-function buildSummaryHTML() {
-    const count = StellaState.messageCount;
-    let perfEmoji = '', perfTitle = '';
-    if (count >= 10) { perfEmoji = '🌟'; perfTitle = 'Amazing session!'; }
-    else if (count >= 5) { perfEmoji = '⭐'; perfTitle = 'Great session!'; }
-    else { perfEmoji = '💫'; perfTitle = 'Good start!'; }
+    function buildSummaryHTML() {
+        const count = StellaState.messageCount;
+        let perfEmoji = '', perfTitle = '';
+        if (count >= 10) { perfEmoji = '🌟'; perfTitle = 'Amazing session!'; }
+        else if (count >= 5) { perfEmoji = '⭐'; perfTitle = 'Great session!'; }
+        else { perfEmoji = '💫'; perfTitle = 'Good start!'; }
 
-    const wordsHTML = StellaState.sessionWords.length
-        ? `<div class="summary-words">${StellaState.sessionWords.map(w =>
-            `<span class="summary-word-pill" onclick="stella_speakWord('${escapeAttr(typeof w === 'string' ? w : w.word)}')">${typeof w === 'string' ? w : w.word}</span>`
-        ).join('')
-        }</div>`
-        : '';
+        const wordsHTML = StellaState.sessionWords.length
+            ? `<div class="summary-words">${StellaState.sessionWords.map(w =>
+                `<span class="summary-word-pill" onclick="stella_speakWord('${escapeAttr(typeof w === 'string' ? w : w.word)}')">${typeof w === 'string' ? w : w.word}</span>`
+            ).join('')
+            }</div>`
+            : '';
 
-    const levelDisplay = StellaState.leveledUp
-        ? `🎉 Level Up! Now at Level ${StellaState.newLevelAfterUp} — ${LEVEL_CONFIGS[StellaState.newLevelAfterUp]?.name}`
-        : `Level ${StellaState.currentLevel} — ${LEVEL_CONFIGS[StellaState.currentLevel]?.name}`;
+        const levelDisplay = StellaState.leveledUp
+            ? `🎉 Level Up! Now at Level ${StellaState.newLevelAfterUp} — ${LEVEL_CONFIGS[StellaState.newLevelAfterUp]?.name}`
+            : `Level ${StellaState.currentLevel} — ${LEVEL_CONFIGS[StellaState.currentLevel]?.name}`;
 
-    return `
+        return `
       <div class="stella-summary-card">
         <span class="summary-emoji">${perfEmoji}</span>
         <div class="summary-title">${perfTitle}</div>
@@ -817,426 +858,427 @@ function buildSummaryHTML() {
         <button class="secondary" onclick="window.location.href='dashboard.html'">🏠 Dashboard</button>
       </div>
     `;
-}
-
-window.stella_speakWord = function (word) { speakText(word); };
-
-// ── Voice INPUT (Web Speech API) ──────────────────────────────────────
-function initVoiceInput() {
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    const micBtn = document.getElementById('stellaMicBtn');
-
-    if (!SpeechRecognition) {
-        if (micBtn) {
-            micBtn.style.opacity = '0.4';
-            micBtn.title = 'Voice not available — use Chrome for voice chat!';
-            micBtn.disabled = true;
-        }
-        return;
     }
 
-    const recognition = new SpeechRecognition();
-    recognition.lang = 'en-US';
-    recognition.continuous = false;
-    recognition.interimResults = true;
-    recognition.maxAlternatives = 1;
-    StellaState.recognition = recognition;
+    window.stella_speakWord = function (word) { speakText(word); };
 
-    recognition.onstart = () => {
-        StellaState.isRecording = true;
-        if (micBtn) micBtn.classList.add('recording');
-        const indicator = document.getElementById('stellaVoiceIndicator');
-        if (indicator) indicator.classList.remove('hidden');
-        const status = document.getElementById('stellaVoiceStatus');
-        if (status) status.textContent = 'Listening... speak now! 🎤';
-        setStellaState('idle');
-    };
+    // ── Voice INPUT (Web Speech API) ──────────────────────────────────────
+    function initVoiceInput() {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        const micBtn = document.getElementById('stellaMicBtn');
 
-    recognition.onresult = (event) => {
-        const transcript = Array.from(event.results)
-            .map(r => r[0].transcript)
-            .join('');
-
-        const transcriptEl = document.getElementById('stellaVoiceTranscript');
-        if (transcriptEl) transcriptEl.textContent = transcript;
-
-        if (event.results[0].isFinal) {
-            stopRecording();
-            const input = document.getElementById('stellaInput');
-            if (input) {
-                input.value = transcript;
-                updateSendBtn(transcript);
+        if (!SpeechRecognition) {
+            if (micBtn) {
+                micBtn.style.opacity = '0.4';
+                micBtn.title = 'Voice not available — use Chrome for voice chat!';
+                micBtn.disabled = true;
             }
-            // Auto-send after 2s if no editing
-            if (StellaState.autoSendTimer) clearTimeout(StellaState.autoSendTimer);
-            StellaState.autoSendTimer = setTimeout(() => {
-                if (input && input.value === transcript) {
-                    sendMessage(transcript);
-                }
-            }, 2000);
+            return;
         }
-    };
 
-    recognition.onerror = (err) => {
-        stopRecording();
-        const msg = err.error === 'no-speech' ? "I didn't hear anything — try again! 🎤"
-            : err.error === 'not-allowed' ? 'Microphone permission needed for voice chat!'
-                : 'Voice error — try typing instead!';
-        setStatus(msg);
-        setTimeout(() => setStatus('Stella is ready! ⭐'), 3000);
-    };
+        const recognition = new SpeechRecognition();
+        recognition.lang = 'en-US';
+        recognition.continuous = false;
+        recognition.interimResults = true;
+        recognition.maxAlternatives = 1;
+        StellaState.recognition = recognition;
 
-    recognition.onend = () => stopRecording();
+        recognition.onstart = () => {
+            StellaState.isRecording = true;
+            if (micBtn) micBtn.classList.add('recording');
+            const indicator = document.getElementById('stellaVoiceIndicator');
+            if (indicator) indicator.classList.remove('hidden');
+            const status = document.getElementById('stellaVoiceStatus');
+            if (status) status.textContent = 'Listening... speak now! 🎤';
+            setStellaState('idle');
+        };
 
-    if (micBtn) {
-        micBtn.addEventListener('click', () => {
-            if (StellaState.isRecording) stopRecording();
-            else startRecording();
-        });
+        recognition.onresult = (event) => {
+            const transcript = Array.from(event.results)
+                .map(r => r[0].transcript)
+                .join('');
+
+            const transcriptEl = document.getElementById('stellaVoiceTranscript');
+            if (transcriptEl) transcriptEl.textContent = transcript;
+
+            if (event.results[0].isFinal) {
+                stopRecording();
+                const input = document.getElementById('stellaInput');
+                if (input) {
+                    input.value = transcript;
+                    updateSendBtn(transcript);
+                }
+                // Auto-send after 2s if no editing
+                if (StellaState.autoSendTimer) clearTimeout(StellaState.autoSendTimer);
+                StellaState.autoSendTimer = setTimeout(() => {
+                    if (input && input.value === transcript) {
+                        sendMessage(transcript);
+                    }
+                }, 2000);
+            }
+        };
+
+        recognition.onerror = (err) => {
+            stopRecording();
+            const msg = err.error === 'no-speech' ? "I didn't hear anything — try again! 🎤"
+                : err.error === 'not-allowed' ? 'Microphone permission needed for voice chat!'
+                    : 'Voice error — try typing instead!';
+            setStatus(msg);
+            setTimeout(() => setStatus('Stella is ready! ⭐'), 3000);
+        };
+
+        recognition.onend = () => stopRecording();
+
+        if (micBtn) {
+            micBtn.addEventListener('click', () => {
+                if (StellaState.isRecording) stopRecording();
+                else startRecording();
+            });
+        }
+
+        document.getElementById('stellaCancelVoice')?.addEventListener('click', stopRecording);
     }
 
-    document.getElementById('stellaCancelVoice')?.addEventListener('click', stopRecording);
-}
-
-function startRecording() {
-    try {
-        StellaState.recognition?.start();
-    } catch (e) { console.warn('Recognition already started', e); }
-}
-
-function stopRecording() {
-    StellaState.isRecording = false;
-    try { StellaState.recognition?.stop(); } catch { }
-    document.getElementById('stellaMicBtn')?.classList.remove('recording');
-    const indicator = document.getElementById('stellaVoiceIndicator');
-    if (indicator) indicator.classList.add('hidden');
-    setStellaState('idle');
-}
-
-// ── Voice OUTPUT — ElevenLabs TTS (with SpeechSynthesis fallback) ─────
-
-/** Stop whatever is currently playing */
-function stopCurrentAudio() {
-    // ElevenLabs AudioContext source
-    if (StellaState.currentAudioSource) {
-        try { StellaState.currentAudioSource.stop(); } catch { }
-        StellaState.currentAudioSource = null;
-    }
-    // HTML Audio element fallback
-    if (StellaState.currentAudio) {
-        StellaState.currentAudio.pause();
-        StellaState.currentAudio.src = '';
-        StellaState.currentAudio = null;
-    }
-    // Browser SpeechSynthesis fallback
-    if (window.speechSynthesis) window.speechSynthesis.cancel();
-    StellaState.isSpeaking = false;
-}
-
-/** Strip emojis and extra whitespace from text before sending to TTS */
-function cleanForTTS(text) {
-    return text
-        // Remove common emoji ranges
-        .replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE00}-\u{FEFF}]/gu, '')
-        .replace(/[✨🌟⭐💫🎉🎊🔥💪🌈🐾🌱🔍⚡🏆👑😊💡📖]/g, '')
-        .replace(/\s+/g, ' ')
-        .trim();
-}
-
-/**
- * Speak text using ElevenLabs TTS API.
- * Falls back to browser SpeechSynthesis if API key is missing.
- * @param {string} text
- * @param {Function|null} onEnd  — called when audio finishes
- */
-async function speakText(text, onEnd = null) {
-    if (!StellaState.voiceEnabled) return;
-
-    // Stop previous audio immediately
-    stopCurrentAudio();
-
-    const cleanText = cleanForTTS(text);
-    if (!cleanText) return;
-
-    const apiKey = window.CONFIG?.ELEVENLABS_API_KEY;
-    const voiceId = window.CONFIG?.ELEVENLABS_VOICE_ID || 'EXAVITQu4vr4xnSDxMaL'; // Bella (child-friendly)
-    const model = window.CONFIG?.ELEVENLABS_MODEL || 'eleven_turbo_v2';
-
-    // ── If no ElevenLabs key → fallback to SpeechSynthesis ──────────
-    const isKeyMissing = !apiKey ||
-        apiKey === 'YOUR_ELEVENLABS_API_KEY_HERE' ||
-        apiKey.trim() === '';
-
-    if (isKeyMissing) {
-        console.info('Stella TTS: No ElevenLabs key — using browser SpeechSynthesis');
-        speakWithBrowser(cleanText, onEnd);
-        return;
+    function startRecording() {
+        try {
+            StellaState.recognition?.start();
+        } catch (e) { console.warn('Recognition already started', e); }
     }
 
-    setStellaState('speaking');
-    StellaState.isSpeaking = true;
+    function stopRecording() {
+        StellaState.isRecording = false;
+        try { StellaState.recognition?.stop(); } catch { }
+        document.getElementById('stellaMicBtn')?.classList.remove('recording');
+        const indicator = document.getElementById('stellaVoiceIndicator');
+        if (indicator) indicator.classList.add('hidden');
+        setStellaState('idle');
+    }
 
-    try {
-        const endpoint =
-            `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`;
+    // ── Voice OUTPUT — ElevenLabs TTS (with SpeechSynthesis fallback) ─────
 
-        const resp = await fetch(endpoint, {
-            method: 'POST',
-            headers: {
-                'xi-api-key': apiKey,
-                'Content-Type': 'application/json',
-                'Accept': 'audio/mpeg',
-            },
-            body: JSON.stringify({
-                text: cleanText,
-                model_id: model,
-                voice_settings: {
-                    stability: 0.55,
-                    similarity_boost: 0.80,
-                    style: 0.30,
-                    use_speaker_boost: true,
-                },
-            }),
-        });
+    /** Stop whatever is currently playing */
+    function stopCurrentAudio() {
+        // ElevenLabs AudioContext source
+        if (StellaState.currentAudioSource) {
+            try { StellaState.currentAudioSource.stop(); } catch { }
+            StellaState.currentAudioSource = null;
+        }
+        // HTML Audio element fallback
+        if (StellaState.currentAudio) {
+            StellaState.currentAudio.pause();
+            StellaState.currentAudio.src = '';
+            StellaState.currentAudio = null;
+        }
+        // Browser SpeechSynthesis fallback
+        if (window.speechSynthesis) window.speechSynthesis.cancel();
+        StellaState.isSpeaking = false;
+    }
 
-        if (!resp.ok) {
-            const errText = await resp.text().catch(() => '');
-            console.warn(`Stella TTS: ElevenLabs ${resp.status}`, errText);
-            // Graceful fallback
+    /** Strip emojis and extra whitespace from text before sending to TTS */
+    function cleanForTTS(text) {
+        return text
+            // Remove common emoji ranges
+            .replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE00}-\u{FEFF}]/gu, '')
+            .replace(/[✨🌟⭐💫🎉🎊🔥💪🌈🐾🌱🔍⚡🏆👑😊💡📖]/g, '')
+            .replace(/\s+/g, ' ')
+            .trim();
+    }
+
+    /**
+     * Speak text using ElevenLabs TTS API.
+     * Falls back to browser SpeechSynthesis if API key is missing.
+     * @param {string} text
+     * @param {Function|null} onEnd  — called when audio finishes
+     */
+    async function speakText(text, onEnd = null) {
+        if (!StellaState.voiceEnabled) return;
+
+        // Stop previous audio immediately
+        stopCurrentAudio();
+
+        const cleanText = cleanForTTS(text);
+        if (!cleanText) return;
+
+        const apiKey = window.CONFIG?.ELEVENLABS_API_KEY;
+        const voiceId = window.CONFIG?.ELEVENLABS_VOICE_ID || 'EXAVITQu4vr4xnSDxMaL'; // Bella (child-friendly)
+        const model = window.CONFIG?.ELEVENLABS_MODEL || 'eleven_turbo_v2';
+
+        // ── If no ElevenLabs key → fallback to SpeechSynthesis ──────────
+        const isKeyMissing = !apiKey ||
+            apiKey === 'YOUR_ELEVENLABS_API_KEY_HERE' ||
+            apiKey.trim() === '';
+
+        if (isKeyMissing) {
+            console.info('Stella TTS: No ElevenLabs key — using browser SpeechSynthesis');
             speakWithBrowser(cleanText, onEnd);
             return;
         }
 
-        const arrayBuffer = await resp.arrayBuffer();
+        setStellaState('speaking');
+        StellaState.isSpeaking = true;
 
-        // Decode + play via Web Audio API for precise onEnd callback
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        audioCtx.decodeAudioData(arrayBuffer, (buffer) => {
-            // If another message interrupted, bail
-            if (!StellaState.isSpeaking) { setStellaState('idle'); return; }
+        try {
+            const endpoint =
+                `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`;
 
-            const source = audioCtx.createBufferSource();
-            source.buffer = buffer;
-            source.connect(audioCtx.destination);
+            const resp = await fetch(endpoint, {
+                method: 'POST',
+                headers: {
+                    'xi-api-key': apiKey,
+                    'Content-Type': 'application/json',
+                    'Accept': 'audio/mpeg',
+                },
+                body: JSON.stringify({
+                    text: cleanText,
+                    model_id: model,
+                    voice_settings: {
+                        stability: 0.55,
+                        similarity_boost: 0.80,
+                        style: 0.30,
+                        use_speaker_boost: true,
+                    },
+                }),
+            });
 
-            StellaState.currentAudioSource = source;
-
-            source.onended = () => {
-                StellaState.isSpeaking = false;
-                StellaState.currentAudioSource = null;
-                setStellaState('idle');
-                if (onEnd) onEnd();
-            };
-
-            source.start(0);
-
-        }, (err) => {
-            console.warn('Stella TTS: Audio decode failed', err);
-            StellaState.isSpeaking = false;
-            speakWithBrowser(cleanText, onEnd);
-        });
-
-    } catch (err) {
-        console.warn('Stella TTS: ElevenLabs fetch failed', err);
-        StellaState.isSpeaking = false;
-        // Fallback to browser
-        speakWithBrowser(cleanText, onEnd);
-    }
-}
-
-/** Browser SpeechSynthesis fallback */
-function speakWithBrowser(cleanText, onEnd = null) {
-    if (!window.speechSynthesis) { if (onEnd) onEnd(); return; }
-
-    setStellaState('speaking');
-    const utterance = new SpeechSynthesisUtterance(cleanText);
-
-    const trySpeak = () => {
-        const voices = window.speechSynthesis.getVoices();
-        const preferred =
-            voices.find(v => v.name.includes('Samantha')) ||
-            voices.find(v => v.name.includes('Karen')) ||
-            voices.find(v => v.lang === 'en-US' && v.name.toLowerCase().includes('google')) ||
-            voices.find(v => v.lang.startsWith('en')) ||
-            null;
-
-        if (preferred) utterance.voice = preferred;
-        utterance.rate = 0.88;
-        utterance.pitch = 1.15;
-        utterance.volume = 0.9;
-
-        utterance.onstart = () => setStellaState('speaking');
-        utterance.onend = () => { setStellaState('idle'); if (onEnd) onEnd(); };
-        utterance.onerror = () => { setStellaState('idle'); if (onEnd) onEnd(); };
-
-        window.speechSynthesis.speak(utterance);
-    };
-
-    if (window.speechSynthesis.getVoices().length === 0) {
-        window.speechSynthesis.addEventListener('voiceschanged', trySpeak, { once: true });
-    } else {
-        trySpeak();
-    }
-}
-
-// ── Voice toggle ──────────────────────────────────────────────────────
-function initVoiceToggle() {
-    const btn = document.getElementById('stellaVoiceToggle');
-    StellaState.voiceEnabled = localStorage.getItem('stella_voice_enabled') !== 'false';
-    if (btn) {
-        btn.textContent = StellaState.voiceEnabled ? '🔊' : '🔇';
-        if (!StellaState.voiceEnabled) btn.classList.add('muted');
-        btn.addEventListener('click', () => {
-            StellaState.voiceEnabled = !StellaState.voiceEnabled;
-            localStorage.setItem('stella_voice_enabled', StellaState.voiceEnabled);
-            btn.textContent = StellaState.voiceEnabled ? '🔊' : '🔇';
-            btn.classList.toggle('muted', !StellaState.voiceEnabled);
-            // Stop any currently playing ElevenLabs or browser audio
-            if (!StellaState.voiceEnabled) stopCurrentAudio();
-        });
-    }
-}
-
-// ── Input Events ──────────────────────────────────────────────────────
-function initInputEvents() {
-    const input = document.getElementById('stellaInput');
-    const sendbtn = document.getElementById('stellaSendBtn');
-    const endBtn = document.getElementById('stellaEndBtn');
-
-    input?.addEventListener('input', () => updateSendBtn(input.value));
-    input?.addEventListener('keydown', e => {
-        if (e.key === 'Enter' && !e.shiftKey && input.value.trim()) {
-            e.preventDefault();
-            sendMessage(input.value);
-        }
-        // Cancel auto-send if typing
-        if (StellaState.autoSendTimer) {
-            clearTimeout(StellaState.autoSendTimer);
-            StellaState.autoSendTimer = null;
-        }
-    });
-
-    sendbtn?.addEventListener('click', () => {
-        if (input && input.value.trim()) sendMessage(input.value);
-    });
-
-    endBtn?.addEventListener('click', endSession);
-}
-
-function updateSendBtn(val) {
-    const btn = document.getElementById('stellaSendBtn');
-    if (!btn) return;
-    if (val.trim()) btn.classList.add('visible');
-    else btn.classList.remove('visible');
-}
-
-// ── Confetti ──────────────────────────────────────────────────────────
-function spawnConfetti(count) {
-    for (let i = 0; i < count; i++) {
-        setTimeout(() => {
-            const el = document.createElement('div');
-            el.className = 'confetti-piece';
-            el.style.left = Math.random() * 100 + 'vw';
-            el.style.top = '-10px';
-            el.style.background = CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)];
-            el.style.animationDuration = (Math.random() * 1.5 + 1) + 's';
-            el.style.animationDelay = '0s';
-            document.body.appendChild(el);
-            setTimeout(() => el.remove(), 3000);
-        }, i * 60);
-    }
-}
-
-// ── Utilities ─────────────────────────────────────────────────────────
-function escapeHTML(s) {
-    return String(s)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;');
-}
-function escapeAttr(s) {
-    return String(s || '').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-}
-function escapeRegex(s) {
-    return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
-
-// ── Init ──────────────────────────────────────────────────────────────
-async function initStella() {
-    // Get user from auth
-    try {
-        if (window.eduplay?.getCurrentUser) {
-            const user = await window.eduplay.getCurrentUser();
-            if (!user) {
-                window.location.href = 'login.html';
+            if (!resp.ok) {
+                const errText = await resp.text().catch(() => '');
+                console.warn(`Stella TTS: ElevenLabs ${resp.status}`, errText);
+                // Graceful fallback
+                speakWithBrowser(cleanText, onEnd);
                 return;
             }
-            StellaState.userId = user.id || user.auth_id;
-            StellaState.childData = user;
-        } else if (window.eduplay?.session?.getUser) {
-            const user = window.eduplay.session.getUser();
-            if (!user) { window.location.href = 'login.html'; return; }
-            StellaState.userId = user.id;
-            StellaState.childData = user;
+
+            const arrayBuffer = await resp.arrayBuffer();
+
+            // Decode + play via Web Audio API for precise onEnd callback
+            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            audioCtx.decodeAudioData(arrayBuffer, (buffer) => {
+                // If another message interrupted, bail
+                if (!StellaState.isSpeaking) { setStellaState('idle'); return; }
+
+                const source = audioCtx.createBufferSource();
+                source.buffer = buffer;
+                source.connect(audioCtx.destination);
+
+                StellaState.currentAudioSource = source;
+
+                source.onended = () => {
+                    StellaState.isSpeaking = false;
+                    StellaState.currentAudioSource = null;
+                    setStellaState('idle');
+                    if (onEnd) onEnd();
+                };
+
+                source.start(0);
+
+            }, (err) => {
+                console.warn('Stella TTS: Audio decode failed', err);
+                StellaState.isSpeaking = false;
+                speakWithBrowser(cleanText, onEnd);
+            });
+
+        } catch (err) {
+            console.warn('Stella TTS: ElevenLabs fetch failed', err);
+            StellaState.isSpeaking = false;
+            // Fallback to browser
+            speakWithBrowser(cleanText, onEnd);
         }
-    } catch (e) {
-        console.error('Stella: auth error', e);
     }
 
-    if (!StellaState.userId) {
-        // Try Supabase session directly
+    /** Browser SpeechSynthesis fallback */
+    function speakWithBrowser(cleanText, onEnd = null) {
+        if (!window.speechSynthesis) { if (onEnd) onEnd(); return; }
+
+        setStellaState('speaking');
+        const utterance = new SpeechSynthesisUtterance(cleanText);
+
+        const trySpeak = () => {
+            const voices = window.speechSynthesis.getVoices();
+            const preferred =
+                voices.find(v => v.name.includes('Samantha')) ||
+                voices.find(v => v.name.includes('Karen')) ||
+                voices.find(v => v.lang === 'en-US' && v.name.toLowerCase().includes('google')) ||
+                voices.find(v => v.lang.startsWith('en')) ||
+                null;
+
+            if (preferred) utterance.voice = preferred;
+            utterance.rate = 0.88;
+            utterance.pitch = 1.15;
+            utterance.volume = 0.9;
+
+            utterance.onstart = () => setStellaState('speaking');
+            utterance.onend = () => { setStellaState('idle'); if (onEnd) onEnd(); };
+            utterance.onerror = () => { setStellaState('idle'); if (onEnd) onEnd(); };
+
+            window.speechSynthesis.speak(utterance);
+        };
+
+        if (window.speechSynthesis.getVoices().length === 0) {
+            window.speechSynthesis.addEventListener('voiceschanged', trySpeak, { once: true });
+        } else {
+            trySpeak();
+        }
+    }
+
+    // ── Voice toggle ──────────────────────────────────────────────────────
+    function initVoiceToggle() {
+        const btn = document.getElementById('stellaVoiceToggle');
+        StellaState.voiceEnabled = localStorage.getItem('stella_voice_enabled') !== 'false';
+        if (btn) {
+            btn.textContent = StellaState.voiceEnabled ? '🔊' : '🔇';
+            if (!StellaState.voiceEnabled) btn.classList.add('muted');
+            btn.addEventListener('click', () => {
+                StellaState.voiceEnabled = !StellaState.voiceEnabled;
+                localStorage.setItem('stella_voice_enabled', StellaState.voiceEnabled);
+                btn.textContent = StellaState.voiceEnabled ? '🔊' : '🔇';
+                btn.classList.toggle('muted', !StellaState.voiceEnabled);
+                // Stop any currently playing ElevenLabs or browser audio
+                if (!StellaState.voiceEnabled) stopCurrentAudio();
+            });
+        }
+    }
+
+    // ── Input Events ──────────────────────────────────────────────────────
+    function initInputEvents() {
+        const input = document.getElementById('stellaInput');
+        const sendbtn = document.getElementById('stellaSendBtn');
+        const endBtn = document.getElementById('stellaEndBtn');
+
+        input?.addEventListener('input', () => updateSendBtn(input.value));
+        input?.addEventListener('keydown', e => {
+            if (e.key === 'Enter' && !e.shiftKey && input.value.trim()) {
+                e.preventDefault();
+                sendMessage(input.value);
+            }
+            // Cancel auto-send if typing
+            if (StellaState.autoSendTimer) {
+                clearTimeout(StellaState.autoSendTimer);
+                StellaState.autoSendTimer = null;
+            }
+        });
+
+        sendbtn?.addEventListener('click', () => {
+            if (input && input.value.trim()) sendMessage(input.value);
+        });
+
+        endBtn?.addEventListener('click', endSession);
+    }
+
+    function updateSendBtn(val) {
+        const btn = document.getElementById('stellaSendBtn');
+        if (!btn) return;
+        if (val.trim()) btn.classList.add('visible');
+        else btn.classList.remove('visible');
+    }
+
+    // ── Confetti ──────────────────────────────────────────────────────────
+    function spawnConfetti(count) {
+        for (let i = 0; i < count; i++) {
+            setTimeout(() => {
+                const el = document.createElement('div');
+                el.className = 'confetti-piece';
+                el.style.left = Math.random() * 100 + 'vw';
+                el.style.top = '-10px';
+                el.style.background = CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)];
+                el.style.animationDuration = (Math.random() * 1.5 + 1) + 's';
+                el.style.animationDelay = '0s';
+                document.body.appendChild(el);
+                setTimeout(() => el.remove(), 3000);
+            }, i * 60);
+        }
+    }
+
+    // ── Utilities ─────────────────────────────────────────────────────────
+    function escapeHTML(s) {
+        return String(s)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
+    }
+    function escapeAttr(s) {
+        return String(s || '').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+    function escapeRegex(s) {
+        return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    }
+
+    // ── Init ──────────────────────────────────────────────────────────────
+    async function initStella() {
+        // Get user from auth
+        try {
+            if (window.eduplay?.getCurrentUser) {
+                const user = await window.eduplay.getCurrentUser();
+                if (!user) {
+                    window.location.href = 'login.html';
+                    return;
+                }
+                StellaState.userId = user.id || user.auth_id;
+                StellaState.childData = user;
+            } else if (window.eduplay?.session?.getUser) {
+                const user = window.eduplay.session.getUser();
+                if (!user) { window.location.href = 'login.html'; return; }
+                StellaState.userId = user.id;
+                StellaState.childData = user;
+            }
+        } catch (e) {
+            console.error('Stella: auth error', e);
+        }
+
+        if (!StellaState.userId) {
+            // Try Supabase session directly
+            try {
+                const sb = getSupabase();
+                const { data: { session } } = await sb.auth.getSession();
+                if (!session) { window.location.href = 'login.html'; return; }
+                StellaState.userId = session.user.id;
+                const { data: profile } = await sb.from('users').select('*').eq('id', session.user.id).single();
+                StellaState.childData = profile || { id: session.user.id, username: session.user.email?.split('@')[0] || 'Explorer' };
+            } catch (e) { console.error('Stella: fallback auth failed', e); return; }
+        }
+
+        // Load progress
+        StellaState.progress = await loadProgress();
+        if (StellaState.progress) {
+            StellaState.currentLevel = StellaState.progress.current_level || 1;
+        }
+        StellaState.levelAtSessionStart = StellaState.currentLevel;
+
+        // Setup UI
+        updateLevelUI(StellaState.currentLevel);
+        renderLeftPanelStats();
+        startSessionTimer();
+        initVoiceInput();
+        initVoiceToggle();
+        initInputEvents();
+
+        // Show opening message
+        const opening = buildStellaOpening();
+        setTimeout(() => {
+            displayStellaMessage(opening.message);
+            scrollToBottom(true, true);
+            speakText(opening.message);
+        }, 600);
+    }
+
+    // Boot when DOM ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initStella);
+    } else {
+        initStella();
+    }
+
+    // ── Dashboard integration ─────────────────────────────────────────────
+    window.loadStellaProgress = async function (userId) {
         try {
             const sb = getSupabase();
-            const { data: { session } } = await sb.auth.getSession();
-            if (!session) { window.location.href = 'login.html'; return; }
-            StellaState.userId = session.user.id;
-            const { data: profile } = await sb.from('users').select('*').eq('id', session.user.id).single();
-            StellaState.childData = profile || { id: session.user.id, username: session.user.email?.split('@')[0] || 'Explorer' };
-        } catch (e) { console.error('Stella: fallback auth failed', e); return; }
-    }
+            const { data } = await sb
+                .from('user_english_progress')
+                .select('current_level, total_sessions, words_learned')
+                .eq('user_id', userId)
+                .single();
+            return data ?? null;
+        } catch { return null; }
+    };
 
-    // Load progress
-    StellaState.progress = await loadProgress();
-    if (StellaState.progress) {
-        StellaState.currentLevel = StellaState.progress.current_level || 1;
-    }
-    StellaState.levelAtSessionStart = StellaState.currentLevel;
-
-    // Setup UI
-    updateLevelUI(StellaState.currentLevel);
-    renderLeftPanelStats();
-    startSessionTimer();
-    initVoiceInput();
-    initVoiceToggle();
-    initInputEvents();
-
-    // Show opening message
-    const opening = buildStellaOpening();
-    setTimeout(() => {
-        displayStellaMessage(opening.message);
-        speakText(opening.message);
-    }, 600);
-}
-
-// Boot when DOM ready
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initStella);
-} else {
-    initStella();
-}
-
-// ── Dashboard integration ─────────────────────────────────────────────
-window.loadStellaProgress = async function (userId) {
-    try {
-        const sb = getSupabase();
-        const { data } = await sb
-            .from('user_english_progress')
-            .select('current_level, total_sessions, words_learned')
-            .eq('user_id', userId)
-            .single();
-        return data ?? null;
-    } catch { return null; }
-};
-
-}) ();
+})();

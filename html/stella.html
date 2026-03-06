@@ -5,14 +5,18 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Stella — English Coach | EduPlay</title>
-  <meta name="description" content="Chat with Stella, your AI English learning companion! Practice speaking and improve your English level.">
+  <meta name="description"
+    content="Chat with Stella, your AI English learning companion! Practice speaking and improve your English level.">
 
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800;900&family=Nunito:wght@700;800;900&family=Fredoka+One&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800;900&family=Nunito:wght@700;800;900&family=Fredoka+One&display=swap"
+    rel="stylesheet">
 
   <!-- Styles -->
+  <link rel="stylesheet" href="../css/navbar.css">
   <link rel="stylesheet" href="../css/stella.css">
 
   <!-- Supabase SDK -->
@@ -21,15 +25,57 @@
 
 <body>
   <!-- Stars Canvas Background -->
-  <canvas id="starsCanvas" style="position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;opacity:0.6;"></canvas>
+  <canvas id="starsCanvas"
+    style="position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;opacity:0.6;"></canvas>
 
   <div class="stella-page" style="position:relative;z-index:1;">
 
     <!-- NAVBAR -->
-    <nav class="stella-navbar">
-      <span class="stella-brand">🎓 EduPlay</span>
-      <span class="stella-nav-title">✨ Stella — English Coach</span>
-      <a href="dashboard.html" class="stella-back-btn">← Dashboard</a>
+    <nav class="dashboard-navbar" id="dashboardNavbar">
+
+      <!-- LEFT: Brand -->
+      <a href="dashboard.html" class="nav-brand">
+        <span class="nav-brand-icon">🎓</span>
+        <span class="nav-brand-text">EduPlay</span>
+      </a>
+
+      <!-- CENTER: Navigation links -->
+      <div class="nav-links">
+        <a href="dashboard.html" class="nav-link" data-i18n="nav.dashboard">Dashboard</a>
+        <a href="progress.html" class="nav-link" data-i18n="nav.progress">My Progress</a>
+        <a href="games.html" class="nav-link" data-i18n="nav.games">Games</a>
+        <a href="stella.html" class="nav-link nav-link-stella active">
+          <span class="stella-nav-star">🌟</span>
+          <span class="stella-nav-text">Stella</span>
+        </a>
+      </div>
+
+      <!-- RIGHT: Actions -->
+      <div class="nav-actions">
+
+        <!-- Parent View button -->
+        <button class="nav-parent-btn" id="parentViewBtn" onclick="ParentView.handleNavbarClick()">
+          👨‍👩‍👧 <span>Parent View</span>
+        </button>
+
+        <!-- Coins chip -->
+        <div class="nav-coins-chip" id="navCoinsChip">
+          <span class="nav-coins-icon">🪙</span>
+          <span class="nav-coins-value" id="navCoinsValue">0</span>
+        </div>
+
+        <!-- User avatar + name -->
+        <div class="nav-user">
+          <div class="nav-avatar" id="navAvatar">?</div>
+          <span class="nav-username" id="navUsername">Explorer</span>
+        </div>
+
+        <!-- Logout -->
+        <button class="nav-logout-btn" id="logoutBtn">
+          Logout
+        </button>
+
+      </div>
     </nav>
 
     <!-- MAIN LAYOUT -->
@@ -111,12 +157,16 @@
           <!-- Messages appear here -->
         </div>
 
+        <!-- Floating Jump to Bottom Button -->
+        <button class="scroll-to-bottom-btn" id="scrollToBottomBtn" onclick="stella_scrollToBottom_click()">
+          ↓ New message
+        </button>
+
         <!-- Input Area -->
         <div class="stella-input-area">
           <button class="stella-mic-btn" id="stellaMicBtn" title="Speak to Stella">🎤</button>
-          <input type="text" class="stella-input" id="stellaInput"
-                 placeholder="Type your message to Stella..."
-                 autocomplete="off" />
+          <input type="text" class="stella-input" id="stellaInput" placeholder="Type your message to Stella..."
+            autocomplete="off" />
           <button class="stella-send-btn" id="stellaSendBtn">➤</button>
         </div>
 
