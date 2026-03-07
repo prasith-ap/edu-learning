@@ -366,7 +366,10 @@ function updateModuleCards(history) {
 function initDailyChallenge(history) {
   const today = new Date().toISOString().split('T')[0];
   const todayCorrect = history ? history
-    .filter(h => h.date.startsWith(today))
+    .filter(h => {
+      const d = h.date || h.created_at || new Date().toISOString();
+      return d.startsWith(today);
+    })
     .reduce((acc, h) => acc + (h.correct || 0), 0) : 0;
 
   const count = Math.min(todayCorrect, 5);
@@ -407,7 +410,7 @@ function animateCountUp(el, target, duration, suffix = '') {
 function calculateStreak(history) {
   if (!history || history.length === 0) return 0;
 
-  const dates = [...new Set(history.map(h => h.date.split('T')[0]))].sort().reverse();
+  const dates = [...new Set(history.map(h => (h.date || h.created_at || new Date().toISOString()).split('T')[0]))].sort().reverse();
   let streak = 0;
   let today = new Date().toISOString().split('T')[0];
 
