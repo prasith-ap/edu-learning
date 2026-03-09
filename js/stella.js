@@ -952,10 +952,18 @@ RESPOND ONLY IN THIS EXACT JSON FORMAT — NO TEXT OUTSIDE
         document.getElementById('stellaCancelVoice')?.addEventListener('click', stopRecording);
     }
 
-    function startRecording() {
+    async function startRecording() {
         try {
+            // Ask for explicit permission to avoid silent fail on new browsers
+            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                await navigator.mediaDevices.getUserMedia({ audio: true });
+            }
             StellaState.recognition?.start();
-        } catch (e) { console.warn('Recognition already started', e); }
+        } catch (e) {
+            console.warn('Recognition start failed', e);
+            setStatus('Microphone access denied! 🎤');
+            setTimeout(() => setStatus('Stella is ready! ⭐'), 3000);
+        }
     }
 
     function stopRecording() {
@@ -1261,6 +1269,19 @@ RESPOND ONLY IN THIS EXACT JSON FORMAT — NO TEXT OUTSIDE
         // Setup basic UI
         updateLevelUI(StellaState.currentLevel);
         renderLeftPanelStats();
+
+        document.getElementById('navUsername').textContent = StellaState.childData?.username || 'Explorer';
+        document.getElementById('navAvatar').textContent = (StellaState.childData?.username || 'EX').substring(0, 2).toUpperCase();
+
+        // Fetch coins for navbar
+        try {
+            const sb = getSupabase();
+            const { data } = await sb.from('users').select('game_coins').eq('id', StellaState.userId).single();
+            if (data && data.game_coins !== undefined) {
+                const dashCoinEl = document.getElementById('navCoinsValue');
+                if (dashCoinEl) dashCoinEl.textContent = data.game_coins;
+            }
+        } catch (e) { console.warn('Failed to load Stella nav coins', e); }
 
         // Stop here. The user must click 'Start Session' to proceed.
     }

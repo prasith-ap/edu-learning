@@ -542,9 +542,15 @@
         const section = document.getElementById('pvHeatmapSection');
         const dateCounts = {};
 
+        // Local timestamp parsing so UTC offsets don't group quizzes into the wrong local day limit
+        const getLocalKey = (dateObj) => {
+            const tzOff = dateObj.getTimezoneOffset() * 60000;
+            return new Date(dateObj.getTime() - tzOff).toISOString().split('T')[0];
+        };
+
         h.forEach(q => {
-            const d = getQuizDate(q).toISOString().split('T')[0];
-            dateCounts[d] = (dateCounts[d] || 0) + 1;
+            const dStr = getLocalKey(getQuizDate(q));
+            dateCounts[dStr] = (dateCounts[dStr] || 0) + 1;
         });
 
         const days = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
@@ -555,7 +561,7 @@
         for (let i = 27; i >= 0; i--) {
             const d = new Date(today);
             d.setDate(today.getDate() - i);
-            const key = d.toISOString().split('T')[0];
+            const key = getLocalKey(d);
             const count = dateCounts[key] || 0;
             const cls = count === 0 ? 'pv-heat-0'
                 : count === 1 ? 'pv-heat-1'
@@ -587,11 +593,13 @@
         const h = PVState.quizHistory;
         const section = document.getElementById('pvChartSection');
 
-        const mathData = h.filter(q => getQuizModule(q).includes('math')).slice(-15);
-        const englishData = h.filter(q => getQuizModule(q).includes('english')).slice(-15);
+        // Supabase returns descending, so oldest is at end.
+        // We want the most recent 15, then reversed so chart goes left-to-right (old->new)
+        const mathData = h.filter(q => getQuizModule(q).includes('math')).slice(0, 15).reverse();
+        const englishData = h.filter(q => getQuizModule(q).includes('english')).slice(0, 15).reverse();
         const gkData = h.filter(q =>
             getQuizModule(q).includes('general') || getQuizModule(q).includes('gk')
-        ).slice(-15);
+        ).slice(0, 15).reverse();
 
         const toDataset = (arr, label, color) => ({
             label,

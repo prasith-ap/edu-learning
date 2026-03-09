@@ -822,7 +822,7 @@ async function checkAuth() {
  */
 async function updateNavCoins(identifier) {
   const coinEl = document.getElementById('navCoins');
-  if (!coinEl || !identifier) return;
+  if (!coinEl && !document.getElementById('navCoinsValue')) return;
 
   try {
     const client = initSupabase();
@@ -833,7 +833,15 @@ async function updateNavCoins(identifier) {
 
     const { data } = await client.from('users').select('game_coins').eq(queryCol, identifier).single();
     if (data && data.game_coins !== undefined) {
-      coinEl.textContent = data.game_coins;
+      if (coinEl) coinEl.textContent = data.game_coins;
+
+      const dashCoinEl = document.getElementById('navCoinsValue');
+      if (dashCoinEl) dashCoinEl.textContent = data.game_coins;
+
+      if (typeof window.animateNavCoins === 'function') {
+        window.animateNavCoins(data.game_coins);
+      }
+
       // Expose globally for quick access in games.html
       window.eduplay_current_coins = data.game_coins;
     }

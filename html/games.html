@@ -287,20 +287,21 @@
             if (!userId) return;
             currentUser = { id: userId, username };
 
-            document.getElementById('navUsername').textContent = username || 'Explorer';
-            document.getElementById('userAvatar').textContent = (username || 'EX').substring(0, 2).toUpperCase();
-
             supabaseHub = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
 
             // Fetch user data
             try {
                 const { data: user } = await supabaseHub
                     .from('users')
-                    .select('game_coins')
+                    .select('game_coins, username')
                     .eq('id', userId)
                     .single();
 
+                const dbUsername = user?.username || username || 'Explorer';
                 const coins = user?.game_coins || 0;
+
+                document.getElementById('navUsername').textContent = dbUsername;
+                document.getElementById('userAvatar').textContent = dbUsername.substring(0, 2).toUpperCase();
 
                 document.getElementById('navCoins').textContent = coins;
                 document.getElementById('statsCoins').textContent = coins;

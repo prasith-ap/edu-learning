@@ -589,7 +589,7 @@ function setActiveNavLink() {
 /* ============================================
    COIN VALUE UPDATE WITH ANIMATION
    ============================================ */
-function updateNavCoins(newValue, animate = true) {
+function animateNavCoins(newValue, animate = true) {
   const chip = document.getElementById('navCoinsChip');
   const valueEl = document.getElementById('navCoinsValue');
 
@@ -604,3 +604,5 @@ function updateNavCoins(newValue, animate = true) {
     setTimeout(() => chip.classList.remove('coin-added'), 400);
   }
 }
+
+window.animateNavCoins = animateNavCoins;
