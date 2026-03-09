@@ -1,0 +1,841 @@
+/* =========================================================
+   EduPlay Homepage Animations — COMPLETE REWRITE v2
+   File: css/homepage-animations.css
+   ========================================================= */
+
+/* ── Global page layer stack ─────────────────────────────── */
+body {
+  background: linear-gradient(180deg,
+      #1a1a6e 0%,
+      #3d1a78 30%,
+      #7b2fa0 60%,
+      #c561a0 85%,
+      #ffa07a 100%);
+  min-height: 100vh;
+  transition: background 1.2s ease;
+  position: relative;
+}
+
+/* Canvas background — fixed, behind everything */
+#ep-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  display: block;
+}
+
+/* All direct body children: sit above canvas at z-index 1
+   EXCLUDE fixed/absolute overlay elements from this rule */
+body>*:not(#ep-bg):not(#ep-chase-lane):not(#ep-car):not(#ep-mute-top-btn):not(#ep-mascot-btn):not(#ep-score):not(.amazing-text):not(.ep-confetti) {
+  position: relative;
+  z-index: 1;
+}
+
+/* ── PART 1 — Hero Heading (CSS Only, zero JS) ───────────── */
+.hero h1,
+.hero-content h1 {
+  background: linear-gradient(100deg,
+      #FFD700 0%,
+      #FF6B9D 35%,
+      #B8FF66 65%,
+      #66FFEE 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ── Hero section must be relatively positioned ──────────── */
+.hero {
+  position: relative !important;
+  overflow: visible !important;
+  min-height: 520px;
+}
+
+/* ── PART 2 — Star Collector Game ────────────────────────── */
+#ep-star-game {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.ep-star {
+  position: absolute;
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(135deg, #FFD700, #FF8C00);
+  clip-path: polygon(50% 0%, 61% 35%, 98% 35%,
+      68% 57%, 79% 91%, 50% 70%,
+      21% 91%, 32% 57%, 2% 35%, 39% 35%);
+  box-shadow: 0 0 12px #FFD700, 0 0 24px rgba(255, 215, 0, 0.4);
+  cursor: pointer;
+  pointer-events: auto;
+  will-change: transform;
+  animation: starFloat 3s ease-in-out infinite alternate;
+}
+
+.ep-star-particle {
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  pointer-events: none;
+  animation: particleBurst 0.45s ease-out forwards;
+}
+
+/* Score HUD */
+#ep-score {
+  position: fixed;
+  top: 80px;
+  left: 20px;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.55);
+  border: 2px solid #FFD700;
+  color: #FFD700;
+  font-size: 1rem;
+  font-weight: 700;
+  padding: 8px 18px;
+  border-radius: 20px;
+  pointer-events: none;
+  transition: border-color 0.3s;
+  letter-spacing: 0.5px;
+}
+
+/* ── PART 3 — Mood Selector ──────────────────────────────── */
+#ep-mood {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  z-index: 10;
+  display: flex;
+  gap: 12px;
+}
+
+.ep-mood-btn {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  font-size: 1.6rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+  will-change: transform;
+  line-height: 1;
+}
+
+.ep-mood-btn:hover {
+  transform: scale(1.2);
+}
+
+.ep-mood-btn.active {
+  border-color: #FFD700;
+  animation: moodSpin 0.5s ease-out;
+}
+
+/* ── PART 4 — Tom & Jerry Chase Lane ─────────────────────── */
+#ep-chase-lane {
+  position: fixed;
+  bottom: 165px;
+  left: 0;
+  width: 100vw;
+  height: 130px;
+  z-index: 50;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.ep-chase-char {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  will-change: transform;
+  display: block;
+}
+
+/* Running leg animations */
+@keyframes catRun {
+  0% {
+    transform: rotate(-38deg);
+  }
+
+  50% {
+    transform: rotate(38deg);
+  }
+
+  100% {
+    transform: rotate(-38deg);
+  }
+}
+
+@keyframes mouseRun {
+  0% {
+    transform: rotate(-30deg);
+  }
+
+  50% {
+    transform: rotate(30deg);
+  }
+
+  100% {
+    transform: rotate(-30deg);
+  }
+}
+
+.cat-leg-f {
+  transform-origin: top center;
+  animation: catRun 0.26s linear infinite;
+}
+
+.cat-leg-b {
+  transform-origin: top center;
+  animation: catRun 0.26s linear infinite reverse;
+}
+
+.mouse-leg-f {
+  transform-origin: top center;
+  animation: mouseRun 0.21s linear infinite;
+}
+
+.mouse-leg-b {
+  transform-origin: top center;
+  animation: mouseRun 0.21s linear infinite reverse;
+}
+
+.cat-tail {
+  transform-origin: 0 0;
+  animation: tailChase 0.5s ease-in-out infinite alternate;
+}
+
+.mouse-star {
+  transform-origin: center;
+  animation: starWiggle 0.6s ease-in-out infinite alternate;
+}
+
+/* Speech bubbles */
+.chase-bubble {
+  position: absolute;
+  top: -40px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: white;
+  color: #333;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 16px;
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+}
+
+.chase-bubble::after {
+  content: '';
+  position: absolute;
+  bottom: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top-color: white;
+  border-bottom: none;
+}
+
+.chase-bubble.show-bubble {
+  opacity: 1;
+}
+
+/* ── PART 5 — Supercar ───────────────────────────────────── */
+#ep-car {
+  position: fixed !important;
+  bottom: 25px;
+  left: -420px;
+  width: 320px;
+  height: 130px;
+  z-index: 40;
+  will-change: left, transform;
+  pointer-events: none;
+  display: block;
+}
+
+.ep-neon {
+  animation: neonPulse 1.8s ease-in-out infinite alternate;
+}
+
+.ep-hl {
+  animation: hlFlicker 0.8s ease-in-out infinite alternate;
+}
+
+.ep-rl {
+  animation: rlBlink 1.2s ease-in-out infinite alternate;
+}
+
+.ep-flame {
+  animation: flameFlicker 0.18s ease-in-out infinite alternate;
+}
+
+.ep-speedline {
+  animation: speedLineSweep 0.35s linear infinite;
+}
+
+.ep-wh {
+  animation: wheelSpin 0.4s linear infinite;
+}
+
+.ep-antenna-ball {
+  animation: antennaBob 0.6s ease-in-out infinite alternate;
+}
+
+/* Headlight cone — visible only when idling */
+.ep-hl-cone {
+  position: absolute;
+  right: -88px;
+  top: 18px;
+  width: 100px;
+  height: 70px;
+  clip-path: polygon(0% 15%, 100% 0%, 100% 100%, 0% 85%);
+  background: rgba(255, 255, 200, 0.10);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.5s;
+}
+
+#ep-car.idling .ep-hl-cone {
+  opacity: 1;
+}
+
+/* ── PART 6 — Mute & Mascot ──────────────────────────────── */
+#ep-mute-top-btn {
+  position: fixed !important;
+  top: 16px;
+  right: 70px;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.45);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  font-size: 1.3rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  transition: transform 0.2s;
+  line-height: 1;
+}
+
+#ep-mute-top-btn:hover {
+  transform: scale(1.15);
+}
+
+#ep-mascot-btn {
+  position: fixed !important;
+  bottom: 20px;
+  right: 20px;
+  z-index: 9999;
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #FFD700, #FF8C00);
+  border: 3px solid rgba(255, 255, 255, 0.5);
+  font-size: 2rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 20px rgba(255, 165, 0, 0.5);
+  transition: transform 0.2s;
+  animation: mascotFloat 2.5s ease-in-out infinite alternate;
+  will-change: transform;
+}
+
+#ep-mascot-btn:hover {
+  transform: scale(1.15);
+}
+
+/* ── PART 7 — Subject Doors ──────────────────────────────── */
+#ep-doors {
+  display: flex;
+  justify-content: center;
+  gap: 32px;
+  flex-wrap: wrap;
+  padding: 32px 0 48px;
+  position: relative;
+  z-index: 1;
+}
+
+.ep-door-container {
+  perspective: 600px;
+  cursor: pointer;
+}
+
+.ep-door {
+  width: 180px;
+  height: 220px;
+  border-radius: 12px 12px 0 0;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.4s ease, box-shadow 0.4s ease;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 16px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: white;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+  will-change: transform;
+  animation: doorWiggle 3s ease-in-out infinite;
+}
+
+.ep-door::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 4px solid rgba(0, 0, 0, 0.25);
+  border-radius: 12px 12px 0 0;
+  pointer-events: none;
+}
+
+.door-math {
+  background: linear-gradient(135deg, #FF6B35, #FF8C00);
+  animation-delay: 0s;
+}
+
+.door-math:hover {
+  transform: rotateY(-25deg);
+  box-shadow: 16px 0 40px rgba(255, 107, 53, 0.5);
+}
+
+.door-eng {
+  background: linear-gradient(135deg, #6C63FF, #9B59B6);
+  animation-delay: -1s;
+}
+
+.door-eng:hover {
+  transform: rotateY(25deg);
+  box-shadow: -16px 0 40px rgba(108, 99, 255, 0.5);
+}
+
+.door-sci {
+  background: linear-gradient(135deg, #00B894, #00CEC9);
+  animation-delay: -2s;
+}
+
+.door-sci:hover {
+  transform: rotateY(-25deg);
+  box-shadow: 16px 0 40px rgba(0, 184, 148, 0.5);
+}
+
+.ep-door-knob {
+  position: absolute;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: gold;
+  box-shadow: 0 0 8px gold;
+}
+
+.ep-door-float {
+  position: absolute;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 1rem;
+  font-weight: 700;
+  animation: doorItemFloat 2.5s ease-in-out infinite alternate;
+  pointer-events: none;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+}
+
+.ep-door-float:nth-child(2) {
+  top: 18%;
+  left: 16%;
+}
+
+.ep-door-float:nth-child(3) {
+  top: 40%;
+  right: 14%;
+}
+
+.ep-door-float:nth-child(4) {
+  top: 60%;
+  left: 20%;
+}
+
+/* ── PART 8 — Confetti ───────────────────────────────────── */
+.ep-confetti {
+  position: fixed;
+  top: -20px;
+  z-index: 9998;
+  pointer-events: none;
+  border-radius: 2px;
+  animation: confettiFall linear forwards;
+}
+
+/* ── Celebration text ─────────────────────────────────────── */
+.amazing-text {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  z-index: 10000;
+  font-size: 2.5rem;
+  font-weight: 900;
+  background: linear-gradient(90deg, #FFD700, #FF6B9D, #6C63FF);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: none;
+  pointer-events: none;
+  animation: amazingPop 2s ease-out forwards;
+}
+
+#ep-score.score-rainbow {
+  animation: rainbowBorder 2s linear;
+}
+
+/* ══ KEYFRAMES ══════════════════════════════════════════════ */
+
+@keyframes starFloat {
+  0% {
+    transform: translateY(0) rotate(0deg);
+  }
+
+  100% {
+    transform: translateY(-15px) rotate(15deg);
+  }
+}
+
+@keyframes starPop {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  50% {
+    transform: scale(1.8);
+    opacity: 0.8;
+  }
+
+  100% {
+    transform: scale(0);
+    opacity: 0;
+  }
+}
+
+@keyframes particleBurst {
+  0% {
+    transform: translate(0, 0) scale(1);
+    opacity: 1;
+  }
+
+  100% {
+    transform: translate(var(--dx), var(--dy)) scale(0);
+    opacity: 0;
+  }
+}
+
+@keyframes moodSpin {
+  0% {
+    transform: rotate(0deg) scale(1);
+  }
+
+  50% {
+    transform: rotate(180deg) scale(1.2);
+  }
+
+  100% {
+    transform: rotate(360deg) scale(1);
+  }
+}
+
+@keyframes tailChase {
+  0% {
+    transform: rotate(-20deg);
+  }
+
+  100% {
+    transform: rotate(20deg);
+  }
+}
+
+@keyframes starWiggle {
+  0% {
+    transform: rotate(-15deg);
+  }
+
+  100% {
+    transform: rotate(15deg);
+  }
+}
+
+@keyframes carBounce {
+  0% {
+    transform: translateY(0);
+  }
+
+  28% {
+    transform: translateY(-20px);
+  }
+
+  50% {
+    transform: translateY(0);
+  }
+
+  70% {
+    transform: translateY(-9px);
+  }
+
+  86% {
+    transform: translateY(0);
+  }
+
+  100% {
+    transform: translateY(0);
+  }
+}
+
+@keyframes carIdle {
+  0% {
+    transform: translateY(0);
+  }
+
+  100% {
+    transform: translateY(-5px);
+  }
+}
+
+@keyframes wheelSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes neonPulse {
+  0% {
+    opacity: 0.35;
+    filter: blur(2px);
+  }
+
+  100% {
+    opacity: 1;
+    filter: blur(4px);
+  }
+}
+
+@keyframes hlFlicker {
+  0% {
+    opacity: 0.7;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes rlBlink {
+  0% {
+    opacity: 0.5;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes flameFlicker {
+  0% {
+    transform: scaleX(0.8) scaleY(0.9);
+    opacity: 0.8;
+  }
+
+  100% {
+    transform: scaleX(1.2) scaleY(1.1);
+    opacity: 1;
+  }
+}
+
+@keyframes speedLineSweep {
+  0% {
+    transform: translateX(0);
+    opacity: 0.65;
+  }
+
+  100% {
+    transform: translateX(-45px);
+    opacity: 0;
+  }
+}
+
+@keyframes antennaBob {
+  0% {
+    transform: translateY(0);
+  }
+
+  100% {
+    transform: translateY(-3px);
+  }
+}
+
+@keyframes doorWiggle {
+
+  0%,
+  100% {
+    transform: rotate(-2deg);
+  }
+
+  50% {
+    transform: rotate(2deg);
+  }
+}
+
+@keyframes doorItemFloat {
+  0% {
+    transform: translateY(0);
+  }
+
+  100% {
+    transform: translateY(-10px) rotate(10deg);
+  }
+}
+
+@keyframes confettiFall {
+  0% {
+    transform: translateY(-20px) rotate(0deg);
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateY(110vh) rotate(720deg);
+    opacity: 0;
+  }
+}
+
+@keyframes amazingPop {
+  0% {
+    transform: translate(-50%, -50%) scale(0.5);
+    opacity: 0;
+  }
+
+  20% {
+    transform: translate(-50%, -50%) scale(1.2);
+    opacity: 1;
+  }
+
+  80% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+
+  100% {
+    transform: translate(-50%, -50%) scale(1.1);
+    opacity: 0;
+  }
+}
+
+@keyframes rainbowBorder {
+  0% {
+    border-color: #FF6B9D;
+  }
+
+  17% {
+    border-color: #FFD700;
+  }
+
+  33% {
+    border-color: #00D4AA;
+  }
+
+  50% {
+    border-color: #6C63FF;
+  }
+
+  67% {
+    border-color: #FF8C42;
+  }
+
+  83% {
+    border-color: #00B894;
+  }
+
+  100% {
+    border-color: #FFD700;
+  }
+}
+
+@keyframes mascotFloat {
+  0% {
+    transform: translateY(0);
+  }
+
+  100% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes screenShake {
+
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  20% {
+    transform: translateX(-2px);
+  }
+
+  40% {
+    transform: translateX(2px);
+  }
+
+  60% {
+    transform: translateX(-2px);
+  }
+
+  80% {
+    transform: translateX(2px);
+  }
+}
+
+body.shaking {
+  animation: screenShake 0.3s ease-in-out 6;
+}
+
+/* ── prefers-reduced-motion ──────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+
+  #ep-bg {
+    display: none;
+  }
+
+  #ep-chase-lane {
+    display: none;
+  }
+
+  #ep-car {
+    display: none;
+  }
+
+  .ep-star {
+    animation: none !important;
+  }
+}

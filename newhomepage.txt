@@ -1,0 +1,96 @@
+FULL REWRITE: Delete ALL existing code in js/homepage-animations.js and css/homepage-animations.css. Start completely fresh. Do not touch any other file.
+🎨 PART 1 — NEW BACKGROUND SYSTEM
+Replace the plain lavender background on the entire page with this layered system applied to body:
+
+background: linear-gradient(180deg, #E8F4FF 0%, #EDE8FF 40%, #FFE8F4 100%);
+Then inject a <canvas id="ep-sky"> via JS, position: fixed, top:0, left:0, width:100vw, height:100vh, z-index: 0, pointer-events: none. Draw these on it with requestAnimationFrame:
+Clouds — Draw 5 clouds using multiple overlapping ctx.arc circles, pure white (rgba(255,255,255,0.85)), sizes ranging 80px–140px wide. Move them left at speed 0.2–0.5px/frame. When a cloud exits left, it reappears on the right. No sharp edges — use ctx.shadowBlur = 15, ctx.shadowColor = 'white'.
+Stars/Sparkles — 40 tiny dots, colors cycling between #FFD700, #FF6B9D, #6C63FF, #00D4AA. Each twinkles by oscillating globalAlpha between 0.1 and 0.9 using Math.sin(Date.now()/600 + offset). Sizes 1.5–4px radius.
+Floating bubbles — 12 circles, radius 15–40px, colors rgba(108,99,255,0.15), rgba(255,107,157,0.15), rgba(255,215,0,0.2). Float upward 0.3px/frame, wrap back to bottom when they reach top.
+All existing page content must sit above canvas: ensure .navbar, .hero, all sections have position: relative; z-index: 1.
+
+🚗 PART 2 — THE SUPERCAR (Most Important)
+Build the car as a self-contained inline SVG, minimum 280px wide × 110px tall. It must look like a real cartoon Lamborghini. Build it with these exact SVG elements:
+Car body: A low, wide, aerodynamic shape using <path> — sweeping curved roofline, sharp nose, aggressive rear wing. Fill: url(#carGradient) — define <linearGradient id="carGradient"> from #FF2D55 (bright red) to #C0001A (dark red), direction top-to-bottom. Add a <path> highlight strip along the top in rgba(255,255,255,0.4) for gloss.
+Purple racing stripe: A diagonal <path> across the door panel, fill #6C63FF, width ~15px.
+Windows: Windshield and side window as <polygon> shapes, fill rgba(120,200,255,0.7), stroke #4488AA.
+Wheels (2): Each wheel = outer <circle> fill #222 (tyre), inner <circle> fill #C0A000 (gold rim), 6× <line> spokes from center outward in #FFD700. Wrap each wheel group in <g class="ep-wheel"> — rotate via CSS: @keyframes wheelSpin { to { transform: rotate(360deg); } } applied to .ep-wheel, transform-origin set to the wheel center coordinates.
+Headlights: Two <ellipse> shapes at front, fill #FFFFAA, with CSS animation: headlightPulse 1.5s ease-in-out infinite that oscillates filter: drop-shadow(0 0 8px #FFD700) to drop-shadow(0 0 20px #FFD700).
+Exhaust flames: Three <ellipse> shapes at rear, fills #FF4400, #FF8800, #FFCC00 (layered for depth). CSS @keyframes flamePuff oscillates their scaleX and opacity.
+Speed lines: 5 <line> elements behind the car, stroke rgba(255,255,255,0.6), lengths 60/45/30/45/60px, CSS @keyframes speedBlur fades them in/out repeatedly.
+Wrap the entire SVG in <div id="ep-car">, position: fixed, initially left: -350px, bottom: 120px, z-index: 100.
+Animation sequence (JS, using requestAnimationFrame or CSS transitions):
+
+1. t=0: Car starts at left: -350px
+2. Over 1.8 seconds: Ease to left: calc(50vw - 140px) — center of screen — using CSS transition cubic-bezier(0.25, 0.46, 0.45, 0.94)
+3. At arrival: Play horn — Web Audio API: new AudioContext(), oscillator at 523Hz for 120ms then 659Hz for 120ms
+4. Car does bounce settle: CSS keyframe — translateY goes 0 → -18px → 0 → -8px → 0 over 0.6s
+5. Idle for 3 seconds: Gentle translateY(-4px) float, 1s ease-in-out alternate infinite
+6. After 3s: Transition left: 110vw over 1.2s ease-in — car zooms off right
+7. After car exits: display: none
+
+🎤 PART 3 — ELEVENLABS VOICE (Invisible, Audio Only)
+Zero visible UI changes for the voice. No speech bubble, no text overlay, no mascot animation changes. Just silent audio.
+After 2.5 seconds from page load:
+
+async function playWelcome() {
+  if (localStorage.getItem('ep_muted') === 'true') return;
+  if (!window.CONFIG?.ELEVENLABS_API_KEY) return;
+  try {
+    const res = await fetch('https://api.elevenlabs.io/v1/text-to-speech/EXAVITQu4vr4xnSDxMaL', {
+      method: 'POST',
+      headers: {
+        'xi-api-key': window.CONFIG.ELEVENLABS_API_KEY,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        text: "Hey superstar! Welcome to EduPlay! Get ready to learn amazing things and become a champion today!",
+        model_id: "eleven_turbo_v2",
+        voice_settings: { stability: 0.4, similarity_boost: 0.9 }
+      })
+    });
+    const blob = await res.blob();
+    const audio = new Audio(URL.createObjectURL(blob));
+    audio.play();
+  } catch(e) { /* silent fail */ }
+}
+
+Mute button — position: fixed, top: 72px, right: 16px, z-index: 9999. Style: width: 44px, height: 44px, circular, background: #6C63FF, white icon. Show 🔊 when unmuted, 🔇 when muted. Toggle localStorage('ep_muted'). No other UI elements for voice.
+
+✨ PART 4 — HERO HEADING (One-time fix, stays stable)
+Apply rainbow to heading using CSS only, no JS touching the h1 innerHTML:
+
+.hero h1, section h1:first-of-type {
+  background: linear-gradient(90deg, #6C63FF, #FF6B9D, #FFD700, #00D4AA);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: none; /* STATIC gradient, no animation — stable and readable */
+}
+
+No letter-by-letter splitting. No JS on the heading. Static gradient only.
+
+🐶 PART 5 — MASCOT (Clean, simple)
+One fixed mascot button only. Remove all floating random animal emojis entirely.
+
+position: fixed, bottom: 24px, right: 24px, z-index: 9999
+width: 60px, height: 60px, border-radius: 50%
+background: linear-gradient(135deg, #6C63FF, #FF6B9D)
+border: 3px solid white
+box-shadow: 0 4px 20px rgba(108,99,255,0.5)
+Shows 🐶 at font-size: 1.8rem
+CSS: @keyframes mascotFloat — translateY(0) → translateY(-8px) → translateY(0), 2s ease-in-out infinite
+Click: plays ElevenLabs audio "Amazing job! Keep it up, superstar!" — same fetch pattern as Part 3, same silent fail
+No tooltip, no ripple, no extra elements — just the button
+
+
+📋 ABSOLUTE RULES
+
+1. Only js/homepage-animations.js and css/homepage-animations.css — zero other files modified
+2. No floating random animals anywhere on the page — remove all of them
+3. No JS that touches .hero h1 innerHTML — heading text is CSS-styled only
+4. Stats counters: use IntersectionObserver, parse "50k+" as target 50 + suffix "k+", count from 0 to 50 over 1.5s, then append suffix
+5. Car SVG must be fully visible — test that bottom: 120px places it above the fold
+6. prefers-reduced-motion: skip all transitions and audio autoplay
+7. Entire JS wrapped in DOMContentLoaded
+8. This is a complete rewrite — no code from previous versions survives
