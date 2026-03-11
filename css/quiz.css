@@ -294,6 +294,7 @@ h4,
   position: relative;
 }
 
+/* In-quiz question mascot emoji sizing */
 .mascot-container {
   font-size: 5rem;
   filter: drop-shadow(0 10px 15px rgba(0, 0, 0, 0.5));
@@ -303,6 +304,57 @@ h4,
 
 .mascot-container.fire {
   filter: drop-shadow(0 0 20px rgba(245, 158, 11, 0.8)) drop-shadow(0 0 40px rgba(239, 68, 68, 0.6));
+}
+
+/* Floating Ollie owl companion — reset quiz font-size, override to use main.css compact card */
+#mascotContainer {
+  position: fixed !important;
+  bottom: 24px !important;
+  right: 24px !important;
+  z-index: 600 !important;
+  font-size: inherit !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-end !important;
+  gap: 10px !important;
+  filter: none !important;
+  animation: none !important;
+}
+
+#mascotEmoji {
+  font-size: 52px;
+  cursor: pointer;
+  filter: drop-shadow(0 6px 16px rgba(0,0,0,0.5));
+  animation: mascotBob 3s ease-in-out infinite;
+}
+
+#mascotBubble {
+  background: white;
+  border-radius: 16px 16px 4px 16px;
+  padding: 14px 18px;
+  max-width: 260px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+  border: 2px solid rgba(124,58,237,0.3);
+  opacity: 0;
+  transform: scale(0.85) translateY(8px);
+  transform-origin: bottom right;
+  transition: all 0.4s cubic-bezier(0.34,1.56,0.64,1);
+  pointer-events: none;
+}
+
+#mascotBubble.visible {
+  opacity: 1;
+  transform: scale(1) translateY(0);
+  pointer-events: all;
+}
+
+#mascotText {
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.88rem !important;
+  font-weight: 700;
+  color: #2d1b69;
+  line-height: 1.5;
+  word-wrap: break-word;
 }
 
 .question-bubble {

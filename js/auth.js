@@ -940,39 +940,50 @@ async function saveQuizResult(arg1, topic, scoreArg, totalArg) {
 
   const client = initSupabase();
   try {
-    let subject, score, total, percentage;
+    let subject, score, total, percentage, correctCount;
 
     // Handle object payload from quiz.js vs legacy arguments
     if (typeof arg1 === 'object') {
       subject = arg1.module;
       score = arg1.score;
       total = arg1.total;
-      percentage = arg1.percentage || Math.round((score / total) * 100) || 0;
+      correctCount = arg1.correct || 0;
+      percentage = arg1.percentage || Math.round((correctCount / (total || 10)) * 100) || 0;
     } else {
       subject = arg1;
       score = scoreArg;
       total = totalArg;
+      correctCount = 0;
       percentage = Math.round((score / total) * 100) || 0;
     }
 
-    const { error } = await client
-      .from('quiz_results')
-      .insert([
-        {
-          user_id: user.id,
-          module: subject, // DB column might be named module
-          score: score,
-          total_questions: total,
-          percentage: percentage
-        }
-      ]);
+    // Compute a clean point value based on correct answers (10 pts each)
+    // This is independent of streak multipliers for fair total_points tracking
+    const basePointsEarned = correctCount > 0 ? correctCount * 10 : (score || 0);
 
-    if (error) {
-      console.error('Error saving quiz result to DB:', error);
-      return false;
+    // Step 1: Save quiz result record (non-blocking — even if this fails, stats must update)
+    try {
+      const { error } = await client
+        .from('quiz_results')
+        .insert([
+          {
+            user_id: user.id,
+            module: subject,
+            score: score,
+            total_questions: total,
+            percentage: percentage
+          }
+        ]);
+
+      if (error) {
+        console.warn('Warning: quiz_results insert failed (stats will still update):', error.message);
+      }
+    } catch (insertErr) {
+      console.warn('Warning: quiz_results insert threw exception (stats will still update):', insertErr);
     }
 
-    await updateUserStats(user.id, subject, score);
+    // Step 2: ALWAYS update user stats regardless of quiz_results insert outcome
+    await updateUserStats(user.id, subject, basePointsEarned, correctCount, percentage);
     return true;
   } catch (error) {
     console.error('Save quiz result exception:', error);
@@ -983,7 +994,7 @@ async function saveQuizResult(arg1, topic, scoreArg, totalArg) {
 /**
  * Helper to update user stats after a quiz
  */
-async function updateUserStats(userId, subject, scorePointsToAdd) {
+async function updateUserStats(userId, subject, scorePointsToAdd, correctCount = 0, percentage = 0) {
   const client = initSupabase();
   try {
     const { data: user, error: fetchError } = await client
@@ -995,7 +1006,7 @@ async function updateUserStats(userId, subject, scorePointsToAdd) {
     if (fetchError) throw fetchError;
 
     const quizzesCompleted = (user.quizzes_completed || 0) + 1;
-    // Map scorePointsToAdd directly, fallback to 0 using actual column total_points
+    // Add points to user's total
     const totalScore = (user.total_points || 0) + (scorePointsToAdd || 0);
     const subjectScores = user.subject_scores || {};
 
@@ -1015,11 +1026,16 @@ async function updateUserStats(userId, subject, scorePointsToAdd) {
 
     if (updateError) throw updateError;
 
-    // Check for badges based on quizzes completed or score
-    if (quizzesCompleted >= 1) await saveBadge(userId, 'First Quiz', '🏅');
-    if (quizzesCompleted >= 5) await saveBadge(userId, 'Quiz Master', '👑');
-    // For perfect score we might need percentage, but for now we look at points per question (e.g. >= 100 is high score)
-    if (scorePointsToAdd >= 100) await saveBadge(userId, 'Highest Scorer', '⭐');
+    console.log(`✅ Stats updated: +${scorePointsToAdd} pts, quizzes=${quizzesCompleted}, total=${totalScore}`);
+
+    // Award badges based on milestones
+    if (quizzesCompleted >= 1) await saveBadge(userId, 'First Quest', '🏅');
+    if (quizzesCompleted >= 5) await saveBadge(userId, 'Quiz Explorer', '🚀');
+    if (quizzesCompleted >= 10) await saveBadge(userId, 'Quiz Master', '👑');
+    if (quizzesCompleted >= 20) await saveBadge(userId, 'Quiz Legend', '🏆');
+    if (percentage === 100) await saveBadge(userId, 'Perfect Score', '💯');
+    if (totalScore >= 500) await saveBadge(userId, 'Point Hunter', '⭐');
+    if (totalScore >= 1000) await saveBadge(userId, 'Star Collector', '🌟');
 
   } catch (error) {
     console.error('Error updating user stats:', error);

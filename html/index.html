@@ -61,11 +61,169 @@
           </div>
         </div>
         <div style="flex: 1; min-width: 300px; display: flex; justify-content: center;">
-          <!-- Professional Hero Image Placeholder -->
-          <div
-            style="width: 100%; max-width: 500px; height: 400px; background-color: #ddd; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #777;">
-            <span style="font-size: 1.5rem;">[Professional Learning Image]</span>
+          <!-- Interactive Learning Widget -->
+          <div id="heroWidget"
+            style="width: 100%; max-width: 480px; height: 420px; border-radius: 24px; background: linear-gradient(135deg, #1a0a3c 0%, #2d1b69 50%, #0f3460 100%); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; position: relative; overflow: hidden; box-shadow: 0 20px 60px rgba(108,99,255,0.4); cursor: default;">
+            <!-- Animated Stars Background -->
+            <div class="widget-stars" style="position:absolute;inset:0;pointer-events:none;overflow:hidden;">
+              <span
+                style="position:absolute;top:10%;left:15%;font-size:18px;animation:twinkle 2s ease-in-out infinite;">⭐</span>
+              <span
+                style="position:absolute;top:20%;right:20%;font-size:14px;animation:twinkle 2.5s ease-in-out 0.5s infinite;">✨</span>
+              <span
+                style="position:absolute;top:60%;left:8%;font-size:12px;animation:twinkle 1.8s ease-in-out 1s infinite;">💫</span>
+              <span
+                style="position:absolute;bottom:15%;right:12%;font-size:20px;animation:twinkle 3s ease-in-out 0.3s infinite;">🌟</span>
+              <span
+                style="position:absolute;top:75%;left:40%;font-size:10px;animation:twinkle 2.2s ease-in-out 0.7s infinite;">⭐</span>
+            </div>
+
+            <!-- Title -->
+            <div style="text-align:center;z-index:1;">
+              <div style="font-size:2.5rem;animation:float 3s ease-in-out infinite;">🎓</div>
+              <h3
+                style="color:#FFD700;font-family:'Source Sans Pro',sans-serif;font-size:1.3rem;font-weight:700;margin:4px 0 2px;text-shadow:0 2px 8px rgba(0,0,0,0.4);">
+                Pick a Subject!</h3>
+              <p style="color:rgba(255,255,255,0.7);font-size:0.8rem;margin:0;">Tap to start learning 🚀</p>
+            </div>
+
+            <!-- Subject Cards (Clickable) -->
+            <div style="display:flex;gap:12px;z-index:1;">
+              <button onclick="heroSubjectClick(this,'mathematics','🦉','#4FC3F7')" class="hero-subject-card"
+                style="background:rgba(79,195,247,0.15);border:2px solid rgba(79,195,247,0.5);border-radius:16px;padding:14px 12px;cursor:pointer;transition:all 0.3s ease;color:white;text-align:center;width:110px;font-family:'Source Sans Pro',sans-serif;">
+                <div style="font-size:2rem;">🔢</div>
+                <div style="font-weight:700;font-size:0.85rem;margin-top:4px;">Maths</div>
+                <div style="font-size:0.7rem;opacity:0.7;margin-top:2px;">Numbers & Logic</div>
+              </button>
+              <button onclick="heroSubjectClick(this,'english','🦋','#CE93D8')" class="hero-subject-card"
+                style="background:rgba(206,147,216,0.15);border:2px solid rgba(206,147,216,0.5);border-radius:16px;padding:14px 12px;cursor:pointer;transition:all 0.3s ease;color:white;text-align:center;width:110px;font-family:'Source Sans Pro',sans-serif;">
+                <div style="font-size:2rem;">📚</div>
+                <div style="font-weight:700;font-size:0.85rem;margin-top:4px;">English</div>
+                <div style="font-size:0.7rem;opacity:0.7;margin-top:2px;">Words & Grammar</div>
+              </button>
+              <button onclick="heroSubjectClick(this,'general-knowledge','🌍','#80DEEA')" class="hero-subject-card"
+                style="background:rgba(128,222,234,0.15);border:2px solid rgba(128,222,234,0.5);border-radius:16px;padding:14px 12px;cursor:pointer;transition:all 0.3s ease;color:white;text-align:center;width:110px;font-family:'Source Sans Pro',sans-serif;">
+                <div style="font-size:2rem;">🌍</div>
+                <div style="font-weight:700;font-size:0.85rem;margin-top:4px;">Science</div>
+                <div style="font-size:0.7rem;opacity:0.7;margin-top:2px;">Explore & Discover</div>
+              </button>
+            </div>
+
+            <!-- Progress Bar / Response Area -->
+            <div id="heroFeedback"
+              style="z-index:1;text-align:center;min-height:60px;display:flex;flex-direction:column;align-items:center;gap:6px;">
+              <div style="display:flex;gap:6px;" id="heroProgressDots">
+                <span
+                  style="width:8px;height:8px;background:rgba(255,255,255,0.25);border-radius:50%;display:inline-block;"></span>
+                <span
+                  style="width:8px;height:8px;background:rgba(255,255,255,0.25);border-radius:50%;display:inline-block;"></span>
+                <span
+                  style="width:8px;height:8px;background:rgba(255,255,255,0.25);border-radius:50%;display:inline-block;"></span>
+              </div>
+              <p id="heroFeedbackText"
+                style="color:rgba(255,255,255,0.6);font-size:0.8rem;margin:0;font-family:'Source Sans Pro',sans-serif;">
+                Choose a subject above to begin your adventure!</p>
+            </div>
+
+            <!-- Floating reward emoji container -->
+            <div id="heroRewardZone" style="position:absolute;inset:0;pointer-events:none;z-index:10;overflow:hidden;">
+            </div>
           </div>
+
+          <style>
+            @keyframes twinkle {
+
+              0%,
+              100% {
+                opacity: 0.3;
+                transform: scale(1)
+              }
+
+              50% {
+                opacity: 1;
+                transform: scale(1.3)
+              }
+            }
+
+            @keyframes float {
+
+              0%,
+              100% {
+                transform: translateY(0)
+              }
+
+              50% {
+                transform: translateY(-10px)
+              }
+            }
+
+            @keyframes riseUp {
+              0% {
+                opacity: 1;
+                transform: translateY(0) scale(1)
+              }
+
+              100% {
+                opacity: 0;
+                transform: translateY(-80px) scale(1.5)
+              }
+            }
+
+            @keyframes pulseCard {
+
+              0%,
+              100% {
+                transform: scale(1)
+              }
+
+              50% {
+                transform: scale(1.05)
+              }
+            }
+
+            .hero-subject-card:hover {
+              transform: translateY(-4px) scale(1.05) !important;
+              box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3) !important;
+            }
+          </style>
+          <script>
+            const heroMessages = {
+              'mathematics': ['Great choice! 🔢 Math is magical!', 'Numbers are your superpower! ⚡', 'Let\'s count the stars! 🌟'],
+              'english': ['Words unlock the world! 📖', 'Great choice! Stories await! 📚', 'Every word is an adventure! 🌈'],
+              'general-knowledge': ['Explore the universe! 🌍', 'Science rocks! 🚀', 'Curiosity is your compass! 🧭']
+            };
+            const emojis = ['🌟', '⭐', '✨', '💫', '🎉', '🏆', '🎊', '💎'];
+            function heroSubjectClick(btn, module, mascot, color) {
+              // Highlight selected
+              document.querySelectorAll('.hero-subject-card').forEach(b => {
+                b.style.transform = ''; b.style.boxShadow = ''; b.style.background = b.style.background.replace(/0\.[3-9]/, '0.15');
+              });
+              btn.style.background = color + '33';
+              btn.style.border = `2px solid ${color}`;
+              btn.style.boxShadow = `0 0 20px ${color}66`;
+              btn.style.animation = 'pulseCard 0.4s ease';
+              setTimeout(() => btn.style.animation = '', 400);
+              // Update feedback
+              const msgs = heroMessages[module] || ['Let\'s go! 🚀'];
+              const msg = msgs[Math.floor(Math.random() * msgs.length)];
+              document.getElementById('heroFeedbackText').textContent = mascot + ' ' + msg;
+              document.getElementById('heroFeedbackText').style.color = color;
+              // Animate progress dots
+              const dots = document.querySelectorAll('#heroProgressDots span');
+              dots.forEach((d, i) => { d.style.background = color; d.style.transform = 'scale(1.5)'; setTimeout(() => d.style.transform = '', 300 + i * 100); });
+              // Spawn floating emojis
+              const zone = document.getElementById('heroRewardZone');
+              for (let i = 0; i < 5; i++) {
+                setTimeout(() => {
+                  const e = document.createElement('span');
+                  e.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+                  e.style.cssText = `position:absolute;font-size:${16 + Math.random() * 16}px;left:${10 + Math.random() * 80}%;bottom:10%;animation:riseUp 1s ease forwards;`;
+                  zone.appendChild(e);
+                  setTimeout(() => e.remove(), 1000);
+                }, i * 100);
+              }
+            }
+          </script>
         </div>
       </div>
     </div>

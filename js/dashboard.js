@@ -36,6 +36,15 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (window.eduplayTheme) window.eduplayTheme.initMouseParallax();
 });
 
+// Force fresh data reload when navigating back from quiz page (clears browser BFCache)
+window.addEventListener('pageshow', async (event) => {
+  if (event.persisted) {
+    // Page was restored from cache (back navigation) — reload fresh
+    console.log('📥 Page restored from cache — reloading stats...');
+    await loadUserData();
+  }
+});
+
 /* ─── SECTION 1: PAGE ENTRANCE SEQUENCE ─── */
 
 function initPageEntrance() {
@@ -147,7 +156,6 @@ async function loadUserData() {
     stats = currentUser.stats || stats;
 
     renderStats(stats);
-    renderBadges(stats.badges, stats);
     updateModuleCards(stats.history);
     initDailyChallenge(stats.history);
 
@@ -252,18 +260,29 @@ async function loadUserData() {
 }
 
 function renderStats(stats) {
-  animateCountUp(document.getElementById('totalPoints'), stats.totalPoints || 0, 1200);
+  // Derive reliable quizzes count: prefer DB value, fallback to history length
+  const historyCount = (stats.history && stats.history.length) || 0;
+  const quizzesDone = stats.quizzesCompleted > 0 ? stats.quizzesCompleted : historyCount;
+
+  // Derive reliable total points: prefer DB value, fallback to sum from history scores
+  let totalPts = stats.totalPoints || 0;
+  if (totalPts === 0 && historyCount > 0) {
+    // Compute from history: each entry has a percentage (0-100), multiply by 10 for rough pts
+    totalPts = stats.history.reduce((acc, h) => acc + Math.round((h.percentage || 0) / 10) * 10, 0);
+  }
+
+  animateCountUp(document.getElementById('totalPoints'), totalPts, 1200);
   // Badges count is set by renderBadges after computing from stats
-  animateCountUp(document.getElementById('quizzesCompleted'), stats.quizzesCompleted || 0, 1200);
+  animateCountUp(document.getElementById('quizzesCompleted'), quizzesDone, 1200);
 
   // Calculate avg score: use history if available, otherwise estimate from total_points/quizzes
   let avg = 0;
   if (stats.history && stats.history.length > 0) {
     const totalPercentage = stats.history.reduce((acc, h) => acc + (h.percentage || 0), 0);
     avg = Math.round(totalPercentage / stats.history.length);
-  } else if (stats.quizzesCompleted > 0 && stats.totalPoints > 0) {
+  } else if (quizzesDone > 0 && totalPts > 0) {
     // Estimate: points per quiz out of 100 (10 questions × 10pts each)
-    const pointsPerQuiz = stats.totalPoints / stats.quizzesCompleted;
+    const pointsPerQuiz = totalPts / quizzesDone;
     avg = Math.min(100, Math.round(pointsPerQuiz));
   }
 
@@ -284,6 +303,10 @@ function renderStats(stats) {
       indicator.style.display = 'block';
     }
   }
+
+  // Also update the badges section based on reliable computed values
+  const statsForBadges = { ...stats, totalPoints: totalPts, quizzesCompleted: quizzesDone };
+  renderBadges(stats.badges, statsForBadges);
 }
 
 /**
@@ -365,16 +388,26 @@ function updateModuleCards(history) {
 
 function initDailyChallenge(history) {
   const today = new Date().toISOString().split('T')[0];
-  const todayCorrect = history ? history
-    .filter(h => {
-      const d = h.date || h.created_at || new Date().toISOString();
-      return d.startsWith(today);
-    })
-    .reduce((acc, h) => acc + (h.correct || 0), 0) : 0;
+  const todayQuizzes = history ? history.filter(h => {
+    const d = h.date || h.created_at || new Date().toISOString();
+    return d.startsWith(today);
+  }) : [];
+
+  // Count correct answers from today's quizzes (from 'correct' field or estimate from percentage)
+  const todayCorrect = todayQuizzes.reduce((acc, h) => {
+    const correctCount = h.correct || Math.round(((h.percentage || 0) / 100) * (h.total_questions || 10));
+    return acc + correctCount;
+  }, 0);
 
   const count = Math.min(todayCorrect, 5);
   document.getElementById('challengeProgressText').textContent = `${count}/5 correct today ⭐`;
   document.getElementById('challengeProgressBarFill').style.width = (count * 20) + '%';
+
+  // Color the bar green when complete
+  if (count >= 5) {
+    document.getElementById('challengeProgressBarFill').style.background = 'linear-gradient(90deg, #22c55e, #16a34a)';
+    document.getElementById('challengeProgressText').textContent = `✅ Daily challenge complete! 🎉`;
+  }
 }
 
 /* ─── UTILITIES ─── */
@@ -565,6 +598,24 @@ if (document.readyState === 'loading') {
 } else {
   initSubjectButtons();
 }
+
+/* ─── STELLA PROGRESS (inline, no stella.js required) ─── */
+window.loadStellaProgress = async function (userId) {
+  try {
+    if (!window.supabase || !window.CONFIG) return null;
+    const sb = window._dashboardSupabase || window.supabase.createClient(
+      window.CONFIG.SUPABASE_URL,
+      window.CONFIG.SUPABASE_ANON_KEY
+    );
+    window._dashboardSupabase = sb;
+    const { data } = await sb
+      .from('user_english_progress')
+      .select('current_level, total_sessions, words_learned')
+      .eq('user_id', userId)
+      .single();
+    return data ?? null;
+  } catch { return null; }
+};
 
 document.getElementById('logoutBtn').addEventListener('click', () => {
   console.log('👋 Logging out...');

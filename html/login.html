@@ -356,10 +356,16 @@
     /* ═══ Monkey-patch showError / showSuccess to trigger owl ══ */
     function patchAuthMessages() {
       const origShowError = window.showError;
-      window.showError = function (msg) {
-        owlCoverEyes();
-        owlBubbleShow('Oops! ' + msg + ' 🦉');
-        if (origShowError) origShowError(msg);
+      window.showError = function (msg, type) {
+        // Only show "Oops!" for actual errors, not for success type messages
+        if (type === 'success') {
+          owlJump();
+          owlBubbleShow('Let\'s go! 🚀✨', true);
+        } else {
+          owlCoverEyes();
+          owlBubbleShow('Oops! ' + msg + ' 🦉');
+        }
+        if (origShowError) origShowError(msg, type);
       };
       const origShowSuccess = window.showSuccess;
       window.showSuccess = function (msg) {
