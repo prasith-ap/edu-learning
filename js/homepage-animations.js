@@ -423,11 +423,11 @@ function initTomAndJerry() {
 
   lane.innerHTML = `
     <div class="ep-chase-char" id="ep-mouse">
-      <div class="chase-bubble">😄 CATCH ME!</div>
+      <div class="chase-bubble chase-bubble--mouse">😄 CATCH ME IF YOU CAN!</div>
       ${mouseSVG}
     </div>
     <div class="ep-chase-char" id="ep-cat">
-      <div class="chase-bubble">😾 GOTCHA!</div>
+      <div class="chase-bubble chase-bubble--cat">😾 I'M GONNA GET YOU!</div>
       ${catSVG}
     </div>
   `;
@@ -438,27 +438,50 @@ function initTomAndJerry() {
   const mouseBubble = mouse.querySelector('.chase-bubble');
   const catBubble = cat.querySelector('.chase-bubble');
 
-  let mouseX = -90, catX = -290, catSpeed = 2.7, frame = 0;
+  // Scale up characters a bit
+  mouse.querySelector('svg').setAttribute('width', '80');
+  mouse.querySelector('svg').setAttribute('height', '94');
+  cat.querySelector('svg').setAttribute('width', '116');
+  cat.querySelector('svg').setAttribute('height', '128');
 
+  let mouseX = -100, catX = -340, catSpeed = 2.8, frame = 0;
+
+  function showBubble(el, duration) {
+    el.classList.add('show-bubble');
+    setTimeout(() => el.classList.remove('show-bubble'), duration);
+  }
+
+  // Cat bubble: every 4 seconds
+  showBubble(catBubble, 1800);
+  setInterval(() => showBubble(catBubble, 1800), 4000);
+
+  // Mouse bubble: every 5 seconds (offset)
+  setTimeout(() => {
+    showBubble(mouseBubble, 1800);
+    setInterval(() => showBubble(mouseBubble, 1800), 5000);
+  }, 2500);
+
+  // Random mouse messages
+  const mouseLines = ['😄 CATCH ME IF YOU CAN!', '🏃 TOO SLOW, CAT!', '😜 NYAH NYAH!', '🌟 GOTTA GO FAST!'];
+  const catLines = ['😾 I\'M GONNA GET YOU!', '🔥 ALMOST GOT YA!', '😤 COME BACK HERE!', '🐱 GOTCHA SOON!'];
+  let msgIdx = 0;
   setInterval(() => {
-    catBubble.classList.add('show-bubble');
-    setTimeout(() => catBubble.classList.remove('show-bubble'), 1200);
+    msgIdx++;
+    mouseBubble.textContent = mouseLines[msgIdx % mouseLines.length];
+    catBubble.textContent = catLines[msgIdx % catLines.length];
   }, 5000);
-  setInterval(() => {
-    mouseBubble.classList.add('show-bubble');
-    setTimeout(() => mouseBubble.classList.remove('show-bubble'), 1200);
-  }, 6000);
 
   function chase() {
     frame++;
-    if (frame % 1200 === 0) {
-      catSpeed = 4.0;
+    // Occasional sprint burst
+    if (frame % 1000 === 0) {
+      catSpeed = 4.2;
       document.body.classList.add('shaking');
-      setTimeout(() => { catSpeed = 2.7; document.body.classList.remove('shaking'); }, 2000);
+      setTimeout(() => { catSpeed = 2.8; document.body.classList.remove('shaking'); }, 1800);
     }
-    mouseX += 3.1;
+    mouseX += 3.2;
     catX += catSpeed;
-    if (mouseX > window.innerWidth + 120) { mouseX = -90; catX = -290; }
+    if (mouseX > window.innerWidth + 140) { mouseX = -100; catX = -340; }
     mouse.style.transform = `translateX(${mouseX}px)`;
     cat.style.transform = `translateX(${catX}px)`;
     requestAnimationFrame(chase);
@@ -742,9 +765,8 @@ function initDoors() {
     wrap.appendChild(cont);
   });
 
-  const grid = anchor.querySelector('.card-grid');
-  if (grid) anchor.insertBefore(wrap, grid);
-  else anchor.insertBefore(wrap, anchor.firstChild);
+  // Append doors after heading (no more .card-grid in this section)
+  anchor.appendChild(wrap);
 }
 
 // ==========================================================

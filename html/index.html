@@ -249,63 +249,245 @@
     </div>
   </section>
 
-  <!-- Courses Section -->
-  <section id="courses" style="padding: 80px 0;">
+  <!-- Courses Section — Subject Doors injected here by JS before .interactive-features -->
+  <section id="courses" style="padding: 60px 0 20px;">
+    <div class="container">
+      <div class="text-center" style="margin-bottom: 16px;">
+        <h2 style="margin-bottom: 8px;">🚀 Choose Your Adventure!</h2>
+        <p style="opacity: 0.8;">Click a subject door above and start your learning journey today.</p>
+      </div>
+      <!-- ep-doors injected here by JS -->
+    </div>
+  </section>
+
+  <!-- Interactive Features Showcase -->
+  <section id="features-interactive" style="padding: 60px 0 80px;">
     <div class="container">
       <div class="text-center" style="margin-bottom: 48px;">
-        <h2>Explore Our Courses</h2>
-        <p>Comprehensive learning modules designed by experts.</p>
+        <h2>✨ Why Kids Love EduPlay</h2>
+        <p>An experience designed to keep every young learner engaged and motivated.</p>
       </div>
 
-      <div class="card-grid">
-        <!-- Math Card -->
-        <div class="card">
-          <div class="card-img-placeholder" style="background-color: #E3F2FD; color: #1976D2;">
-            Math
+      <div class="ifeature-grid">
+        <!-- Feature 1: Quizzes -->
+        <div class="ifeature-card" onclick="this.classList.toggle('flipped')" style="--accent:#6C63FF;">
+          <div class="ifeature-front">
+            <div class="ifeature-icon">🎯</div>
+            <h3>Fun Quizzes</h3>
+            <p>Earn points, badges &amp; level up with every correct answer!</p>
+            <div class="ifeature-tag">Tap to explore ✨</div>
           </div>
-          <div class="card-body">
-            <h3 class="card-title">Mathematics</h3>
-            <p class="card-text">Master numbers, operations, and logical problem-solving with our structured curriculum.
-            </p>
-            <div style="margin-top: auto;">
-              <p style="font-size: 0.85rem; color: #666; margin-bottom: 16px;">Beginner to Advanced</p>
-              <a href="register.html" class="btn btn-outline btn-block">Start Learning</a>
-            </div>
-          </div>
-        </div>
-
-        <!-- English Card -->
-        <div class="card">
-          <div class="card-img-placeholder" style="background-color: #F3E5F5; color: #7B1FA2;">
-            English
-          </div>
-          <div class="card-body">
-            <h3 class="card-title">English Language</h3>
-            <p class="card-text">Enhance vocabulary, grammar, and reading comprehension skills.</p>
-            <div style="margin-top: auto;">
-              <p style="font-size: 0.85rem; color: #666; margin-bottom: 16px;">Beginner to Advanced</p>
-              <a href="register.html" class="btn btn-outline btn-block">Start Learning</a>
-            </div>
+          <div class="ifeature-back">
+            <div style="font-size:3rem;margin-bottom:12px;">🏆</div>
+            <p style="font-weight:700;font-size:1.1rem;margin-bottom:10px;">Gamified Learning</p>
+            <ul style="text-align:left;padding-left:16px;line-height:1.9;">
+              <li>10 questions per session</li>
+              <li>Score streaks &amp; multipliers</li>
+              <li>Daily challenge bonuses</li>
+            </ul>
           </div>
         </div>
 
-        <!-- GK Card -->
-        <div class="card">
-          <div class="card-img-placeholder" style="background-color: #E8F5E9; color: #388E3C;">
-            Science
+        <!-- Feature 2: AI Stella -->
+        <div class="ifeature-card" onclick="this.classList.toggle('flipped')" style="--accent:#FF6B9D;">
+          <div class="ifeature-front">
+            <div class="ifeature-icon">🌟</div>
+            <h3>AI Tutor Stella</h3>
+            <p>Chat with Stella — your friendly AI language coach, available 24/7!</p>
+            <div class="ifeature-tag">Tap to explore ✨</div>
           </div>
-          <div class="card-body">
-            <h3 class="card-title">General Knowledge</h3>
-            <p class="card-text">Explore science, geography, and history through engaging lessons.</p>
-            <div style="margin-top: auto;">
-              <p style="font-size: 0.85rem; color: #666; margin-bottom: 16px;">All Ages</p>
-              <a href="register.html" class="btn btn-outline btn-block">Start Learning</a>
-            </div>
+          <div class="ifeature-back">
+            <div style="font-size:3rem;margin-bottom:12px;">💬</div>
+            <p style="font-weight:700;font-size:1.1rem;margin-bottom:10px;">Conversational AI</p>
+            <ul style="text-align:left;padding-left:16px;line-height:1.9;">
+              <li>Voice &amp; text conversations</li>
+              <li>Grammar corrections in real-time</li>
+              <li>Personalized feedback</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Feature 3: Progress -->
+        <div class="ifeature-card" onclick="this.classList.toggle('flipped')" style="--accent:#00B894;">
+          <div class="ifeature-front">
+            <div class="ifeature-icon">📈</div>
+            <h3>Track Progress</h3>
+            <p>Parents &amp; kids can see detailed stats, streaks and improvement!</p>
+            <div class="ifeature-tag">Tap to explore ✨</div>
+          </div>
+          <div class="ifeature-back">
+            <div style="font-size:3rem;margin-bottom:12px;">📊</div>
+            <p style="font-weight:700;font-size:1.1rem;margin-bottom:10px;">Smart Analytics</p>
+            <ul style="text-align:left;padding-left:16px;line-height:1.9;">
+              <li>Subject-wise performance</li>
+              <li>Weekly report for parents</li>
+              <li>Strength &amp; weak-spot insights</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Feature 4: Badges -->
+        <div class="ifeature-card" onclick="this.classList.toggle('flipped')" style="--accent:#FFD700;">
+          <div class="ifeature-front">
+            <div class="ifeature-icon">🏅</div>
+            <h3>Collect Badges</h3>
+            <p>Unlock special badges &amp; celebrate every milestone achieved!</p>
+            <div class="ifeature-tag">Tap to explore ✨</div>
+          </div>
+          <div class="ifeature-back">
+            <div style="font-size:3rem;margin-bottom:12px;">🎖️</div>
+            <p style="font-weight:700;font-size:1.1rem;margin-bottom:10px;">Badge Collection</p>
+            <ul style="text-align:left;padding-left:16px;line-height:1.9;">
+              <li>20+ unique badges to earn</li>
+              <li>Special rare achievements</li>
+              <li>Share with friends &amp; family</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Feature 5: Games -->
+        <div class="ifeature-card" onclick="this.classList.toggle('flipped')" style="--accent:#FF8C42;">
+          <div class="ifeature-front">
+            <div class="ifeature-icon">🎮</div>
+            <h3>Mini Games</h3>
+            <p>Play Word Bubbles, Memory Flip, Math Blaster &amp; more to reinforce learning!</p>
+            <div class="ifeature-tag">Tap to explore ✨</div>
+          </div>
+          <div class="ifeature-back">
+            <div style="font-size:3rem;margin-bottom:12px;">🕹️</div>
+            <p style="font-weight:700;font-size:1.1rem;margin-bottom:10px;">5 Epic Games</p>
+            <ul style="text-align:left;padding-left:16px;line-height:1.9;">
+              <li>Speed Typer challenge</li>
+              <li>Puzzle Quest adventure</li>
+              <li>Memory Flip card match</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Feature 6: CTA -->
+        <div class="ifeature-card ifeature-cta" onclick="window.location.href='register.html'"
+          style="--accent:#6C63FF;cursor:pointer;">
+          <div class="ifeature-front">
+            <div class="ifeature-icon">🚀</div>
+            <h3>Start for Free!</h3>
+            <p>No payment needed. Join thousands of young learners today!</p>
+            <a href="register.html" class="btn btn-primary" style="margin-top:16px;display:inline-block;"
+              onclick="event.stopPropagation()">Join Now →</a>
           </div>
         </div>
       </div>
     </div>
   </section>
+
+  <style>
+    .ifeature-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+
+    @media (max-width: 900px) {
+      .ifeature-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 580px) {
+      .ifeature-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .ifeature-card {
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03));
+      border: 2px solid rgba(255, 255, 255, 0.15);
+      border-radius: 20px;
+      padding: 32px 24px;
+      color: white;
+      cursor: pointer;
+      transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease, border-color 0.3s;
+      position: relative;
+      overflow: hidden;
+      min-height: 230px;
+      display: flex;
+      align-items: stretch;
+    }
+
+    .ifeature-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 80% 20%, var(--accent, #6C63FF) 0%, transparent 65%);
+      opacity: 0.12;
+      transition: opacity 0.3s;
+    }
+
+    .ifeature-card:hover::before {
+      opacity: 0.22;
+    }
+
+    .ifeature-card:hover {
+      transform: translateY(-8px) scale(1.02);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35), 0 0 0 1px var(--accent, #6C63FF);
+      border-color: var(--accent, #6C63FF);
+    }
+
+    .ifeature-front,
+    .ifeature-back {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      transition: opacity 0.3s, transform 0.3s;
+    }
+
+    .ifeature-card.flipped .ifeature-front {
+      display: none;
+    }
+
+    .ifeature-card:not(.flipped) .ifeature-back {
+      display: none;
+    }
+
+    .ifeature-icon {
+      font-size: 2.8rem;
+      margin-bottom: 12px;
+      filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+    }
+
+    .ifeature-card h3 {
+      font-size: 1.2rem;
+      font-weight: 800;
+      margin-bottom: 10px;
+      color: white;
+    }
+
+    .ifeature-card p {
+      font-size: 0.92rem;
+      line-height: 1.6;
+      color: rgba(255, 255, 255, 0.8);
+      flex: 1;
+      margin: 0;
+    }
+
+    .ifeature-tag {
+      margin-top: 16px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      color: var(--accent, #6C63FF);
+      opacity: 0.85;
+    }
+
+    .ifeature-back ul {
+      color: rgba(255, 255, 255, 0.85);
+      font-size: 0.88rem;
+      margin: 0;
+    }
+
+    .ifeature-cta {
+      background: linear-gradient(135deg, rgba(108, 99, 255, 0.25), rgba(108, 99, 255, 0.1));
+    }
+  </style>
 
   <!-- Features Section (Simplified) -->
   <section id="features" style="background-color: var(--bg-light); padding: 80px 0;">
