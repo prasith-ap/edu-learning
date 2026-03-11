@@ -44,7 +44,7 @@ async function loadProgressData() {
     const avatarEl = document.getElementById('userAvatar');
     if (avatarEl) avatarEl.textContent = (user.username || 'EX').substring(0, 2).toUpperCase();
 
-    // ─── 4. Fetch quiz history (gracefully skip if table missing) ────────────
+    // ─── 4. Fetch quiz history ───────────────────────────────────────────────
     let history = [];
     try {
       const { data: histRows, error: histErr } = await client
@@ -56,23 +56,37 @@ async function loadProgressData() {
     } catch (e) { /* quiz_results table doesn't exist yet */ }
 
     // ─── 5. Top stat cards ───────────────────────────────────────────────────
-    const totalPoints = user.total_points || 0;
-    const quizzesCompleted = user.quizzes_completed || 0;
+    // Prefer DB columns, but fall back to computing from quiz_results rows
+    // because updateUserStats can silently fail (RLS / network) leaving columns at 0.
+    let totalPoints = user.total_points || 0;
+    let quizzesCompleted = user.quizzes_completed || 0;
     const subjectScores = user.subject_scores || {};
+
+    if (history.length > 0) {
+      // Derive from real history if DB columns look stale
+      const historyPoints = history.reduce((s, q) => s + (q.score || 0), 0);
+      const historyCount = history.length;
+
+      // Use whichever is higher — DB column might be partially updated
+      if (historyPoints > totalPoints) totalPoints = historyPoints;
+      if (historyCount > quizzesCompleted) quizzesCompleted = historyCount;
+    }
 
     document.getElementById('totalPoints').textContent = totalPoints;
     document.getElementById('totalQuizzes').textContent = quizzesCompleted;
 
-    // Avg accuracy: prefer real history, fallback to pts-per-quiz estimate
+    // Avg accuracy from real history
     let avgAccuracy = 0;
     if (history.length > 0) {
-      avgAccuracy = Math.round(history.reduce((s, q) => s + (q.percentage || 0), 0) / history.length);
+      avgAccuracy = Math.round(
+        history.reduce((s, q) => s + (q.percentage || 0), 0) / history.length
+      );
     } else if (quizzesCompleted > 0 && totalPoints > 0) {
       avgAccuracy = Math.min(100, Math.round(totalPoints / quizzesCompleted));
     }
     document.getElementById('avgCorrect').textContent = avgAccuracy > 0 ? avgAccuracy + '%' : '--';
 
-    // ─── 6. Build synthetic history from subject_scores if history is empty ──
+    // ─── 6. Build display history ────────────────────────────────────────────
     const syntheticHistory = toDisplayHistory(history, subjectScores, totalPoints, quizzesCompleted);
 
     // ─── 7. Render ───────────────────────────────────────────────────────────

@@ -932,13 +932,20 @@ async function getCurrentUser() {
  * or legacy params (subject, topic, score, total)
  */
 async function saveQuizResult(arg1, topic, scoreArg, totalArg) {
-  const user = await getCurrentUser();
-  if (!user) {
-    console.warn('User not authenticated, cannot save quiz result');
+  // Get user ID directly from session — more reliable than getCurrentUser()
+  const client = initSupabase();
+  if (!client) { console.warn('Supabase not available, cannot save quiz result'); return false; }
+
+  let userId;
+  try {
+    const { data: { session } } = await client.auth.getSession();
+    if (!session) { console.warn('No session, cannot save quiz result'); return false; }
+    userId = session.user.id;
+  } catch (e) {
+    console.warn('Failed to get session for quiz save:', e);
     return false;
   }
 
-  const client = initSupabase();
   try {
     let subject, score, total, percentage, correctCount;
 
@@ -958,22 +965,19 @@ async function saveQuizResult(arg1, topic, scoreArg, totalArg) {
     }
 
     // Compute a clean point value based on correct answers (10 pts each)
-    // This is independent of streak multipliers for fair total_points tracking
     const basePointsEarned = correctCount > 0 ? correctCount * 10 : (score || 0);
 
-    // Step 1: Save quiz result record (non-blocking — even if this fails, stats must update)
+    // Step 1: Save quiz result record (non-blocking)
     try {
       const { error } = await client
         .from('quiz_results')
-        .insert([
-          {
-            user_id: user.id,
-            module: subject,
-            score: score,
-            total_questions: total,
-            percentage: percentage
-          }
-        ]);
+        .insert([{
+          user_id: userId,
+          module: subject,
+          score: score,
+          total_questions: total,
+          percentage: percentage
+        }]);
 
       if (error) {
         console.warn('Warning: quiz_results insert failed (stats will still update):', error.message);
@@ -983,7 +987,7 @@ async function saveQuizResult(arg1, topic, scoreArg, totalArg) {
     }
 
     // Step 2: ALWAYS update user stats regardless of quiz_results insert outcome
-    await updateUserStats(user.id, subject, basePointsEarned, correctCount, percentage);
+    await updateUserStats(userId, subject, basePointsEarned, correctCount, percentage);
     return true;
   } catch (error) {
     console.error('Save quiz result exception:', error);
